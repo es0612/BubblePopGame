@@ -17,6 +17,9 @@ class GameViewModel {
     var timeRemaining: Double = 60.0
     var bubbles: [Bubble] = []
     var screenBounds: CGRect = CGRect(x: 0, y: 0, width: 393, height: 852) // iPhone標準サイズ
+    var bubblesPopped: Int = 0
+    var currentStreak: Int = 0
+    var bestStreak: Int = 0
     
     // Services
     private let bubbleService: BubbleService
@@ -57,6 +60,9 @@ class GameViewModel {
         gameState = .playing
         score = 0
         timeRemaining = gameSettings.gameTime
+        bubblesPopped = 0
+        currentStreak = 0
+        bestStreak = 0
         
         // シャボン玉生成
         generateBubbles()
@@ -98,20 +104,39 @@ class GameViewModel {
     func handleBubbleTap(at location: CGPoint) {
         guard gameState == .playing else { return }
         
-        if let hitBubble = bubbleService.checkCollision(at: location, in: bubbles) {
-            // シャボン玉を配列から削除
-            bubbles.removeAll { $0.id == hitBubble.id }
+        if let hitBubbleIndex = bubbleService.checkCollisionIndex(at: location, in: bubbles) {
+            var hitBubble = bubbles[hitBubbleIndex]
             
-            // スコア加算
-            score += calculateScore(for: hitBubble)
+            // 破裂アニメーション開始
+            hitBubble.isPopping = true
+            hitBubble.lastTouchTime = Date()
+            bubbles[hitBubbleIndex] = hitBubble
             
-            // エフェクト再生
+            // 統計更新
+            bubblesPopped += 1
+            currentStreak += 1
+            bestStreak = max(bestStreak, currentStreak)
+            
+            // スコア加算（ストリークボーナス付き）
+            let baseScore = calculateScore(for: hitBubble)
+            let streakBonus = currentStreak >= 5 ? baseScore / 2 : 0
+            let earnedScore = baseScore + streakBonus
+            score += earnedScore
+            
+            // エフェクトとサウンド
             effectService.createPopEffect(at: hitBubble.position, color: hitBubble.color)
             audioService.playSFX(name: "bubble_pop")
-            effectService.triggerHapticFeedback(intensity: .light)
             
-            // 新しいシャボン玉を追加
-            addRandomBubble()
+            // タイプ別の触覚フィードバック
+            let feedbackIntensity: UIImpactFeedbackGenerator.FeedbackStyle = 
+                hitBubble.type == .numbered ? .heavy : .light
+            effectService.triggerHapticFeedback(intensity: feedbackIntensity)
+            
+            // 破裂アニメーション後に削除（0.3秒後）
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
+                self?.bubbles.removeAll { $0.id == hitBubble.id }
+                self?.addRandomBubble()
+            }
         }
     }
     

@@ -19,4 +19,7 @@ struct Bubble: Identifiable {
     var alpha: Double
     var animationPhase: Double
     var isPopping: Bool = false
+    var popAnimationProgress: Double = 0.0
+    var creationTime: Date = Date()
+    var lastTouchTime: Date?
 }

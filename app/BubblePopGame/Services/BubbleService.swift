@@ -12,6 +12,7 @@ protocol BubbleService {
     func createBubble(at position: CGPoint, type: BubbleType) -> Bubble
     func updateBubbles(_ bubbles: inout [Bubble])
     func checkCollision(at point: CGPoint, in bubbles: [Bubble]) -> Bubble?
+    func checkCollisionIndex(at point: CGPoint, in bubbles: [Bubble]) -> Int?
     func generateRandomBubbles(count: Int, screenBounds: CGRect) -> [Bubble]
 }
 
@@ -60,6 +61,15 @@ class BubbleServiceImpl: BubbleService {
     
     func updateBubbles(_ bubbles: inout [Bubble]) {
         for i in bubbles.indices {
+            // 破裂アニメーション処理
+            if bubbles[i].isPopping {
+                if let lastTouchTime = bubbles[i].lastTouchTime {
+                    let elapsed = Date().timeIntervalSince(lastTouchTime)
+                    bubbles[i].popAnimationProgress = min(elapsed / 0.3, 1.0)
+                }
+                continue
+            }
+            
             // 位置更新（60FPS想定）
             bubbles[i].position.x += bubbles[i].velocity.dx / 60.0
             bubbles[i].position.y += bubbles[i].velocity.dy / 60.0
@@ -112,6 +122,15 @@ class BubbleServiceImpl: BubbleService {
     
     func checkCollision(at point: CGPoint, in bubbles: [Bubble]) -> Bubble? {
         return bubbles.first { bubble in
+            guard !bubble.isPopping else { return false }
+            let distance = sqrt(pow(point.x - bubble.position.x, 2) + pow(point.y - bubble.position.y, 2))
+            return distance <= bubble.radius
+        }
+    }
+    
+    func checkCollisionIndex(at point: CGPoint, in bubbles: [Bubble]) -> Int? {
+        return bubbles.firstIndex { bubble in
+            guard !bubble.isPopping else { return false }
             let distance = sqrt(pow(point.x - bubble.position.x, 2) + pow(point.y - bubble.position.y, 2))
             return distance <= bubble.radius
         }

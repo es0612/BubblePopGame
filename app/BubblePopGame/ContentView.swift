@@ -145,20 +145,58 @@ struct GameView: View {
                 // HUD
                 VStack {
                     HStack {
-                        Text("スコア: \(viewModel.score)")
-                            .font(.title2)
-                            .fontWeight(.bold)
-                            .foregroundColor(.white)
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("スコア")
+                                .font(.caption)
+                                .foregroundColor(.white.opacity(0.8))
+                            Text("\(viewModel.score)")
+                                .font(.title)
+                                .fontWeight(.bold)
+                                .foregroundColor(.white)
+                            if viewModel.currentStreak >= 3 {
+                                Text("連鎖: \(viewModel.currentStreak)")
+                                    .font(.caption2)
+                                    .foregroundColor(.yellow)
+                            }
+                        }
+                        
                         Spacer()
-                        Text("残り時間: \(Int(viewModel.timeRemaining))秒")
-                            .font(.title2)
-                            .fontWeight(.bold)
-                            .foregroundColor(.white)
+                        
+                        VStack(alignment: .center, spacing: 4) {
+                            Text("破裂数")
+                                .font(.caption)
+                                .foregroundColor(.white.opacity(0.8))
+                            Text("\(viewModel.bubblesPopped)")
+                                .font(.headline)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.white)
+                        }
+                        
+                        Spacer()
+                        
+                        VStack(alignment: .trailing, spacing: 4) {
+                            Text("残り時間")
+                                .font(.caption)
+                                .foregroundColor(.white.opacity(0.8))
+                            Text("\(Int(viewModel.timeRemaining))秒")
+                                .font(.title)
+                                .fontWeight(.bold)
+                                .foregroundColor(viewModel.timeRemaining <= 10 ? .red : .white)
+                        }
                     }
                     .padding()
-                    .background(Color.black.opacity(0.3))
-                    .cornerRadius(10)
-                    .padding()
+                    .background(
+                        RoundedRectangle(cornerRadius: 15)
+                            .fill(Color.black.opacity(0.4))
+                            .shadow(radius: 5)
+                    )
+                    .padding(.horizontal)
+                    
+                    // プログレスバー（時間）
+                    ProgressView(value: viewModel.timeRemaining, total: 60.0)
+                        .progressViewStyle(LinearProgressViewStyle(tint: viewModel.timeRemaining <= 10 ? .red : .cyan))
+                        .scaleEffect(x: 1, y: 2, anchor: .center)
+                        .padding(.horizontal)
                     
                     Spacer()
                     
@@ -275,7 +313,8 @@ struct BubbleView: View {
             }
         }
         .position(bubble.position)
-        .scaleEffect(bubble.isPopping ? 0 : 1)
+        .scaleEffect(bubble.isPopping ? (1.0 - bubble.popAnimationProgress) : 1)
+        .opacity(bubble.isPopping ? (1.0 - bubble.popAnimationProgress) : bubble.alpha)
         .rotation3DEffect(
             .degrees(bubble.animationPhase * 10),
             axis: (x: 0, y: 1, z: 0)
