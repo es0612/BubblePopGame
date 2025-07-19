@@ -8,6 +8,7 @@
 import Foundation
 import SwiftData
 
+@MainActor
 protocol ScoreRepository {
     func saveScore(_ score: GameScore) throws
     func fetchHighScores(limit: Int) throws -> [GameScore]

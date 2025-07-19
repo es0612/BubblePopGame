@@ -16,20 +16,39 @@ protocol BubbleService {
 }
 
 class BubbleServiceImpl: BubbleService {
-    private let screenBounds: CGRect
+    private var screenBounds: CGRect
     private var bubblePool: [Bubble] = []
     
     init(screenBounds: CGRect) {
         self.screenBounds = screenBounds
     }
     
+    func updateScreenBounds(_ bounds: CGRect) {
+        screenBounds = bounds
+    }
+    
     func createBubble(at position: CGPoint, type: BubbleType) -> Bubble {
-        let radius = CGFloat.random(in: 30...60)
-        let color = Color.random()
+        // 数字タイプは少し大きめに、通常タイプは少し小さめに
+        let radius: CGFloat = type == .numbered ? 
+            CGFloat.random(in: 40...70) : 
+            CGFloat.random(in: 25...50)
+        
+        // 数字タイプは赤や黄色で目立つように
+        let color: Color = type == .numbered ? 
+            [.red, .yellow, .orange].randomElement() ?? .red :
+            Color.random()
+        
+        // 初期速度もタイプによって少し変える
+        let velocityRange: Range<Double> = type == .numbered ? 
+            -30.0..<30.0 : 
+            -50.0..<50.0
         
         return Bubble(
             position: position,
-            velocity: CGVector(dx: Double.random(in: -50...50), dy: Double.random(in: -50...50)),
+            velocity: CGVector(
+                dx: Double.random(in: velocityRange), 
+                dy: Double.random(in: velocityRange)
+            ),
             radius: radius,
             type: type,
             number: type == .numbered ? Int.random(in: 1...10) : nil,
@@ -41,15 +60,36 @@ class BubbleServiceImpl: BubbleService {
     
     func updateBubbles(_ bubbles: inout [Bubble]) {
         for i in bubbles.indices {
-            // 位置更新
+            // 位置更新（60FPS想定）
             bubbles[i].position.x += bubbles[i].velocity.dx / 60.0
             bubbles[i].position.y += bubbles[i].velocity.dy / 60.0
             
-            // アニメーションフェーズ更新
+            // アニメーションフェーズ更新（浮遊アニメーション用）
             bubbles[i].animationPhase += 0.05
+            
+            // タイプ別のアニメーション効果
+            if bubbles[i].type == .numbered {
+                // 数字タイプはより目立つ上下動とスケール変動
+                let floatOffset = sin(bubbles[i].animationPhase * 1.5) * 3.0
+                bubbles[i].position.y += floatOffset / 60.0
+                
+                // 数字タイプはパルスエフェクト
+                bubbles[i].alpha = 0.8 + sin(bubbles[i].animationPhase * 2.0) * 0.2
+            } else {
+                // 通常タイプは緩やかな浮遊
+                let floatOffset = sin(bubbles[i].animationPhase) * 2.0
+                bubbles[i].position.y += floatOffset / 60.0
+                
+                // 通常タイプはゆるやかなアルファ変化
+                bubbles[i].alpha = 0.7 + sin(bubbles[i].animationPhase * 0.5) * 0.2
+            }
             
             // 画面境界での跳ね返り
             handleBoundaryCollision(&bubbles[i])
+            
+            // 速度の減衰（空気抵抗をシミュレート）
+            bubbles[i].velocity.dx *= 0.998
+            bubbles[i].velocity.dy *= 0.998
         }
     }
     
@@ -85,7 +125,9 @@ class BubbleServiceImpl: BubbleService {
             let y = CGFloat.random(in: 60...(screenBounds.height - 60))
             let position = CGPoint(x: x, y: y)
             
-            let bubble = createBubble(at: position, type: .normal)
+            // 10%の確率で数字タイプ、90%で通常タイプ
+            let bubbleType: BubbleType = Double.random(in: 0...1) < 0.1 ? .numbered : .normal
+            let bubble = createBubble(at: position, type: bubbleType)
             bubbles.append(bubble)
         }
         

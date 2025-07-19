@@ -10,28 +10,70 @@ import SwiftData
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
-    @State private var gameViewModel: GameViewModel
+    @State private var gameViewModel: GameViewModel?
     @State private var menuViewModel: MenuViewModel
     
     init() {
-        // TODO: Dependency Injectionで実装予定
-        self._gameViewModel = State(initialValue: GameViewModel())
         self._menuViewModel = State(initialValue: MenuViewModel())
     }
     
     var body: some View {
         NavigationStack {
-            switch gameViewModel.gameState {
-            case .menu:
-                MenuView(viewModel: menuViewModel, gameViewModel: gameViewModel)
-            case .playing, .paused:
-                GameView(viewModel: gameViewModel)
-            case .gameOver:
-                GameOverView(viewModel: gameViewModel)
-            case .settings:
-                SettingsView()
+            if let gameViewModel = gameViewModel {
+                switch gameViewModel.gameState {
+                case .menu:
+                    MenuView(viewModel: menuViewModel, gameViewModel: gameViewModel)
+                case .playing, .paused:
+                    GameView(viewModel: gameViewModel)
+                case .gameOver:
+                    GameOverView(viewModel: gameViewModel)
+                case .settings:
+                    SettingsView()
+                }
+            } else {
+                // 初期化中
+                ProgressView("初期化中...")
+                    .onAppear {
+                        setupDependencies()
+                    }
             }
         }
+    }
+    
+    private func setupDependencies() {
+        // ModelContainer取得
+        let modelContainer = modelContext.container
+        
+        // Repositories作成
+        let scoreRepository = ScoreRepositoryImpl(modelContainer: modelContainer)
+        let settingsRepository = SettingsRepositoryImpl(modelContainer: modelContainer)
+        let statisticsRepository = StatisticsRepositoryImpl(modelContainer: modelContainer)
+        
+        // Services作成
+        let screenBounds = CGRect(x: 0, y: 0, width: 393, height: 852)
+        let bubbleService = BubbleServiceImpl(screenBounds: screenBounds)
+        let audioService = AudioServiceImpl()
+        let effectService = EffectServiceImpl()
+        
+        // ゲーム設定読み込み
+        let gameSettings: GameSettings
+        do {
+            gameSettings = try settingsRepository.fetchSettings() ?? GameSettings()
+        } catch {
+            print("Failed to load settings: \(error)")
+            gameSettings = GameSettings()
+        }
+        
+        // GameViewModel作成
+        self.gameViewModel = GameViewModel(
+            bubbleService: bubbleService,
+            audioService: audioService,
+            effectService: effectService,
+            scoreRepository: scoreRepository,
+            settingsRepository: settingsRepository,
+            statisticsRepository: statisticsRepository,
+            gameSettings: gameSettings
+        )
     }
 }
 
@@ -89,41 +131,99 @@ struct GameView: View {
     let viewModel: GameViewModel
     
     var body: some View {
-        ZStack {
-            // Background
-            LinearGradient(colors: [.blue.opacity(0.3), .cyan.opacity(0.1)], 
-                          startPoint: .top, endPoint: .bottom)
-            
-            // Bubbles
-            ForEach(viewModel.bubbles) { bubble in
-                BubbleView(bubble: bubble)
-                    .onTapGesture {
-                        viewModel.handleBubbleTap(at: bubble.position)
-                    }
-            }
-            
-            // HUD
-            VStack {
-                HStack {
-                    Text("スコア: \(viewModel.score)")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                    Spacer()
-                    Text("残り時間: \(Int(viewModel.timeRemaining))秒")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                }
-                .padding()
-                .background(Color.black.opacity(0.3))
-                .cornerRadius(10)
-                .padding()
+        GeometryReader { geometry in
+            ZStack {
+                // Background
+                LinearGradient(colors: [.blue.opacity(0.3), .cyan.opacity(0.1)], 
+                              startPoint: .top, endPoint: .bottom)
                 
-                Spacer()
+                // Bubbles
+                ForEach(viewModel.bubbles) { bubble in
+                    BubbleView(bubble: bubble)
+                }
+                
+                // HUD
+                VStack {
+                    HStack {
+                        Text("スコア: \(viewModel.score)")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .foregroundColor(.white)
+                        Spacer()
+                        Text("残り時間: \(Int(viewModel.timeRemaining))秒")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .foregroundColor(.white)
+                    }
+                    .padding()
+                    .background(Color.black.opacity(0.3))
+                    .cornerRadius(10)
+                    .padding()
+                    
+                    Spacer()
+                    
+                    // ポーズボタン
+                    if viewModel.gameState == .playing {
+                        Button(action: {
+                            viewModel.pauseGame()
+                        }) {
+                            Image(systemName: "pause.circle.fill")
+                                .font(.title)
+                                .foregroundColor(.white)
+                                .padding()
+                                .background(Color.black.opacity(0.3))
+                                .clipShape(Circle())
+                        }
+                        .padding(.bottom, 50)
+                    } else if viewModel.gameState == .paused {
+                        VStack {
+                            Text("ポーズ中")
+                                .font(.title)
+                                .fontWeight(.bold)
+                                .foregroundColor(.white)
+                                .padding()
+                            
+                            HStack(spacing: 20) {
+                                Button(action: {
+                                    viewModel.resumeGame()
+                                }) {
+                                    Text("再開")
+                                        .font(.title2)
+                                        .fontWeight(.semibold)
+                                        .foregroundColor(.white)
+                                        .padding()
+                                        .background(Color.green)
+                                        .cornerRadius(10)
+                                }
+                                
+                                Button(action: {
+                                    viewModel.endGame()
+                                }) {
+                                    Text("終了")
+                                        .font(.title2)
+                                        .fontWeight(.semibold)
+                                        .foregroundColor(.white)
+                                        .padding()
+                                        .background(Color.red)
+                                        .cornerRadius(10)
+                                }
+                            }
+                        }
+                        .padding(.bottom, 50)
+                    }
+                }
             }
-        }
-        .onAppear {
-            if viewModel.gameState != .playing {
-                viewModel.startGame()
+            .onTapGesture { location in
+                viewModel.handleBubbleTap(at: location)
+            }
+            .onAppear {
+                viewModel.updateScreenBounds(geometry.frame(in: .local))
+                if viewModel.gameState != .playing {
+                    viewModel.startGame()
+                }
+            }
+            .onChange(of: geometry.size) { _, newSize in
+                viewModel.updateScreenBounds(CGRect(origin: .zero, size: newSize))
             }
         }
     }
@@ -133,12 +233,55 @@ struct BubbleView: View {
     let bubble: Bubble
     
     var body: some View {
-        Circle()
-            .fill(bubble.color.opacity(bubble.alpha))
-            .frame(width: bubble.radius * 2, height: bubble.radius * 2)
-            .position(bubble.position)
-            .scaleEffect(bubble.isPopping ? 0 : 1)
-            .animation(.easeOut(duration: 0.3), value: bubble.isPopping)
+        ZStack {
+            // メインのシャボン玉
+            Circle()
+                .fill(
+                    RadialGradient(
+                        colors: [
+                            bubble.color.opacity(0.6),
+                            bubble.color.opacity(bubble.alpha),
+                            bubble.color.opacity(0.8)
+                        ],
+                        center: UnitPoint(x: 0.3, y: 0.3),
+                        startRadius: 0,
+                        endRadius: bubble.radius
+                    )
+                )
+                .frame(width: bubble.radius * 2, height: bubble.radius * 2)
+            
+            // ハイライト効果
+            Circle()
+                .fill(
+                    RadialGradient(
+                        colors: [
+                            Color.white.opacity(0.4),
+                            Color.white.opacity(0.1),
+                            Color.clear
+                        ],
+                        center: UnitPoint(x: 0.2, y: 0.2),
+                        startRadius: 0,
+                        endRadius: bubble.radius * 0.6
+                    )
+                )
+                .frame(width: bubble.radius * 1.2, height: bubble.radius * 1.2)
+            
+            // 数字表示（番号付きシャボン玉の場合）
+            if bubble.type == .numbered, let number = bubble.number {
+                Text("\(number)")
+                    .font(.system(size: bubble.radius * 0.4, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+                    .shadow(color: .black, radius: 1, x: 1, y: 1)
+            }
+        }
+        .position(bubble.position)
+        .scaleEffect(bubble.isPopping ? 0 : 1)
+        .rotation3DEffect(
+            .degrees(bubble.animationPhase * 10),
+            axis: (x: 0, y: 1, z: 0)
+        )
+        .animation(.easeOut(duration: 0.3), value: bubble.isPopping)
+        .animation(.easeInOut(duration: 2), value: bubble.animationPhase)
     }
 }
 

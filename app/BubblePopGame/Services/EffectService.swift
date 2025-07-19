@@ -28,6 +28,8 @@ class EffectServiceImpl: EffectService {
     }
     
     func triggerHapticFeedback(intensity: UIImpactFeedbackGenerator.FeedbackStyle) {
-        hapticFeedback.impactOccurred(intensity: intensity)
+        let generator = UIImpactFeedbackGenerator(style: intensity)
+        generator.prepare()
+        generator.impactOccurred()
     }
 }

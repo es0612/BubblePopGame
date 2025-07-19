@@ -8,6 +8,7 @@
 import Foundation
 import SwiftData
 
+@MainActor
 protocol SettingsRepository {
     func saveSettings(_ settings: GameSettings) throws
     func fetchSettings() throws -> GameSettings?

@@ -8,6 +8,7 @@
 import Foundation
 import SwiftData
 
+@MainActor
 protocol StatisticsRepository {
     func updateStatistics(with score: GameScore) throws
     func fetchStatistics() throws -> GameStatistics?
