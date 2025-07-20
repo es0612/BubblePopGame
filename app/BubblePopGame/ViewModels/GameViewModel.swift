@@ -30,6 +30,8 @@ class GameViewModel {
     private let bubbleService: BubbleService
     let audioService: AudioService
     private let effectService: EffectService
+    private let deviceService: DeviceService
+    private let performanceService: PerformanceService
     
     // Repositories
     let scoreRepository: ScoreRepository
@@ -44,6 +46,8 @@ class GameViewModel {
     init(bubbleService: BubbleService,
          audioService: AudioService,
          effectService: EffectService,
+         deviceService: DeviceService,
+         performanceService: PerformanceService,
          scoreRepository: ScoreRepository,
          settingsRepository: SettingsRepository,
          statisticsRepository: StatisticsRepository,
@@ -51,14 +55,38 @@ class GameViewModel {
         self.bubbleService = bubbleService
         self.audioService = audioService
         self.effectService = effectService
+        self.deviceService = deviceService
+        self.performanceService = performanceService
         self.scoreRepository = scoreRepository
         self.settingsRepository = settingsRepository
         self.statisticsRepository = statisticsRepository
         self.gameSettings = gameSettings ?? GameSettings()
     }
     
+    func updateScreenBounds(_ size: CGSize) {
+        screenBounds = CGRect(origin: .zero, size: size)
+        bubbleService.updateScreenBounds(screenBounds)
+    }
+    
     func updateScreenBounds(_ bounds: CGRect) {
         screenBounds = bounds
+        bubbleService.updateScreenBounds(bounds)
+    }
+    
+    // パフォーマンス最適化メソッド
+    func optimizePerformance() {
+        let adjustment = performanceService.getPerformanceAdjustment()
+        let optimalBubbleCount = Int(Double(gameSettings.bubbleCount) * adjustment)
+        let deviceOptimalCount = deviceService.adaptBubbleCount(for: gameSettings)
+        
+        // より制限の厳しい方を採用
+        let finalBubbleCount = min(optimalBubbleCount, deviceOptimalCount)
+        
+        // バブル数が現在より少ない場合は調整
+        if bubbles.count > finalBubbleCount {
+            let excess = bubbles.count - finalBubbleCount
+            bubbles.removeLast(excess)
+        }
     }
     
     func setupParticleEffectView(_ particleEffectView: ParticleEffectView) {
@@ -92,6 +120,9 @@ class GameViewModel {
         
         // BGM再生
         audioService.playBGM(name: "game_bgm", loop: true)
+        
+        // パフォーマンス監視開始
+        performanceService.startMonitoring()
     }
     
     func pauseGame() {
@@ -120,6 +151,9 @@ class GameViewModel {
         
         // スコア保存
         saveScore()
+        
+        // パフォーマンス監視停止
+        performanceService.stopMonitoring()
     }
     
     func handleBubbleTap(at location: CGPoint) {
@@ -295,6 +329,13 @@ class GameViewModel {
         
         // 画面境界を越えたシャボン玉を削除
         removeBubblesOutOfBounds()
+        
+        // パフォーマンス監視とバブル数の動的調整（60フレームごと＝約1秒）
+        if displayLink?.timestamp.truncatingRemainder(dividingBy: 1.0) ?? 0 < 0.02 {
+            if performanceService.shouldReduceBubbles() {
+                optimizePerformance()
+            }
+        }
     }
     
     private func startGameTimer() {

@@ -19,35 +19,49 @@ struct ContentView: View {
     }
     
     var body: some View {
-        NavigationStack {
-            if let gameViewModel = gameViewModel {
-                switch gameViewModel.gameState {
-                case .menu:
-                    MenuView(viewModel: menuViewModel, gameViewModel: gameViewModel)
-                case .playing, .paused:
-                    GameView(viewModel: gameViewModel)
-                case .gameOver:
-                    GameOverView(viewModel: gameViewModel)
-                case .settings:
-                    if let settingsViewModel = settingsViewModel {
-                        SettingsView(gameViewModel: gameViewModel, settingsViewModel: settingsViewModel)
-                    } else {
-                        ProgressView("設定読み込み中...")
+        GeometryReader { geometry in
+            NavigationStack {
+                if let gameViewModel = gameViewModel {
+                    switch gameViewModel.gameState {
+                    case .menu:
+                        MenuView(viewModel: menuViewModel, gameViewModel: gameViewModel)
+                    case .playing, .paused:
+                        GameView(viewModel: gameViewModel)
+                    case .gameOver:
+                        GameOverView(viewModel: gameViewModel)
+                    case .settings:
+                        if let settingsViewModel = settingsViewModel {
+                            SettingsView(gameViewModel: gameViewModel, settingsViewModel: settingsViewModel)
+                        } else {
+                            ProgressView("設定読み込み中...")
+                        }
+                    case .highScore:
+                        HighScoreView(gameViewModel: gameViewModel)
                     }
-                case .highScore:
-                    HighScoreView(gameViewModel: gameViewModel)
+                } else {
+                    // 初期化中
+                    ProgressView("初期化中...")
+                        .onAppear {
+                            setupDependencies(screenSize: geometry.size)
+                        }
                 }
-            } else {
-                // 初期化中
-                ProgressView("初期化中...")
-                    .onAppear {
-                        setupDependencies()
-                    }
+            }
+            .onAppear {
+                // 画面サイズが変更された時の処理
+                if let gameViewModel = gameViewModel {
+                    gameViewModel.updateScreenBounds(geometry.size)
+                }
+            }
+            .onChange(of: geometry.size) { _, newSize in
+                // 画面サイズ変更時（回転等）
+                if let gameViewModel = gameViewModel {
+                    gameViewModel.updateScreenBounds(newSize)
+                }
             }
         }
     }
     
-    private func setupDependencies() {
+    private func setupDependencies(screenSize: CGSize) {
         // ModelContainer取得
         let modelContainer = modelContext.container
         
@@ -56,8 +70,12 @@ struct ContentView: View {
         let settingsRepository = SettingsRepositoryImpl(modelContainer: modelContainer)
         let statisticsRepository = StatisticsRepositoryImpl(modelContainer: modelContainer)
         
-        // Services作成
-        let screenBounds = CGRect(x: 0, y: 0, width: 393, height: 852)
+        // 新しいサービス作成
+        let deviceService = DeviceServiceImpl()
+        let performanceService = PerformanceServiceImpl()
+        
+        // Services作成（画面サイズを使用）
+        let screenBounds = CGRect(origin: .zero, size: screenSize)
         let bubbleService = BubbleServiceImpl(screenBounds: screenBounds)
         let audioService = AudioServiceImpl()
         let effectService = EffectServiceImpl()
@@ -79,6 +97,8 @@ struct ContentView: View {
             bubbleService: bubbleService,
             audioService: audioService,
             effectService: effectService,
+            deviceService: deviceService,
+            performanceService: performanceService,
             scoreRepository: scoreRepository,
             settingsRepository: settingsRepository,
             statisticsRepository: statisticsRepository,
@@ -92,7 +112,11 @@ struct MenuView: View {
     let gameViewModel: GameViewModel
     
     var body: some View {
-        VStack(spacing: 40) {
+        GeometryReader { geometry in
+            let isIPad = geometry.size.width > 600
+            let spacing: CGFloat = isIPad ? 60 : 40
+            
+            VStack(spacing: spacing) {
             Text("シャボン玉消しゲーム")
                 .font(.largeTitle)
                 .fontWeight(.bold)
@@ -145,12 +169,13 @@ struct MenuView: View {
             .padding(.horizontal, 40)
             
             Spacer()
+            }
+            .padding(isIPad ? 60 : 20)
+            .background(
+                LinearGradient(colors: [.cyan.opacity(0.3), .blue.opacity(0.1)], 
+                              startPoint: .top, endPoint: .bottom)
+            )
         }
-        .padding()
-        .background(
-            LinearGradient(colors: [.cyan.opacity(0.3), .blue.opacity(0.1)], 
-                          startPoint: .top, endPoint: .bottom)
-        )
     }
 }
 

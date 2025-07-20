@@ -16,6 +16,7 @@ protocol BubbleService {
     func checkCollisionIndex(at point: CGPoint, in bubbles: [Bubble]) -> Int?
     func generateRandomBubbles(count: Int, screenBounds: CGRect) -> [Bubble]
     func generateNumberedBubbles(count: Int, screenBounds: CGRect, numberedCount: Int) -> [Bubble]
+    func updateScreenBounds(_ bounds: CGRect)
 }
 
 class BubbleServiceImpl: BubbleService {
