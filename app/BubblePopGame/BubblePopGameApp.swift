@@ -67,7 +67,7 @@ struct BubblePopGameApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            LaunchScreenView()
         }
         .modelContainer(sharedModelContainer)
     }

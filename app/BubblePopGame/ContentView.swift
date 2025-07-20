@@ -110,7 +110,6 @@ struct ContentView: View {
 struct MenuView: View {
     let viewModel: MenuViewModel
     let gameViewModel: GameViewModel
-    @Environment(\.accessibilityContrast) private var accessibilityContrast
     @Environment(\.colorScheme) private var colorScheme
     
     var body: some View {
@@ -122,7 +121,7 @@ struct MenuView: View {
             Text("シャボン玉消しゲーム")
                 .font(.largeTitle)
                 .fontWeight(.bold)
-                .foregroundColor(Color.blue.accessible(highContrast: accessibilityContrast == .high))
+                .foregroundColor(Color.blue.accessible())
                 .accessibilityLabel("シャボン玉消しゲーム")
                 .accessibilityHint("ゲームのメインタイトルです")
             
@@ -137,12 +136,12 @@ struct MenuView: View {
                         .foregroundColor(.white)
                         .padding()
                         .frame(maxWidth: .infinity)
-                        .background(Color.blue.accessible(highContrast: accessibilityContrast == .high))
+                        .background(Color.blue.accessible())
                         .cornerRadius(10)
                 }
                 .accessibilityLabel("ゲーム開始")
                 .accessibilityHint("タップするとゲームが開始されます")
-                .accessibilityTraits(.button)
+                .accessibilityAddTraits(.isButton)
                 
                 Button(action: {
                     gameViewModel.gameState = .settings
@@ -151,15 +150,15 @@ struct MenuView: View {
                     Text("設定")
                         .font(.title2)
                         .fontWeight(.semibold)
-                        .foregroundColor(Color.blue.accessible(highContrast: accessibilityContrast == .high))
+                        .foregroundColor(Color.blue.accessible())
                         .padding()
                         .frame(maxWidth: .infinity)
-                        .background(Color.blue.accessible(highContrast: accessibilityContrast == .high).opacity(0.1))
+                        .background(Color.blue.accessible().opacity(0.1))
                         .cornerRadius(10)
                 }
                 .accessibilityLabel("設定")
                 .accessibilityHint("ゲームの設定を変更できます")
-                .accessibilityTraits(.button)
+                .accessibilityAddTraits(.isButton)
                 
                 // ハイスコア表示ボタン
                 Button(action: {
@@ -169,15 +168,15 @@ struct MenuView: View {
                     Text("ハイスコア")
                         .font(.title2)
                         .fontWeight(.semibold)
-                        .foregroundColor(Color.purple.accessible(highContrast: accessibilityContrast == .high))
+                        .foregroundColor(Color.purple.accessible())
                         .padding()
                         .frame(maxWidth: .infinity)
-                        .background(Color.purple.accessible(highContrast: accessibilityContrast == .high).opacity(0.1))
+                        .background(Color.purple.accessible().opacity(0.1))
                         .cornerRadius(10)
                 }
                 .accessibilityLabel("ハイスコア")
                 .accessibilityHint("過去のハイスコアを確認できます")
-                .accessibilityTraits(.button)
+                .accessibilityAddTraits(.isButton)
             }
             .padding(.horizontal, 40)
             
@@ -207,6 +206,7 @@ struct GameView: View {
                 ForEach(viewModel.bubbles) { bubble in
                     BubbleView(bubble: bubble)
                 }
+                .animation(.spring(response: 0.5, dampingFraction: 0.8), value: viewModel.bubbles.count)
                 
                 // Particle Effects
                 particleEffectView
@@ -279,8 +279,9 @@ struct GameView: View {
                     
                     // プログレスバー（時間）
                     ProgressView(value: viewModel.timeRemaining, total: 60.0)
-                        .progressViewStyle(LinearProgressViewStyle(tint: viewModel.timeRemaining <= 10 ? .red : .cyan))
+                        .progressViewStyle(LinearProgressViewStyle())
                         .scaleEffect(x: 1, y: 2, anchor: .center)
+                        .accentColor(viewModel.timeRemaining <= 10 ? .red : .cyan)
                         .padding(.horizontal)
                     
                     Spacer()
@@ -299,7 +300,7 @@ struct GameView: View {
                         }
                         .accessibilityLabel("ポーズ")
                         .accessibilityHint("ゲームを一時停止します")
-                        .accessibilityTraits(.button)
+                        .accessibilityAddTraits(.isButton)
                         .padding(.bottom, 50)
                     } else if viewModel.gameState == .paused {
                         VStack {
@@ -323,7 +324,7 @@ struct GameView: View {
                                 }
                                 .accessibilityLabel("再開")
                                 .accessibilityHint("ゲームを再開します")
-                                .accessibilityTraits(.button)
+                                .accessibilityAddTraits(.isButton)
                                 
                                 Button(action: {
                                     viewModel.endGame()
@@ -338,7 +339,7 @@ struct GameView: View {
                                 }
                                 .accessibilityLabel("終了")
                                 .accessibilityHint("ゲームを終了してメニューに戻ります")
-                                .accessibilityTraits(.button)
+                                .accessibilityAddTraits(.isButton)
                             }
                         }
                         .padding(.bottom, 50)
@@ -367,7 +368,6 @@ struct GameView: View {
 
 struct BubbleView: View {
     let bubble: Bubble
-    @Environment(\.accessibilityContrast) private var accessibilityContrast
     
     var body: some View {
         ZStack {
@@ -376,9 +376,9 @@ struct BubbleView: View {
                 .fill(
                     RadialGradient(
                         colors: [
-                            bubble.color.accessible(highContrast: accessibilityContrast == .high).opacity(0.6),
-                            bubble.color.accessible(highContrast: accessibilityContrast == .high).opacity(bubble.alpha),
-                            bubble.color.accessible(highContrast: accessibilityContrast == .high).opacity(0.8)
+                            bubble.color.accessible().opacity(0.6),
+                            bubble.color.accessible().opacity(bubble.alpha),
+                            bubble.color.accessible().opacity(0.8)
                         ],
                         center: UnitPoint(x: 0.3, y: 0.3),
                         startRadius: 0,
@@ -419,12 +419,11 @@ struct BubbleView: View {
             axis: (x: 0, y: 1, z: 0)
         )
         .animation(.easeOut(duration: 0.3), value: bubble.isPopping)
-        .animation(.easeInOut(duration: 2), value: bubble.animationPhase)
+        .animation(.easeInOut(duration: 2).repeatForever(autoreverses: true), value: bubble.animationPhase)
         .accessibilityElement()
         .accessibilityLabel(bubble.type == .numbered ? "数字 \(bubble.number ?? 0) のシャボン玉" : "シャボン玉")
         .accessibilityHint("タップすると破裂します")
-        .accessibilityTraits(.button)
-        .accessibilityAddTraits(bubble.type == .numbered ? [.selected] : [])
+        .accessibilityAddTraits(.isButton)
     }
 }
 
