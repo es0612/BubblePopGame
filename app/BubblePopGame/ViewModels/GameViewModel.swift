@@ -43,6 +43,11 @@ class GameViewModel {
     private nonisolated(unsafe) var gameTimer: Timer?
     var gameSettings: GameSettings
     
+    // タッチ応答性監視
+    private var lastTouchTime: CFTimeInterval = 0
+    private var touchResponseTimes: [CFTimeInterval] = []
+    private let maxResponseTimeHistory = 10
+    
     init(bubbleService: BubbleService,
          audioService: AudioService,
          effectService: EffectService,
@@ -159,6 +164,9 @@ class GameViewModel {
     func handleBubbleTap(at location: CGPoint) {
         guard gameState == .playing else { return }
         
+        // タッチ応答性監視開始
+        let touchStartTime = CACurrentMediaTime()
+        
         if let hitBubbleIndex = bubbleService.checkCollisionIndex(at: location, in: bubbles) {
             var hitBubble = bubbles[hitBubbleIndex]
             
@@ -179,6 +187,12 @@ class GameViewModel {
             
             // 通常のバブル処理
             handleNormalBubble(hitBubble, at: hitBubbleIndex)
+            
+            // タッチ応答性記録
+            recordTouchResponseTime(startTime: touchStartTime)
+        } else {
+            // ミスタップも記録
+            recordTouchResponseTime(startTime: touchStartTime)
         }
     }
     
@@ -394,6 +408,37 @@ class GameViewModel {
                    bubble.position.y < -margin ||
                    bubble.position.y > screenBounds.height + margin
         }
+    }
+    
+    // MARK: - Touch Response Monitoring
+    
+    private func recordTouchResponseTime(startTime: CFTimeInterval) {
+        let responseTime = CACurrentMediaTime() - startTime
+        
+        // 応答時間を記録
+        touchResponseTimes.append(responseTime)
+        
+        // 履歴サイズを制限
+        if touchResponseTimes.count > maxResponseTimeHistory {
+            touchResponseTimes.removeFirst()
+        }
+        
+        // 100ms以上の場合は警告ログ
+        if responseTime > 0.1 {
+            print("⚠️ Touch response time exceeded 100ms: \(responseTime * 1000)ms")
+        }
+    }
+    
+    /// 平均タッチ応答時間を取得
+    func getAverageTouchResponseTime() -> Double {
+        guard !touchResponseTimes.isEmpty else { return 0.0 }
+        let sum = touchResponseTimes.reduce(0.0, +)
+        return sum / Double(touchResponseTimes.count)
+    }
+    
+    /// タッチ応答性が良好かどうかを判定
+    func isTouchResponseGood() -> Bool {
+        return getAverageTouchResponseTime() <= 0.1 // 100ms以内
     }
     
     deinit {

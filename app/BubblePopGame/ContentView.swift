@@ -110,6 +110,8 @@ struct ContentView: View {
 struct MenuView: View {
     let viewModel: MenuViewModel
     let gameViewModel: GameViewModel
+    @Environment(\.accessibilityContrast) private var accessibilityContrast
+    @Environment(\.colorScheme) private var colorScheme
     
     var body: some View {
         GeometryReader { geometry in
@@ -120,7 +122,9 @@ struct MenuView: View {
             Text("シャボン玉消しゲーム")
                 .font(.largeTitle)
                 .fontWeight(.bold)
-                .foregroundColor(.blue)
+                .foregroundColor(Color.blue.accessible(highContrast: accessibilityContrast == .high))
+                .accessibilityLabel("シャボン玉消しゲーム")
+                .accessibilityHint("ゲームのメインタイトルです")
             
             VStack(spacing: 20) {
                 Button(action: {
@@ -133,9 +137,12 @@ struct MenuView: View {
                         .foregroundColor(.white)
                         .padding()
                         .frame(maxWidth: .infinity)
-                        .background(Color.blue)
+                        .background(Color.blue.accessible(highContrast: accessibilityContrast == .high))
                         .cornerRadius(10)
                 }
+                .accessibilityLabel("ゲーム開始")
+                .accessibilityHint("タップするとゲームが開始されます")
+                .accessibilityTraits(.button)
                 
                 Button(action: {
                     gameViewModel.gameState = .settings
@@ -144,12 +151,15 @@ struct MenuView: View {
                     Text("設定")
                         .font(.title2)
                         .fontWeight(.semibold)
-                        .foregroundColor(.blue)
+                        .foregroundColor(Color.blue.accessible(highContrast: accessibilityContrast == .high))
                         .padding()
                         .frame(maxWidth: .infinity)
-                        .background(Color.blue.opacity(0.1))
+                        .background(Color.blue.accessible(highContrast: accessibilityContrast == .high).opacity(0.1))
                         .cornerRadius(10)
                 }
+                .accessibilityLabel("設定")
+                .accessibilityHint("ゲームの設定を変更できます")
+                .accessibilityTraits(.button)
                 
                 // ハイスコア表示ボタン
                 Button(action: {
@@ -159,12 +169,15 @@ struct MenuView: View {
                     Text("ハイスコア")
                         .font(.title2)
                         .fontWeight(.semibold)
-                        .foregroundColor(.purple)
+                        .foregroundColor(Color.purple.accessible(highContrast: accessibilityContrast == .high))
                         .padding()
                         .frame(maxWidth: .infinity)
-                        .background(Color.purple.opacity(0.1))
+                        .background(Color.purple.accessible(highContrast: accessibilityContrast == .high).opacity(0.1))
                         .cornerRadius(10)
                 }
+                .accessibilityLabel("ハイスコア")
+                .accessibilityHint("過去のハイスコアを確認できます")
+                .accessibilityTraits(.button)
             }
             .padding(.horizontal, 40)
             
@@ -215,6 +228,8 @@ struct GameView: View {
                                     .foregroundColor(.yellow)
                             }
                         }
+                        .accessibilityElement(children: .combine)
+                        .accessibilityLabel("現在のスコア \(viewModel.score)ポイント\(viewModel.currentStreak >= 3 ? ", \(viewModel.currentStreak)連鎖" : "")")
                         
                         Spacer()
                         
@@ -237,6 +252,8 @@ struct GameView: View {
                                     .foregroundColor(.white)
                             }
                         }
+                        .accessibilityElement(children: .combine)
+                        .accessibilityLabel(viewModel.gameSettings.gameMode == "numbered" ? "次にタップする数字 \(viewModel.nextExpectedNumber)" : "破裂させたバブル数 \(viewModel.bubblesPopped)個")
                         
                         Spacer()
                         
@@ -249,6 +266,8 @@ struct GameView: View {
                                 .fontWeight(.bold)
                                 .foregroundColor(viewModel.timeRemaining <= 10 ? .red : .white)
                         }
+                        .accessibilityElement(children: .combine)
+                        .accessibilityLabel("残り時間 \(Int(viewModel.timeRemaining))秒\(viewModel.timeRemaining <= 10 ? "、時間が少なくなっています" : "")")
                     }
                     .padding()
                     .background(
@@ -278,6 +297,9 @@ struct GameView: View {
                                 .background(Color.black.opacity(0.3))
                                 .clipShape(Circle())
                         }
+                        .accessibilityLabel("ポーズ")
+                        .accessibilityHint("ゲームを一時停止します")
+                        .accessibilityTraits(.button)
                         .padding(.bottom, 50)
                     } else if viewModel.gameState == .paused {
                         VStack {
@@ -299,6 +321,9 @@ struct GameView: View {
                                         .background(Color.green)
                                         .cornerRadius(10)
                                 }
+                                .accessibilityLabel("再開")
+                                .accessibilityHint("ゲームを再開します")
+                                .accessibilityTraits(.button)
                                 
                                 Button(action: {
                                     viewModel.endGame()
@@ -311,15 +336,21 @@ struct GameView: View {
                                         .background(Color.red)
                                         .cornerRadius(10)
                                 }
+                                .accessibilityLabel("終了")
+                                .accessibilityHint("ゲームを終了してメニューに戻ります")
+                                .accessibilityTraits(.button)
                             }
                         }
                         .padding(.bottom, 50)
                     }
                 }
             }
-            .onTapGesture { location in
-                viewModel.handleBubbleTap(at: location)
-            }
+            .simultaneousGesture(
+                DragGesture(minimumDistance: 0)
+                    .onEnded { value in
+                        viewModel.handleBubbleTap(at: value.location)
+                    }
+            )
             .onAppear {
                 viewModel.updateScreenBounds(geometry.frame(in: .local))
                 viewModel.setupParticleEffectView(particleEffectView)
@@ -336,6 +367,7 @@ struct GameView: View {
 
 struct BubbleView: View {
     let bubble: Bubble
+    @Environment(\.accessibilityContrast) private var accessibilityContrast
     
     var body: some View {
         ZStack {
@@ -344,9 +376,9 @@ struct BubbleView: View {
                 .fill(
                     RadialGradient(
                         colors: [
-                            bubble.color.opacity(0.6),
-                            bubble.color.opacity(bubble.alpha),
-                            bubble.color.opacity(0.8)
+                            bubble.color.accessible(highContrast: accessibilityContrast == .high).opacity(0.6),
+                            bubble.color.accessible(highContrast: accessibilityContrast == .high).opacity(bubble.alpha),
+                            bubble.color.accessible(highContrast: accessibilityContrast == .high).opacity(0.8)
                         ],
                         center: UnitPoint(x: 0.3, y: 0.3),
                         startRadius: 0,
@@ -388,6 +420,11 @@ struct BubbleView: View {
         )
         .animation(.easeOut(duration: 0.3), value: bubble.isPopping)
         .animation(.easeInOut(duration: 2), value: bubble.animationPhase)
+        .accessibilityElement()
+        .accessibilityLabel(bubble.type == .numbered ? "数字 \(bubble.number ?? 0) のシャボン玉" : "シャボン玉")
+        .accessibilityHint("タップすると破裂します")
+        .accessibilityTraits(.button)
+        .accessibilityAddTraits(bubble.type == .numbered ? [.selected] : [])
     }
 }
 
