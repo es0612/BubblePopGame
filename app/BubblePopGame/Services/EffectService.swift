@@ -12,24 +12,67 @@ import UIKit
 protocol EffectService {
     func createPopEffect(at position: CGPoint, color: Color)
     func triggerHapticFeedback(intensity: UIImpactFeedbackGenerator.FeedbackStyle)
+    func triggerSuccessFeedback()
+    func triggerWarningFeedback()
+    func triggerErrorFeedback()
 }
 
 class EffectServiceImpl: EffectService {
-    private let hapticFeedback: UIImpactFeedbackGenerator
+    private let lightFeedback: UIImpactFeedbackGenerator
+    private let mediumFeedback: UIImpactFeedbackGenerator
+    private let heavyFeedback: UIImpactFeedbackGenerator
+    private let selectionFeedback: UISelectionFeedbackGenerator
+    private let notificationFeedback: UINotificationFeedbackGenerator
+    
+    var particleEffectView: ParticleEffectView?
     
     init() {
-        self.hapticFeedback = UIImpactFeedbackGenerator()
-        hapticFeedback.prepare()
+        self.lightFeedback = UIImpactFeedbackGenerator(style: .light)
+        self.mediumFeedback = UIImpactFeedbackGenerator(style: .medium)
+        self.heavyFeedback = UIImpactFeedbackGenerator(style: .heavy)
+        self.selectionFeedback = UISelectionFeedbackGenerator()
+        self.notificationFeedback = UINotificationFeedbackGenerator()
+        
+        // フィードバックジェネレーターの準備
+        lightFeedback.prepare()
+        mediumFeedback.prepare()
+        heavyFeedback.prepare()
+        selectionFeedback.prepare()
+        notificationFeedback.prepare()
     }
     
     func createPopEffect(at position: CGPoint, color: Color) {
-        // TODO: パーティクルエフェクト実装
-        print("Creating pop effect at position: \(position) with color: \(color)")
+        // パーティクルエフェクトを作成
+        particleEffectView?.addEffect(at: position, color: color)
+        print("🎆 Pop effect created at: \(position)")
     }
     
     func triggerHapticFeedback(intensity: UIImpactFeedbackGenerator.FeedbackStyle) {
-        let generator = UIImpactFeedbackGenerator(style: intensity)
-        generator.prepare()
-        generator.impactOccurred()
+        switch intensity {
+        case .light:
+            lightFeedback.impactOccurred()
+        case .medium:
+            mediumFeedback.impactOccurred()
+        case .heavy:
+            heavyFeedback.impactOccurred()
+        case .soft:
+            lightFeedback.impactOccurred()
+        case .rigid:
+            heavyFeedback.impactOccurred()
+        @unknown default:
+            lightFeedback.impactOccurred()
+        }
+    }
+    
+    func triggerSuccessFeedback() {
+        notificationFeedback.notificationOccurred(.success)
+    }
+    
+    func triggerWarningFeedback() {
+        notificationFeedback.notificationOccurred(.warning)
+    }
+    
+    func triggerErrorFeedback() {
+        notificationFeedback.notificationOccurred(.error)
     }
 }

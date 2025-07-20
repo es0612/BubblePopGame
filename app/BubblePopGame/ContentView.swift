@@ -91,6 +91,7 @@ struct MenuView: View {
             VStack(spacing: 20) {
                 Button(action: {
                     gameViewModel.startGame()
+                    gameViewModel.audioService.playSFX(name: "button_tap")
                 }) {
                     Text("ゲーム開始")
                         .font(.title2)
@@ -129,6 +130,7 @@ struct MenuView: View {
 
 struct GameView: View {
     let viewModel: GameViewModel
+    @State private var particleEffectView = ParticleEffectView()
     
     var body: some View {
         GeometryReader { geometry in
@@ -141,6 +143,9 @@ struct GameView: View {
                 ForEach(viewModel.bubbles) { bubble in
                     BubbleView(bubble: bubble)
                 }
+                
+                // Particle Effects
+                particleEffectView
                 
                 // HUD
                 VStack {
@@ -256,6 +261,7 @@ struct GameView: View {
             }
             .onAppear {
                 viewModel.updateScreenBounds(geometry.frame(in: .local))
+                viewModel.setupParticleEffectView(particleEffectView)
                 if viewModel.gameState != .playing {
                     viewModel.startGame()
                 }
@@ -406,6 +412,130 @@ struct SettingsView: View {
                           startPoint: .top, endPoint: .bottom)
         )
     }
+}
+
+struct ParticleEffect: View {
+    let position: CGPoint
+    let color: Color
+    @State private var particles: [Particle] = []
+    @State private var isAnimating = false
+    
+    var body: some View {
+        ZStack {
+            ForEach(particles) { particle in
+                Circle()
+                    .fill(particle.color)
+                    .frame(width: particle.size, height: particle.size)
+                    .position(particle.position)
+                    .opacity(particle.opacity)
+                    .scaleEffect(particle.scale)
+            }
+        }
+        .onAppear {
+            createParticles()
+            animateParticles()
+        }
+    }
+    
+    private func createParticles() {
+        particles = []
+        let particleCount = Int.random(in: 8...12)
+        
+        for _ in 0..<particleCount {
+            let angle = Double.random(in: 0...(2 * .pi))
+            let velocity = Double.random(in: 30...80)
+            let size = Double.random(in: 4...12)
+            
+            let particle = Particle(
+                position: position,
+                velocity: CGVector(
+                    dx: cos(angle) * velocity,
+                    dy: sin(angle) * velocity
+                ),
+                color: color.opacity(Double.random(in: 0.6...1.0)),
+                size: size,
+                opacity: 1.0,
+                scale: 1.0,
+                lifespan: Double.random(in: 0.8...1.5)
+            )
+            particles.append(particle)
+        }
+    }
+    
+    private func animateParticles() {
+        isAnimating = true
+        
+        let animationDuration = 1.5
+        let steps = 60
+        let stepDuration = animationDuration / Double(steps)
+        
+        for step in 0..<steps {
+            DispatchQueue.main.asyncAfter(deadline: .now() + stepDuration * Double(step)) {
+                updateParticles(progress: Double(step) / Double(steps))
+            }
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + animationDuration) {
+            particles.removeAll()
+            isAnimating = false
+        }
+    }
+    
+    private func updateParticles(progress: Double) {
+        for i in particles.indices {
+            let timeStep = 1.0 / 60.0
+            
+            particles[i].position.x += particles[i].velocity.dx * timeStep
+            particles[i].position.y += particles[i].velocity.dy * timeStep
+            
+            particles[i].velocity.dy += 120 * timeStep
+            
+            particles[i].velocity.dx *= 0.98
+            particles[i].velocity.dy *= 0.98
+            
+            let life = progress / particles[i].lifespan
+            particles[i].opacity = max(0, 1.0 - life)
+            particles[i].scale = 1.0 - (life * 0.5)
+        }
+    }
+}
+
+struct Particle: Identifiable {
+    let id = UUID()
+    var position: CGPoint
+    var velocity: CGVector
+    let color: Color
+    let size: Double
+    var opacity: Double
+    var scale: Double
+    let lifespan: Double
+}
+
+struct ParticleEffectView: View {
+    @State private var effects: [ParticleEffectData] = []
+    
+    var body: some View {
+        ZStack {
+            ForEach(effects) { effect in
+                ParticleEffect(position: effect.position, color: effect.color)
+            }
+        }
+    }
+    
+    func addEffect(at position: CGPoint, color: Color) {
+        let effect = ParticleEffectData(position: position, color: color)
+        effects.append(effect)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            effects.removeAll { $0.id == effect.id }
+        }
+    }
+}
+
+struct ParticleEffectData: Identifiable {
+    let id = UUID()
+    let position: CGPoint
+    let color: Color
 }
 
 #Preview {

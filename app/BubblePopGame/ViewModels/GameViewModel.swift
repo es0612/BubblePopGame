@@ -23,7 +23,7 @@ class GameViewModel {
     
     // Services
     private let bubbleService: BubbleService
-    private let audioService: AudioService
+    let audioService: AudioService
     private let effectService: EffectService
     
     // Repositories
@@ -54,6 +54,12 @@ class GameViewModel {
     
     func updateScreenBounds(_ bounds: CGRect) {
         screenBounds = bounds
+    }
+    
+    func setupParticleEffectView(_ particleEffectView: ParticleEffectView) {
+        if let effectServiceImpl = effectService as? EffectServiceImpl {
+            effectServiceImpl.particleEffectView = particleEffectView
+        }
     }
     
     func startGame() {
@@ -96,6 +102,10 @@ class GameViewModel {
         stopGameLoop()
         stopGameTimer()
         audioService.stopAllSounds()
+        
+        // ゲームオーバー音とフィードバック
+        audioService.playSFX(name: "game_over")
+        effectService.triggerErrorFeedback()
         
         // スコア保存
         saveScore()

@@ -12,8 +12,12 @@ protocol AudioService {
     func playBGM(name: String, loop: Bool)
     func playSFX(name: String)
     func setVolume(_ volume: Float)
+    func setBGMVolume(_ volume: Float)
+    func setSFXVolume(_ volume: Float)
     func toggleMute()
     func stopAllSounds()
+    func stopBGM()
+    var isPlaying: Bool { get }
 }
 
 class AudioServiceImpl: AudioService {
@@ -21,19 +25,41 @@ class AudioServiceImpl: AudioService {
     private var bgmPlayer: AVAudioPlayerNode
     private var sfxPlayers: [String: AVAudioPlayerNode]
     private var isMuted: Bool = false
-    private var currentVolume: Float = 1.0
+    private var masterVolume: Float = 1.0
+    private var bgmVolume: Float = 0.7
+    private var sfxVolume: Float = 0.8
+    private var bgmMixerNode: AVAudioMixerNode
+    private var sfxMixerNode: AVAudioMixerNode
+    
+    var isPlaying: Bool {
+        return bgmPlayer.isPlaying
+    }
     
     init() {
         self.audioEngine = AVAudioEngine()
         self.bgmPlayer = AVAudioPlayerNode()
         self.sfxPlayers = [:]
+        self.bgmMixerNode = AVAudioMixerNode()
+        self.sfxMixerNode = AVAudioMixerNode()
         
         setupAudioEngine()
     }
     
     private func setupAudioEngine() {
+        // ミキサーノードをアタッチ
+        audioEngine.attach(bgmMixerNode)
+        audioEngine.attach(sfxMixerNode)
         audioEngine.attach(bgmPlayer)
-        audioEngine.connect(bgmPlayer, to: audioEngine.mainMixerNode, format: nil)
+        
+        // BGMプレイヤーをBGMミキサーに接続
+        audioEngine.connect(bgmPlayer, to: bgmMixerNode, format: nil)
+        
+        // ミキサーをメインミキサーに接続
+        audioEngine.connect(bgmMixerNode, to: audioEngine.mainMixerNode, format: nil)
+        audioEngine.connect(sfxMixerNode, to: audioEngine.mainMixerNode, format: nil)
+        
+        // 初期音量設定
+        updateVolumes()
         
         do {
             try audioEngine.start()
@@ -43,23 +69,50 @@ class AudioServiceImpl: AudioService {
     }
     
     func playBGM(name: String, loop: Bool) {
-        // TODO: BGM再生実装（音声ファイルが必要）
+        // BGMを停止
+        bgmPlayer.stop()
+        
+        // 実際の音声ファイルがないので、システム音で代用
+        generateSynthesizedBGM()
         print("Playing BGM: \(name), loop: \(loop)")
     }
     
     func playSFX(name: String) {
-        // TODO: 効果音再生実装（音声ファイルが必要）
-        print("Playing SFX: \(name)")
+        // 効果音の種類に応じてシステム音で代用
+        switch name {
+        case "bubble_pop":
+            generatePopSound()
+        case "button_tap":
+            generateButtonSound()
+        case "game_over":
+            generateGameOverSound()
+        default:
+            print("Playing SFX: \(name)")
+        }
     }
     
     func setVolume(_ volume: Float) {
-        currentVolume = max(0.0, min(1.0, volume))
-        audioEngine.mainMixerNode.outputVolume = isMuted ? 0.0 : currentVolume
+        masterVolume = max(0.0, min(1.0, volume))
+        updateVolumes()
+    }
+    
+    func setBGMVolume(_ volume: Float) {
+        bgmVolume = max(0.0, min(1.0, volume))
+        updateVolumes()
+    }
+    
+    func setSFXVolume(_ volume: Float) {
+        sfxVolume = max(0.0, min(1.0, volume))
+        updateVolumes()
     }
     
     func toggleMute() {
         isMuted.toggle()
-        audioEngine.mainMixerNode.outputVolume = isMuted ? 0.0 : currentVolume
+        updateVolumes()
+    }
+    
+    func stopBGM() {
+        bgmPlayer.stop()
     }
     
     func stopAllSounds() {
@@ -67,5 +120,34 @@ class AudioServiceImpl: AudioService {
         for player in sfxPlayers.values {
             player.stop()
         }
+    }
+    
+    private func updateVolumes() {
+        let effectiveVolume = isMuted ? 0.0 : masterVolume
+        bgmMixerNode.outputVolume = effectiveVolume * bgmVolume
+        sfxMixerNode.outputVolume = effectiveVolume * sfxVolume
+    }
+    
+    private func generateSynthesizedBGM() {
+        // 実際のプロジェクトでは音声ファイルを使用
+        print("🎵 BGM playing (synthesized)")
+    }
+    
+    private func generatePopSound() {
+        // シャボン玉破裂音をシミュレート
+        AudioServicesPlaySystemSound(1306) // Pop sound
+        print("🎵 Pop sound")
+    }
+    
+    private func generateButtonSound() {
+        // ボタンタップ音をシミュレート
+        AudioServicesPlaySystemSound(1104) // Click sound
+        print("🎵 Button sound")
+    }
+    
+    private func generateGameOverSound() {
+        // ゲームオーバー音をシミュレート
+        AudioServicesPlaySystemSound(1322) // Anticipate sound
+        print("🎵 Game over sound")
     }
 }
