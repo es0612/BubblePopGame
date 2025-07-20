@@ -21,6 +21,11 @@ class GameViewModel {
     var currentStreak: Int = 0
     var bestStreak: Int = 0
     
+    // 数字順ゲームモード専用
+    var nextExpectedNumber: Int = 1
+    var numberedBubblesCount: Int = 5
+    var timePenalty: Double = 0.0
+    
     // Services
     private let bubbleService: BubbleService
     let audioService: AudioService
@@ -34,7 +39,7 @@ class GameViewModel {
     // ゲームループ
     private nonisolated(unsafe) var displayLink: CADisplayLink?
     private nonisolated(unsafe) var gameTimer: Timer?
-    private var gameSettings: GameSettings
+    var gameSettings: GameSettings
     
     init(bubbleService: BubbleService,
          audioService: AudioService,
@@ -69,6 +74,12 @@ class GameViewModel {
         bubblesPopped = 0
         currentStreak = 0
         bestStreak = 0
+        
+        // 数字順ゲームモード初期化
+        if gameSettings.gameMode == "numbered" {
+            nextExpectedNumber = 1
+            timePenalty = 0.0
+        }
         
         // シャボン玉生成
         generateBubbles()
@@ -117,46 +128,129 @@ class GameViewModel {
         if let hitBubbleIndex = bubbleService.checkCollisionIndex(at: location, in: bubbles) {
             var hitBubble = bubbles[hitBubbleIndex]
             
-            // 破裂アニメーション開始
-            hitBubble.isPopping = true
-            hitBubble.lastTouchTime = Date()
-            bubbles[hitBubbleIndex] = hitBubble
-            
-            // 統計更新
-            bubblesPopped += 1
-            currentStreak += 1
-            bestStreak = max(bestStreak, currentStreak)
-            
-            // スコア加算（ストリークボーナス付き）
-            let baseScore = calculateScore(for: hitBubble)
-            let streakBonus = currentStreak >= 5 ? baseScore / 2 : 0
-            let earnedScore = baseScore + streakBonus
-            score += earnedScore
-            
-            // エフェクトとサウンド
-            effectService.createPopEffect(at: hitBubble.position, color: hitBubble.color)
-            audioService.playSFX(name: "bubble_pop")
-            
-            // タイプ別の触覚フィードバック
-            let feedbackIntensity: UIImpactFeedbackGenerator.FeedbackStyle = 
-                hitBubble.type == .numbered ? .heavy : .light
-            effectService.triggerHapticFeedback(intensity: feedbackIntensity)
-            
-            // 破裂アニメーション後に削除（0.3秒後）
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
-                self?.bubbles.removeAll { $0.id == hitBubble.id }
-                self?.addRandomBubble()
+            // 数字順ゲームモードでの順序チェック
+            if gameSettings.gameMode == "numbered" && hitBubble.type == .numbered {
+                if let bubbleNumber = hitBubble.number {
+                    if bubbleNumber == nextExpectedNumber {
+                        // 正しい順序
+                        handleCorrectNumberedBubble(hitBubble, at: hitBubbleIndex)
+                        return
+                    } else {
+                        // 間違った順序
+                        handleIncorrectNumberedBubble(hitBubble)
+                        return
+                    }
+                }
             }
+            
+            // 通常のバブル処理
+            handleNormalBubble(hitBubble, at: hitBubbleIndex)
         }
     }
     
     // MARK: - Private Methods
     
+    private func handleCorrectNumberedBubble(_ bubble: Bubble, at index: Int) {
+        // 破裂アニメーション開始
+        var hitBubble = bubble
+        hitBubble.isPopping = true
+        hitBubble.lastTouchTime = Date()
+        bubbles[index] = hitBubble
+        
+        // 統計更新
+        bubblesPopped += 1
+        currentStreak += 1
+        bestStreak = max(bestStreak, currentStreak)
+        
+        // ボーナススコア計算（数字順の場合は2倍）
+        let baseScore = bubble.number ?? 1
+        let sequenceBonus = baseScore * 2
+        let streakBonus = currentStreak >= 3 ? baseScore : 0
+        let earnedScore = sequenceBonus + streakBonus
+        score += earnedScore
+        
+        // 次の期待番号を更新
+        nextExpectedNumber += 1
+        if nextExpectedNumber > numberedBubblesCount {
+            nextExpectedNumber = 1
+        }
+        
+        // 成功エフェクトとサウンド
+        effectService.createPopEffect(at: bubble.position, color: .green)
+        audioService.playSFX(name: "bubble_pop")
+        effectService.triggerSuccessFeedback()
+        
+        // 破裂アニメーション後に削除
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
+            self?.bubbles.removeAll { $0.id == bubble.id }
+            self?.addRandomBubble()
+        }
+    }
+    
+    private func handleIncorrectNumberedBubble(_ bubble: Bubble) {
+        // 時間ペナルティ（5秒減少）
+        let penalty = 5.0
+        timePenalty += penalty
+        timeRemaining = max(0, timeRemaining - penalty)
+        
+        // ストリークリセット
+        currentStreak = 0
+        
+        // エラーエフェクトとサウンド
+        effectService.createPopEffect(at: bubble.position, color: .red)
+        audioService.playSFX(name: "error_sound")
+        effectService.triggerErrorFeedback()
+        
+        // バブルは削除しない（正しい順序まで残る）
+    }
+    
+    private func handleNormalBubble(_ bubble: Bubble, at index: Int) {
+        // 破裂アニメーション開始
+        var hitBubble = bubble
+        hitBubble.isPopping = true
+        hitBubble.lastTouchTime = Date()
+        bubbles[index] = hitBubble
+        
+        // 統計更新
+        bubblesPopped += 1
+        currentStreak += 1
+        bestStreak = max(bestStreak, currentStreak)
+        
+        // スコア加算（ストリークボーナス付き）
+        let baseScore = calculateScore(for: bubble)
+        let streakBonus = currentStreak >= 5 ? baseScore / 2 : 0
+        let earnedScore = baseScore + streakBonus
+        score += earnedScore
+        
+        // エフェクトとサウンド
+        effectService.createPopEffect(at: bubble.position, color: bubble.color)
+        audioService.playSFX(name: "bubble_pop")
+        
+        // タイプ別の触覚フィードバック
+        let feedbackIntensity: UIImpactFeedbackGenerator.FeedbackStyle = 
+            bubble.type == .numbered ? .heavy : .light
+        effectService.triggerHapticFeedback(intensity: feedbackIntensity)
+        
+        // 破裂アニメーション後に削除（0.3秒後）
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
+            self?.bubbles.removeAll { $0.id == bubble.id }
+            self?.addRandomBubble()
+        }
+    }
+    
     private func generateBubbles() {
-        bubbles = bubbleService.generateRandomBubbles(
-            count: gameSettings.bubbleCount,
-            screenBounds: screenBounds
-        )
+        if gameSettings.gameMode == "numbered" {
+            bubbles = bubbleService.generateNumberedBubbles(
+                count: gameSettings.bubbleCount,
+                screenBounds: screenBounds,
+                numberedCount: numberedBubblesCount
+            )
+        } else {
+            bubbles = bubbleService.generateRandomBubbles(
+                count: gameSettings.bubbleCount,
+                screenBounds: screenBounds
+            )
+        }
     }
     
     private func addRandomBubble() {
@@ -246,7 +340,7 @@ class GameViewModel {
         }
     }
     
-    private func calculateAccuracy() -> Double {
+    func calculateAccuracy() -> Double {
         let totalBubbles = gameSettings.bubbleCount - bubbles.count + score
         return totalBubbles > 0 ? Double(score) / Double(totalBubbles) : 0.0
     }

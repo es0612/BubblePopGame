@@ -29,6 +29,6 @@ class GameSettings {
         self.animationSpeed = 1.0
         self.soundEnabled = true
         self.vibrationEnabled = true
-        self.gameMode = "normal"
+        self.gameMode = "normal" // "normal" or "numbered"
     }
 }

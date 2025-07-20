@@ -28,7 +28,7 @@ struct ContentView: View {
                 case .gameOver:
                     GameOverView(viewModel: gameViewModel)
                 case .settings:
-                    SettingsView()
+                    SettingsView(gameViewModel: gameViewModel)
                 }
             } else {
                 // 初期化中
@@ -105,6 +105,7 @@ struct MenuView: View {
                 
                 Button(action: {
                     gameViewModel.gameState = .settings
+                    gameViewModel.audioService.playSFX(name: "button_tap")
                 }) {
                     Text("設定")
                         .font(.title2)
@@ -113,6 +114,21 @@ struct MenuView: View {
                         .padding()
                         .frame(maxWidth: .infinity)
                         .background(Color.blue.opacity(0.1))
+                        .cornerRadius(10)
+                }
+                
+                // ハイスコア表示ボタン
+                Button(action: {
+                    // TODO: ハイスコア画面への遷移
+                    gameViewModel.audioService.playSFX(name: "button_tap")
+                }) {
+                    Text("ハイスコア")
+                        .font(.title2)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.purple)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(Color.purple.opacity(0.1))
                         .cornerRadius(10)
                 }
             }
@@ -168,13 +184,23 @@ struct GameView: View {
                         Spacer()
                         
                         VStack(alignment: .center, spacing: 4) {
-                            Text("破裂数")
-                                .font(.caption)
-                                .foregroundColor(.white.opacity(0.8))
-                            Text("\(viewModel.bubblesPopped)")
-                                .font(.headline)
-                                .fontWeight(.semibold)
-                                .foregroundColor(.white)
+                            if viewModel.gameSettings.gameMode == "numbered" {
+                                Text("次の数字")
+                                    .font(.caption)
+                                    .foregroundColor(.white.opacity(0.8))
+                                Text("\(viewModel.nextExpectedNumber)")
+                                    .font(.largeTitle)
+                                    .fontWeight(.bold)
+                                    .foregroundColor(.yellow)
+                            } else {
+                                Text("破裂数")
+                                    .font(.caption)
+                                    .foregroundColor(.white.opacity(0.8))
+                                Text("\(viewModel.bubblesPopped)")
+                                    .font(.headline)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(.white)
+                            }
                         }
                         
                         Spacer()
@@ -332,31 +358,106 @@ struct BubbleView: View {
 
 struct GameOverView: View {
     let viewModel: GameViewModel
+    @State private var showingStats = false
     
     var body: some View {
-        VStack(spacing: 40) {
-            Text("ゲーム終了")
-                .font(.largeTitle)
-                .fontWeight(.bold)
-                .foregroundColor(.red)
+        VStack(spacing: 30) {
+            // ゲーム終了タイトル
+            VStack(spacing: 10) {
+                Text("ゲーム終了")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                    .foregroundColor(.red)
+                
+                Text("お疲れ様でした！")
+                    .font(.headline)
+                    .foregroundColor(.secondary)
+            }
             
-            Text("最終スコア: \(viewModel.score)")
-                .font(.title)
-                .fontWeight(.semibold)
+            // スコア表示セクション
+            VStack(spacing: 20) {
+                ScoreCard(title: "最終スコア", value: "\(viewModel.score)", color: .orange)
+                
+                HStack(spacing: 15) {
+                    ScoreCard(title: "破裂数", value: "\(viewModel.bubblesPopped)", color: .blue)
+                    ScoreCard(title: "最大連鎖", value: "\(viewModel.bestStreak)", color: .purple)
+                }
+                
+                ScoreCard(title: "正確率", value: String(format: "%.1f%%", viewModel.calculateAccuracy() * 100), color: .green)
+            }
             
-            Button(action: {
-                viewModel.gameState = .menu
-            }) {
-                Text("メニューに戻る")
+            // ボタン群
+            VStack(spacing: 15) {
+                Button(action: {
+                    viewModel.audioService.playSFX(name: "button_tap")
+                    viewModel.startGame()
+                }) {
+                    HStack {
+                        Image(systemName: "arrow.clockwise")
+                        Text("もう一度プレイ")
+                    }
                     .font(.title2)
                     .fontWeight(.semibold)
                     .foregroundColor(.white)
                     .padding()
                     .frame(maxWidth: .infinity)
-                    .background(Color.blue)
+                    .background(Color.green)
                     .cornerRadius(10)
+                }
+                
+                Button(action: {
+                    viewModel.audioService.playSFX(name: "button_tap")
+                    viewModel.gameState = .menu
+                }) {
+                    HStack {
+                        Image(systemName: "house")
+                        Text("メニューに戻る")
+                    }
+                    .font(.title2)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.blue)
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Color.blue.opacity(0.1))
+                    .cornerRadius(10)
+                }
+                
+                Button(action: {
+                    showingStats.toggle()
+                    viewModel.audioService.playSFX(name: "button_tap")
+                }) {
+                    HStack {
+                        Image(systemName: "chart.bar")
+                        Text("詳細統計")
+                    }
+                    .font(.title3)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.purple)
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Color.purple.opacity(0.1))
+                    .cornerRadius(10)
+                }
             }
-            .padding(.horizontal, 40)
+            .padding(.horizontal, 30)
+            
+            if showingStats {
+                VStack(spacing: 10) {
+                    Text("ゲーム統計")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                    
+                    VStack(spacing: 8) {
+                        StatRow(label: "プレイ時間", value: String(format: "%.1f秒", 60.0 - viewModel.timeRemaining))
+                        StatRow(label: "平均反応速度", value: viewModel.bubblesPopped > 0 ? String(format: "%.2f秒/個", (60.0 - viewModel.timeRemaining) / Double(viewModel.bubblesPopped)) : "N/A")
+                        StatRow(label: "シャボン玉密度", value: String(format: "%.1f個/秒", Double(viewModel.bubblesPopped) / max(1, 60.0 - viewModel.timeRemaining)))
+                    }
+                }
+                .padding()
+                .background(Color.gray.opacity(0.1))
+                .cornerRadius(10)
+                .padding(.horizontal, 30)
+            }
             
             Spacer()
         }
@@ -368,49 +469,204 @@ struct GameOverView: View {
     }
 }
 
+struct ScoreCard: View {
+    let title: String
+    let value: String
+    let color: Color
+    
+    var body: some View {
+        VStack(spacing: 5) {
+            Text(title)
+                .font(.caption)
+                .foregroundColor(.secondary)
+            Text(value)
+                .font(.title2)
+                .fontWeight(.bold)
+                .foregroundColor(color)
+        }
+        .padding()
+        .background(Color.white.opacity(0.8))
+        .cornerRadius(10)
+        .shadow(radius: 2)
+    }
+}
+
+struct StatRow: View {
+    let label: String
+    let value: String
+    
+    var body: some View {
+        HStack {
+            Text(label)
+                .font(.body)
+                .foregroundColor(.primary)
+            Spacer()
+            Text(value)
+                .font(.body)
+                .fontWeight(.semibold)
+                .foregroundColor(.secondary)
+        }
+    }
+}
+
 struct SettingsView: View {
+    let gameViewModel: GameViewModel
     @State private var settingsViewModel = SettingsViewModel()
     
     var body: some View {
-        VStack(spacing: 20) {
-            Text("設定")
-                .font(.largeTitle)
-                .fontWeight(.bold)
+        NavigationView {
+            VStack(spacing: 30) {
+                Text("設定")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                    .padding()
+                
+                // 音響設定セクション
+                VStack(alignment: .leading, spacing: 20) {
+                    Text("音響設定")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                    
+                    VStack(spacing: 15) {
+                        HStack {
+                            Text("音声")
+                                .font(.title3)
+                            Spacer()
+                            Toggle("", isOn: $settingsViewModel.gameSettings.soundEnabled)
+                        }
+                        
+                        if settingsViewModel.gameSettings.soundEnabled {
+                            VStack(spacing: 10) {
+                                HStack {
+                                    Text("BGM音量")
+                                        .font(.body)
+                                    Spacer()
+                                    Text("\(Int(settingsViewModel.bgmVolume * 100))%")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                                
+                                Slider(value: $settingsViewModel.bgmVolume, in: 0...1)
+                                    .accentColor(.blue)
+                                
+                                HStack {
+                                    Text("効果音音量")
+                                        .font(.body)
+                                    Spacer()
+                                    Text("\(Int(settingsViewModel.sfxVolume * 100))%")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                                
+                                Slider(value: $settingsViewModel.sfxVolume, in: 0...1)
+                                    .accentColor(.green)
+                            }
+                            .padding(.leading, 20)
+                        }
+                        
+                        HStack {
+                            Text("振動")
+                                .font(.title3)
+                            Spacer()
+                            Toggle("", isOn: $settingsViewModel.gameSettings.vibrationEnabled)
+                        }
+                    }
+                }
                 .padding()
-            
-            VStack(spacing: 15) {
-                HStack {
-                    Text("音声")
-                        .font(.title3)
-                    Spacer()
-                    Toggle("", isOn: $settingsViewModel.gameSettings.soundEnabled)
-                }
+                .background(Color.gray.opacity(0.1))
+                .cornerRadius(15)
                 
-                HStack {
-                    Text("振動")
-                        .font(.title3)
-                    Spacer()
-                    Toggle("", isOn: $settingsViewModel.gameSettings.vibrationEnabled)
+                // ゲーム設定セクション
+                VStack(alignment: .leading, spacing: 20) {
+                    Text("ゲーム設定")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                    
+                    VStack(spacing: 15) {
+                        HStack {
+                            Text("ゲーム時間")
+                                .font(.title3)
+                            Spacer()
+                            Text("\(Int(settingsViewModel.gameSettings.gameTime))秒")
+                                .font(.title3)
+                                .fontWeight(.semibold)
+                        }
+                        
+                        Slider(value: $settingsViewModel.gameSettings.gameTime, in: 30...120, step: 10)
+                            .accentColor(.orange)
+                        
+                        HStack {
+                            Text("シャボン玉数")
+                                .font(.title3)
+                            Spacer()
+                            Text("\(settingsViewModel.gameSettings.bubbleCount)")
+                                .font(.title3)
+                                .fontWeight(.semibold)
+                        }
+                        
+                        Slider(value: Binding(
+                            get: { Double(settingsViewModel.gameSettings.bubbleCount) },
+                            set: { settingsViewModel.gameSettings.bubbleCount = Int($0) }
+                        ), in: 10...50, step: 5)
+                            .accentColor(.purple)
+                        
+                        HStack {
+                            Text("ゲームモード")
+                                .font(.title3)
+                            Spacer()
+                            Picker("ゲームモード", selection: $settingsViewModel.gameSettings.gameMode) {
+                                Text("通常").tag("normal")
+                                Text("数字順").tag("numbered")
+                            }
+                            .pickerStyle(SegmentedPickerStyle())
+                        }
+                    }
                 }
+                .padding()
+                .background(Color.gray.opacity(0.1))
+                .cornerRadius(15)
                 
-                HStack {
-                    Text("シャボン玉数")
-                        .font(.title3)
-                    Spacer()
-                    Text("\(settingsViewModel.gameSettings.bubbleCount)")
-                        .font(.title3)
-                        .fontWeight(.semibold)
+                Spacer()
+                
+                // 保存・戻るボタン
+                HStack(spacing: 20) {
+                    Button(action: {
+                        settingsViewModel.saveSettings()
+                        gameViewModel.audioService.playSFX(name: "button_tap")
+                        gameViewModel.gameState = .menu
+                    }) {
+                        Text("保存")
+                            .font(.title3)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.white)
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(Color.blue)
+                            .cornerRadius(10)
+                    }
+                    
+                    Button(action: {
+                        gameViewModel.audioService.playSFX(name: "button_tap")
+                        gameViewModel.gameState = .menu
+                    }) {
+                        Text("キャンセル")
+                            .font(.title3)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.red)
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(Color.red.opacity(0.1))
+                            .cornerRadius(10)
+                    }
                 }
+                .padding(.horizontal)
             }
             .padding()
-            
-            Spacer()
+            .background(
+                LinearGradient(colors: [.green.opacity(0.3), .mint.opacity(0.1)], 
+                              startPoint: .top, endPoint: .bottom)
+            )
         }
-        .padding()
-        .background(
-            LinearGradient(colors: [.green.opacity(0.3), .mint.opacity(0.1)], 
-                          startPoint: .top, endPoint: .bottom)
-        )
     }
 }
 

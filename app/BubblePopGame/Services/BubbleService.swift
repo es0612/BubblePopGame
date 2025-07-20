@@ -10,10 +10,12 @@ import SwiftUI
 
 protocol BubbleService {
     func createBubble(at position: CGPoint, type: BubbleType) -> Bubble
+    func createNumberedBubble(at position: CGPoint, number: Int) -> Bubble
     func updateBubbles(_ bubbles: inout [Bubble])
     func checkCollision(at point: CGPoint, in bubbles: [Bubble]) -> Bubble?
     func checkCollisionIndex(at point: CGPoint, in bubbles: [Bubble]) -> Int?
     func generateRandomBubbles(count: Int, screenBounds: CGRect) -> [Bubble]
+    func generateNumberedBubbles(count: Int, screenBounds: CGRect, numberedCount: Int) -> [Bubble]
 }
 
 class BubbleServiceImpl: BubbleService {
@@ -55,6 +57,25 @@ class BubbleServiceImpl: BubbleService {
             number: type == .numbered ? Int.random(in: 1...10) : nil,
             color: color,
             alpha: 0.8,
+            animationPhase: 0.0
+        )
+    }
+    
+    func createNumberedBubble(at position: CGPoint, number: Int) -> Bubble {
+        let radius: CGFloat = 50.0 // 数字バブルは固定サイズ
+        let color: Color = .yellow // 数字バブルは黄色で統一
+        
+        return Bubble(
+            position: position,
+            velocity: CGVector(
+                dx: Double.random(in: -20.0..<20.0), 
+                dy: Double.random(in: -20.0..<20.0)
+            ),
+            radius: radius,
+            type: .numbered,
+            number: number,
+            color: color,
+            alpha: 0.9,
             animationPhase: 0.0
         )
     }
@@ -147,6 +168,32 @@ class BubbleServiceImpl: BubbleService {
             // 10%の確率で数字タイプ、90%で通常タイプ
             let bubbleType: BubbleType = Double.random(in: 0...1) < 0.1 ? .numbered : .normal
             let bubble = createBubble(at: position, type: bubbleType)
+            bubbles.append(bubble)
+        }
+        
+        return bubbles
+    }
+    
+    func generateNumberedBubbles(count: Int, screenBounds: CGRect, numberedCount: Int) -> [Bubble] {
+        var bubbles: [Bubble] = []
+        
+        // 指定された数の数字付きバブルを生成（1からnumberedCountまで）
+        for number in 1...numberedCount {
+            let x = CGFloat.random(in: 60...(screenBounds.width - 60))
+            let y = CGFloat.random(in: 60...(screenBounds.height - 60))
+            let position = CGPoint(x: x, y: y)
+            
+            let bubble = createNumberedBubble(at: position, number: number)
+            bubbles.append(bubble)
+        }
+        
+        // 残りは通常のバブル
+        for _ in numberedCount..<count {
+            let x = CGFloat.random(in: 60...(screenBounds.width - 60))
+            let y = CGFloat.random(in: 60...(screenBounds.height - 60))
+            let position = CGPoint(x: x, y: y)
+            
+            let bubble = createBubble(at: position, type: .normal)
             bubbles.append(bubble)
         }
         

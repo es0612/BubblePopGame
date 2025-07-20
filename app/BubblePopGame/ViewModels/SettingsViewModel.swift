@@ -10,6 +10,8 @@ import Foundation
 @Observable
 class SettingsViewModel {
     var gameSettings: GameSettings
+    var bgmVolume: Double = 0.7
+    var sfxVolume: Double = 0.8
     
     init() {
         // 初期設定として空のGameSettingsを作成
