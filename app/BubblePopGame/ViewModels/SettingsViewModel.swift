@@ -8,18 +8,42 @@
 import Foundation
 
 @Observable
+@MainActor
 class SettingsViewModel {
     var gameSettings: GameSettings
     var bgmVolume: Double = 0.7
     var sfxVolume: Double = 0.8
     
-    init() {
-        // 初期設定として空のGameSettingsを作成
-        self.gameSettings = GameSettings()
+    private let settingsRepository: SettingsRepository?
+    
+    init(settingsRepository: SettingsRepository? = nil) {
+        self.settingsRepository = settingsRepository
+        
+        // 保存された設定を読み込み、なければデフォルト設定を使用
+        if let repository = settingsRepository {
+            do {
+                self.gameSettings = try repository.fetchSettings() ?? GameSettings()
+            } catch {
+                print("Failed to load settings: \(error)")
+                self.gameSettings = GameSettings()
+            }
+        } else {
+            self.gameSettings = GameSettings()
+        }
     }
     
     func saveSettings() {
-        // TODO: Repository経由で設定保存
+        guard let repository = settingsRepository else {
+            print("SettingsRepository not available")
+            return
+        }
+        
+        do {
+            try repository.saveSettings(gameSettings)
+            print("Settings saved successfully")
+        } catch {
+            print("Failed to save settings: \(error)")
+        }
     }
     
     func resetToDefaults() {

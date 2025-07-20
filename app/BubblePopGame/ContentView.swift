@@ -12,6 +12,7 @@ struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var gameViewModel: GameViewModel?
     @State private var menuViewModel: MenuViewModel
+    @State private var settingsViewModel: SettingsViewModel?
     
     init() {
         self._menuViewModel = State(initialValue: MenuViewModel())
@@ -28,7 +29,13 @@ struct ContentView: View {
                 case .gameOver:
                     GameOverView(viewModel: gameViewModel)
                 case .settings:
-                    SettingsView(gameViewModel: gameViewModel)
+                    if let settingsViewModel = settingsViewModel {
+                        SettingsView(gameViewModel: gameViewModel, settingsViewModel: settingsViewModel)
+                    } else {
+                        ProgressView("設定読み込み中...")
+                    }
+                case .highScore:
+                    HighScoreView(gameViewModel: gameViewModel)
                 }
             } else {
                 // 初期化中
@@ -63,6 +70,9 @@ struct ContentView: View {
             print("Failed to load settings: \(error)")
             gameSettings = GameSettings()
         }
+        
+        // SettingsViewModel作成
+        self.settingsViewModel = SettingsViewModel(settingsRepository: settingsRepository)
         
         // GameViewModel作成
         self.gameViewModel = GameViewModel(
@@ -119,7 +129,7 @@ struct MenuView: View {
                 
                 // ハイスコア表示ボタン
                 Button(action: {
-                    // TODO: ハイスコア画面への遷移
+                    gameViewModel.gameState = .highScore
                     gameViewModel.audioService.playSFX(name: "button_tap")
                 }) {
                     Text("ハイスコア")
@@ -511,7 +521,7 @@ struct StatRow: View {
 
 struct SettingsView: View {
     let gameViewModel: GameViewModel
-    @State private var settingsViewModel = SettingsViewModel()
+    let settingsViewModel: SettingsViewModel
     
     var body: some View {
         NavigationView {
@@ -532,7 +542,10 @@ struct SettingsView: View {
                             Text("音声")
                                 .font(.title3)
                             Spacer()
-                            Toggle("", isOn: $settingsViewModel.gameSettings.soundEnabled)
+                            Toggle("", isOn: Binding(
+                                get: { settingsViewModel.gameSettings.soundEnabled },
+                                set: { settingsViewModel.gameSettings.soundEnabled = $0 }
+                            ))
                         }
                         
                         if settingsViewModel.gameSettings.soundEnabled {
@@ -546,7 +559,10 @@ struct SettingsView: View {
                                         .foregroundColor(.secondary)
                                 }
                                 
-                                Slider(value: $settingsViewModel.bgmVolume, in: 0...1)
+                                Slider(value: Binding(
+                                    get: { settingsViewModel.bgmVolume },
+                                    set: { settingsViewModel.bgmVolume = $0 }
+                                ), in: 0...1)
                                     .accentColor(.blue)
                                 
                                 HStack {
@@ -558,7 +574,10 @@ struct SettingsView: View {
                                         .foregroundColor(.secondary)
                                 }
                                 
-                                Slider(value: $settingsViewModel.sfxVolume, in: 0...1)
+                                Slider(value: Binding(
+                                    get: { settingsViewModel.sfxVolume },
+                                    set: { settingsViewModel.sfxVolume = $0 }
+                                ), in: 0...1)
                                     .accentColor(.green)
                             }
                             .padding(.leading, 20)
@@ -568,7 +587,10 @@ struct SettingsView: View {
                             Text("振動")
                                 .font(.title3)
                             Spacer()
-                            Toggle("", isOn: $settingsViewModel.gameSettings.vibrationEnabled)
+                            Toggle("", isOn: Binding(
+                                get: { settingsViewModel.gameSettings.vibrationEnabled },
+                                set: { settingsViewModel.gameSettings.vibrationEnabled = $0 }
+                            ))
                         }
                     }
                 }
@@ -592,7 +614,10 @@ struct SettingsView: View {
                                 .fontWeight(.semibold)
                         }
                         
-                        Slider(value: $settingsViewModel.gameSettings.gameTime, in: 30...120, step: 10)
+                        Slider(value: Binding(
+                            get: { settingsViewModel.gameSettings.gameTime },
+                            set: { settingsViewModel.gameSettings.gameTime = $0 }
+                        ), in: 30...120, step: 10)
                             .accentColor(.orange)
                         
                         HStack {
@@ -614,7 +639,10 @@ struct SettingsView: View {
                             Text("ゲームモード")
                                 .font(.title3)
                             Spacer()
-                            Picker("ゲームモード", selection: $settingsViewModel.gameSettings.gameMode) {
+                            Picker("ゲームモード", selection: Binding(
+                                get: { settingsViewModel.gameSettings.gameMode },
+                                set: { settingsViewModel.gameSettings.gameMode = $0 }
+                            )) {
                                 Text("通常").tag("normal")
                                 Text("数字順").tag("numbered")
                             }
@@ -792,6 +820,144 @@ struct ParticleEffectData: Identifiable {
     let id = UUID()
     let position: CGPoint
     let color: Color
+}
+
+struct HighScoreView: View {
+    let gameViewModel: GameViewModel
+    @State private var highScores: [GameScore] = []
+    @State private var selectedMode: String = "normal"
+    
+    var body: some View {
+        VStack(spacing: 20) {
+            Text("ハイスコア")
+                .font(.largeTitle)
+                .fontWeight(.bold)
+                .foregroundColor(.purple)
+                .padding()
+            
+            // ゲームモード選択
+            Picker("ゲームモード", selection: $selectedMode) {
+                Text("通常").tag("normal")
+                Text("数字順").tag("numbered")
+            }
+            .pickerStyle(SegmentedPickerStyle())
+            .padding(.horizontal)
+            .onChange(of: selectedMode) { _, newMode in
+                loadHighScores(for: newMode)
+            }
+            
+            // スコアリスト
+            ScrollView {
+                LazyVStack(spacing: 12) {
+                    ForEach(Array(highScores.enumerated()), id: \.element.id) { index, score in
+                        HighScoreRow(rank: index + 1, score: score)
+                    }
+                }
+                .padding(.horizontal)
+            }
+            
+            Spacer()
+            
+            // 戻るボタン
+            Button(action: {
+                gameViewModel.audioService.playSFX(name: "button_tap")
+                gameViewModel.gameState = .menu
+            }) {
+                HStack {
+                    Image(systemName: "house")
+                    Text("メニューに戻る")
+                }
+                .font(.title3)
+                .fontWeight(.semibold)
+                .foregroundColor(.white)
+                .padding()
+                .frame(maxWidth: .infinity)
+                .background(Color.purple)
+                .cornerRadius(10)
+            }
+            .padding(.horizontal)
+        }
+        .background(
+            LinearGradient(colors: [.purple.opacity(0.3), .pink.opacity(0.1)], 
+                          startPoint: .top, endPoint: .bottom)
+        )
+        .onAppear {
+            loadHighScores(for: selectedMode)
+        }
+    }
+    
+    private func loadHighScores(for mode: String) {
+        do {
+            highScores = try gameViewModel.scoreRepository.fetchScoresByMode(mode)
+        } catch {
+            print("Failed to load high scores: \(error)")
+            highScores = []
+        }
+    }
+}
+
+struct HighScoreRow: View {
+    let rank: Int
+    let score: GameScore
+    
+    var body: some View {
+        HStack {
+            // ランク表示
+            Text("#\(rank)")
+                .font(.title2)
+                .fontWeight(.bold)
+                .foregroundColor(rankColor)
+                .frame(width: 50)
+            
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text("\(score.score)")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.primary)
+                    
+                    Spacer()
+                    
+                    Text(score.gameMode == "numbered" ? "数字順" : "通常")
+                        .font(.caption)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(score.gameMode == "numbered" ? Color.orange : Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(8)
+                }
+                
+                HStack {
+                    Text("破裂数: \(score.bubblesPopped)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    
+                    Spacer()
+                    
+                    Text("正確率: \(String(format: "%.1f%%", score.accuracy * 100))")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                
+                Text(score.playDate.formatted(date: .abbreviated, time: .shortened))
+                    .font(.caption2)
+                    .foregroundColor(Color.secondary.opacity(0.7))
+            }
+        }
+        .padding()
+        .background(Color.white.opacity(0.8))
+        .cornerRadius(12)
+        .shadow(radius: 2)
+    }
+    
+    private var rankColor: Color {
+        switch rank {
+        case 1: return .yellow
+        case 2: return .gray
+        case 3: return .brown
+        default: return .primary
+        }
+    }
 }
 
 #Preview {

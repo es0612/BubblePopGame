@@ -32,7 +32,7 @@ class GameViewModel {
     private let effectService: EffectService
     
     // Repositories
-    private let scoreRepository: ScoreRepository
+    let scoreRepository: ScoreRepository
     private let settingsRepository: SettingsRepository
     private let statisticsRepository: StatisticsRepository
     

@@ -13,4 +13,5 @@ enum GameState: String, CaseIterable {
     case paused = "paused"
     case gameOver = "gameOver"
     case settings = "settings"
+    case highScore = "highScore"
 }
