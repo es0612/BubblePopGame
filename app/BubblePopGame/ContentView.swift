@@ -23,6 +23,8 @@ struct ContentView: View {
             NavigationStack {
                 if let gameViewModel = gameViewModel {
                     switch gameViewModel.gameState {
+                    case .tutorial:
+                        TutorialView(gameViewModel: gameViewModel)
                     case .menu:
                         MenuView(viewModel: menuViewModel, gameViewModel: gameViewModel)
                     case .playing, .paused:
@@ -93,7 +95,7 @@ struct ContentView: View {
         self.settingsViewModel = SettingsViewModel(settingsRepository: settingsRepository)
         
         // GameViewModel作成
-        self.gameViewModel = GameViewModel(
+        let viewModel = GameViewModel(
             bubbleService: bubbleService,
             audioService: audioService,
             effectService: effectService,
@@ -104,6 +106,15 @@ struct ContentView: View {
             statisticsRepository: statisticsRepository,
             gameSettings: gameSettings
         )
+        
+        // 初回起動時はチュートリアル、そうでなければメニュー
+        if gameSettings.isFirstLaunch {
+            viewModel.gameState = .tutorial
+        } else {
+            viewModel.gameState = .menu
+        }
+        
+        self.gameViewModel = viewModel
     }
 }
 
@@ -268,6 +279,23 @@ struct GameView: View {
                         }
                         .accessibilityElement(children: .combine)
                         .accessibilityLabel("残り時間 \(Int(viewModel.timeRemaining))秒\(viewModel.timeRemaining <= 10 ? "、時間が少なくなっています" : "")")
+                        
+                        // ポーズボタンをHUD領域に移動
+                        if viewModel.gameState == .playing {
+                            Button(action: {
+                                viewModel.pauseGame()
+                            }) {
+                                Image(systemName: "pause.circle.fill")
+                                    .font(.title2)
+                                    .foregroundColor(.white)
+                                    .padding(8)
+                                    .background(Color.black.opacity(0.5))
+                                    .clipShape(Circle())
+                            }
+                            .accessibilityLabel("ポーズ")
+                            .accessibilityHint("ゲームを一時停止します")
+                            .accessibilityAddTraits(.isButton)
+                        }
                     }
                     .padding()
                     .background(
@@ -286,63 +314,9 @@ struct GameView: View {
                     
                     Spacer()
                     
-                    // ポーズボタン
-                    if viewModel.gameState == .playing {
-                        Button(action: {
-                            viewModel.pauseGame()
-                        }) {
-                            Image(systemName: "pause.circle.fill")
-                                .font(.title)
-                                .foregroundColor(.white)
-                                .padding()
-                                .background(Color.black.opacity(0.3))
-                                .clipShape(Circle())
-                        }
-                        .accessibilityLabel("ポーズ")
-                        .accessibilityHint("ゲームを一時停止します")
-                        .accessibilityAddTraits(.isButton)
-                        .padding(.bottom, 50)
-                    } else if viewModel.gameState == .paused {
-                        VStack {
-                            Text("ポーズ中")
-                                .font(.title)
-                                .fontWeight(.bold)
-                                .foregroundColor(.white)
-                                .padding()
-                            
-                            HStack(spacing: 20) {
-                                Button(action: {
-                                    viewModel.resumeGame()
-                                }) {
-                                    Text("再開")
-                                        .font(.title2)
-                                        .fontWeight(.semibold)
-                                        .foregroundColor(.white)
-                                        .padding()
-                                        .background(Color.green)
-                                        .cornerRadius(10)
-                                }
-                                .accessibilityLabel("再開")
-                                .accessibilityHint("ゲームを再開します")
-                                .accessibilityAddTraits(.isButton)
-                                
-                                Button(action: {
-                                    viewModel.endGame()
-                                }) {
-                                    Text("終了")
-                                        .font(.title2)
-                                        .fontWeight(.semibold)
-                                        .foregroundColor(.white)
-                                        .padding()
-                                        .background(Color.red)
-                                        .cornerRadius(10)
-                                }
-                                .accessibilityLabel("終了")
-                                .accessibilityHint("ゲームを終了してメニューに戻ります")
-                                .accessibilityAddTraits(.isButton)
-                            }
-                        }
-                        .padding(.bottom, 50)
+                    // ポーズ状態のオーバーレイ
+                    if viewModel.gameState == .paused {
+                        PauseOverlayView(gameViewModel: viewModel)
                     }
                 }
             }
@@ -949,6 +923,94 @@ struct ParticleEffectData: Identifiable {
     let id = UUID()
     let position: CGPoint
     let color: Color
+}
+
+struct PauseOverlayView: View {
+    let gameViewModel: GameViewModel
+    @State private var showExitButton = false
+    @State private var showExitConfirmation = false
+    
+    var body: some View {
+        VStack(spacing: 30) {
+            Text("ポーズ中")
+                .font(.largeTitle)
+                .fontWeight(.bold)
+                .foregroundColor(.white)
+                .shadow(radius: 5)
+            
+            VStack(spacing: 20) {
+                // 再開ボタン（常に表示）
+                Button(action: {
+                    gameViewModel.resumeGame()
+                }) {
+                    HStack {
+                        Image(systemName: "play.circle.fill")
+                        Text("再開")
+                    }
+                    .font(.title2)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.white)
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Color.green)
+                    .cornerRadius(15)
+                    .shadow(radius: 3)
+                }
+                .accessibilityLabel("再開")
+                .accessibilityHint("ゲームを再開します")
+                .accessibilityAddTraits(.isButton)
+                
+                // 終了ボタン（2.5秒遅延で表示）
+                if showExitButton {
+                    Button(action: {
+                        showExitConfirmation = true
+                    }) {
+                        HStack {
+                            Image(systemName: "stop.circle.fill")
+                            Text("終了")
+                        }
+                        .font(.title3)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.white)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(Color.red.opacity(0.8))
+                        .cornerRadius(15)
+                        .shadow(radius: 3)
+                    }
+                    .accessibilityLabel("終了")
+                    .accessibilityHint("ゲームを終了してメニューに戻ります")
+                    .accessibilityAddTraits(.isButton)
+                    .transition(.opacity.combined(with: .scale))
+                }
+            }
+            .padding(.horizontal, 40)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.black.opacity(0.7))
+        .onAppear {
+            // 2.5秒後に終了ボタンを表示
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+                withAnimation(.easeInOut(duration: 0.5)) {
+                    showExitButton = true
+                }
+            }
+        }
+        .onDisappear {
+            showExitButton = false
+            showExitConfirmation = false
+        }
+        .alert("ゲーム終了確認", isPresented: $showExitConfirmation) {
+            Button("キャンセル", role: .cancel) {
+                showExitConfirmation = false
+            }
+            Button("終了", role: .destructive) {
+                gameViewModel.endGame()
+            }
+        } message: {
+            Text("本当にゲームを終了しますか？\n進行状況は保存されません。")
+        }
+    }
 }
 
 struct HighScoreView: View {

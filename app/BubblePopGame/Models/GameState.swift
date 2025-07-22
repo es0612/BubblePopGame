@@ -8,6 +8,7 @@
 import Foundation
 
 enum GameState: String, CaseIterable {
+    case tutorial = "tutorial"
     case menu = "menu"
     case playing = "playing"
     case paused = "paused"

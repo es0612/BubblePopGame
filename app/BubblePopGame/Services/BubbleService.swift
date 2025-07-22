@@ -161,9 +161,13 @@ class BubbleServiceImpl: BubbleService {
     func generateRandomBubbles(count: Int, screenBounds: CGRect) -> [Bubble] {
         var bubbles: [Bubble] = []
         
+        // HUD領域（上部150px）とマージン（60px）を除外した生成領域
+        let hudHeight: CGFloat = 150
+        let margin: CGFloat = 60
+        
         for _ in 0..<count {
-            let x = CGFloat.random(in: 60...(screenBounds.width - 60))
-            let y = CGFloat.random(in: 60...(screenBounds.height - 60))
+            let x = CGFloat.random(in: margin...(screenBounds.width - margin))
+            let y = CGFloat.random(in: (hudHeight + margin)...(screenBounds.height - margin))
             let position = CGPoint(x: x, y: y)
             
             // 10%の確率で数字タイプ、90%で通常タイプ
@@ -178,10 +182,14 @@ class BubbleServiceImpl: BubbleService {
     func generateNumberedBubbles(count: Int, screenBounds: CGRect, numberedCount: Int) -> [Bubble] {
         var bubbles: [Bubble] = []
         
+        // HUD領域（上部150px）とマージン（60px）を除外した生成領域
+        let hudHeight: CGFloat = 150
+        let margin: CGFloat = 60
+        
         // 指定された数の数字付きバブルを生成（1からnumberedCountまで）
         for number in 1...numberedCount {
-            let x = CGFloat.random(in: 60...(screenBounds.width - 60))
-            let y = CGFloat.random(in: 60...(screenBounds.height - 60))
+            let x = CGFloat.random(in: margin...(screenBounds.width - margin))
+            let y = CGFloat.random(in: (hudHeight + margin)...(screenBounds.height - margin))
             let position = CGPoint(x: x, y: y)
             
             let bubble = createNumberedBubble(at: position, number: number)
@@ -190,8 +198,8 @@ class BubbleServiceImpl: BubbleService {
         
         // 残りは通常のバブル
         for _ in numberedCount..<count {
-            let x = CGFloat.random(in: 60...(screenBounds.width - 60))
-            let y = CGFloat.random(in: 60...(screenBounds.height - 60))
+            let x = CGFloat.random(in: margin...(screenBounds.width - margin))
+            let y = CGFloat.random(in: (hudHeight + margin)...(screenBounds.height - margin))
             let position = CGPoint(x: x, y: y)
             
             let bubble = createBubble(at: position, type: .normal)

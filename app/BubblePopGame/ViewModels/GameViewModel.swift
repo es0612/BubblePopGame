@@ -310,9 +310,11 @@ class GameViewModel {
     }
     
     private func randomPosition() -> CGPoint {
+        // HUD領域（上部150px）とマージン（60px）を除外した生成領域
+        let hudHeight: CGFloat = 150
         let margin: CGFloat = 60
         let x = CGFloat.random(in: margin...(screenBounds.width - margin))
-        let y = CGFloat.random(in: margin...(screenBounds.height - margin))
+        let y = CGFloat.random(in: (hudHeight + margin)...(screenBounds.height - margin))
         return CGPoint(x: x, y: y)
     }
     
@@ -439,6 +441,11 @@ class GameViewModel {
     /// タッチ応答性が良好かどうかを判定
     func isTouchResponseGood() -> Bool {
         return getAverageTouchResponseTime() <= 0.1 // 100ms以内
+    }
+    
+    /// ゲーム設定を保存する
+    func saveGameSettings() throws {
+        try settingsRepository.saveSettings(gameSettings)
     }
     
     deinit {

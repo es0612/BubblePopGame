@@ -19,6 +19,7 @@ class GameSettings {
     var soundEnabled: Bool
     var vibrationEnabled: Bool
     var gameMode: String
+    var isFirstLaunch: Bool
     
     init() {
         self.id = UUID()
@@ -30,5 +31,6 @@ class GameSettings {
         self.soundEnabled = true
         self.vibrationEnabled = true
         self.gameMode = "normal" // "normal" or "numbered"
+        self.isFirstLaunch = true
     }
 }
