@@ -105,6 +105,11 @@ struct TutorialView: View {
                 if currentStep == 2 {
                     setupTutorialBubbles()
                 }
+                
+                // チュートリアル開始時にBGMを再生
+                if gameViewModel.gameSettings.bgmEnabled && gameViewModel.gameSettings.bgmTrack != "off" {
+                    gameViewModel.audioService.playBGMTrack(gameViewModel.gameSettings.bgmTrack, loop: true)
+                }
             }
         }
     }

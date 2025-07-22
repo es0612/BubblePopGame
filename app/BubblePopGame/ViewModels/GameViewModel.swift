@@ -123,8 +123,10 @@ class GameViewModel {
         // タイマー開始
         startGameTimer()
         
-        // BGM再生
-        audioService.playBGM(name: "game_bgm", loop: true)
+        // BGM再生（設定に基づいて）
+        if gameSettings.bgmEnabled && gameSettings.bgmTrack != "off" {
+            audioService.playBGMTrack(gameSettings.bgmTrack, loop: true)
+        }
         
         // パフォーマンス監視開始
         performanceService.startMonitoring()

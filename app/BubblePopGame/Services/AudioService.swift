@@ -10,6 +10,8 @@ import AVFoundation
 
 protocol AudioService {
     func playBGM(name: String, loop: Bool)
+    func playBGMTrack(_ track: String, loop: Bool)
+    func setBGMEnabled(_ enabled: Bool)
     func playSFX(name: String)
     func setVolume(_ volume: Float)
     func setBGMVolume(_ volume: Float)
@@ -18,6 +20,8 @@ protocol AudioService {
     func stopAllSounds()
     func stopBGM()
     var isPlaying: Bool { get }
+    var isBGMEnabled: Bool { get }
+    var currentBGMTrack: String? { get }
 }
 
 class AudioServiceImpl: AudioService {
@@ -31,8 +35,21 @@ class AudioServiceImpl: AudioService {
     private var bgmMixerNode: AVAudioMixerNode
     private var sfxMixerNode: AVAudioMixerNode
     
+    // 実際のBGM再生用のAVAudioPlayer
+    private var bgmAudioPlayer: AVAudioPlayer?
+    private var _isBGMEnabled: Bool = true
+    private var _currentBGMTrack: String?
+    
     var isPlaying: Bool {
-        return bgmPlayer.isPlaying
+        return bgmAudioPlayer?.isPlaying ?? false
+    }
+    
+    var isBGMEnabled: Bool {
+        return _isBGMEnabled
+    }
+    
+    var currentBGMTrack: String? {
+        return _currentBGMTrack
     }
     
     init() {
@@ -69,12 +86,72 @@ class AudioServiceImpl: AudioService {
     }
     
     func playBGM(name: String, loop: Bool) {
-        // BGMを停止
-        bgmPlayer.stop()
+        // 後方互換性のため、従来の呼び出しをtrack1にマッピング
+        playBGMTrack("track1", loop: loop)
+    }
+    
+    func playBGMTrack(_ track: String, loop: Bool) {
+        guard _isBGMEnabled && track != "off" else {
+            stopBGM()
+            return
+        }
         
-        // 実際の音声ファイルがないので、システム音で代用
-        generateSynthesizedBGM()
-        print("Playing BGM: \(name), loop: \(loop)")
+        // 現在再生中のBGMを停止
+        bgmAudioPlayer?.stop()
+        
+        // ファイル名をマッピング
+        let fileName: String
+        switch track {
+        case "track1":
+            fileName = "1.mp3"
+        case "track2":
+            fileName = "2.mp3"
+        case "track3":
+            fileName = "3.mp3"
+        default:
+            print("Unknown BGM track: \(track)")
+            return
+        }
+        
+        // バンドルからファイルを取得
+        guard let bundlePath = Bundle.main.path(forResource: fileName.components(separatedBy: ".").first, 
+                                              ofType: "mp3", inDirectory: "Bgm"),
+              let url = URL(string: "file://\(bundlePath)") else {
+            print("BGM file not found: \(fileName)")
+            // フォールバック: システム音で代用
+            generateSynthesizedBGM()
+            return
+        }
+        
+        do {
+            // AVAudioPlayerを作成して再生
+            bgmAudioPlayer = try AVAudioPlayer(contentsOf: url)
+            bgmAudioPlayer?.numberOfLoops = loop ? -1 : 0  // -1は無限ループ
+            bgmAudioPlayer?.volume = Float(bgmVolume * masterVolume * (isMuted ? 0.0 : 1.0))
+            
+            let success = bgmAudioPlayer?.play() ?? false
+            if success {
+                _currentBGMTrack = track
+                print("🎵 Playing BGM track: \(track) (\(fileName))")
+            } else {
+                print("Failed to play BGM track: \(track)")
+                generateSynthesizedBGM() // フォールバック
+            }
+        } catch {
+            print("Error loading BGM file \(fileName): \(error)")
+            generateSynthesizedBGM() // フォールバック
+        }
+    }
+    
+    func setBGMEnabled(_ enabled: Bool) {
+        _isBGMEnabled = enabled
+        
+        if !enabled {
+            stopBGM()
+        } else if let track = _currentBGMTrack {
+            // BGMが有効化された場合、前回のトラックを再生
+            playBGMTrack(track, loop: true)
+        }
     }
     
     func playSFX(name: String) {
@@ -112,11 +189,15 @@ class AudioServiceImpl: AudioService {
     }
     
     func stopBGM() {
+        bgmAudioPlayer?.stop()
         bgmPlayer.stop()
+        _currentBGMTrack = nil
     }
     
     func stopAllSounds() {
+        bgmAudioPlayer?.stop()
         bgmPlayer.stop()
+        _currentBGMTrack = nil
         for player in sfxPlayers.values {
             player.stop()
         }
@@ -124,6 +205,13 @@ class AudioServiceImpl: AudioService {
     
     private func updateVolumes() {
         let effectiveVolume = isMuted ? 0.0 : masterVolume
+        
+        // 実際のBGMプレイヤーの音量を更新
+        if let player = bgmAudioPlayer {
+            player.volume = Float(effectiveVolume * bgmVolume)
+        }
+        
+        // 従来のAudioEngine音量も更新（フォールバック用）
         bgmMixerNode.outputVolume = effectiveVolume * bgmVolume
         sfxMixerNode.outputVolume = effectiveVolume * sfxVolume
     }

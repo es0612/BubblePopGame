@@ -103,10 +103,30 @@ class MockBubbleService: BubbleService {
 
 class MockAudioService: AudioService {
     var isPlaying: Bool = false
+    var _isBGMEnabled: Bool = true
+    var _currentBGMTrack: String?
+    
+    var isBGMEnabled: Bool { _isBGMEnabled }
+    var currentBGMTrack: String? { _currentBGMTrack }
     
     func playBGM(name: String, loop: Bool) {
         isPlaying = true
     }
+    
+    func playBGMTrack(_ track: String, loop: Bool) {
+        if _isBGMEnabled {
+            isPlaying = true
+            _currentBGMTrack = track
+        }
+    }
+    
+    func setBGMEnabled(_ enabled: Bool) {
+        _isBGMEnabled = enabled
+        if !enabled {
+            stopBGM()
+        }
+    }
+    
     func playSFX(name: String) {}
     func setVolume(_ volume: Float) {}
     func setBGMVolume(_ volume: Float) {}
@@ -114,9 +134,11 @@ class MockAudioService: AudioService {
     func toggleMute() {}
     func stopAllSounds() {
         isPlaying = false
+        _currentBGMTrack = nil
     }
     func stopBGM() {
         isPlaying = false
+        _currentBGMTrack = nil
     }
 }
 
@@ -506,5 +528,177 @@ struct PerformanceTests {
         #expect(performanceService.getPerformanceAdjustment() == 1.0)
         
         performanceService.stopMonitoring()
+    }
+}
+
+// MARK: - AudioService Tests
+struct AudioServiceTests {
+    
+    @Test func bgmTrackPlaybackEnabled() async throws {
+        let audioService = MockAudioService()
+        
+        // BGMが有効な場合
+        audioService.setBGMEnabled(true)
+        audioService.playBGMTrack("track1", loop: true)
+        
+        #expect(audioService.isPlaying == true)
+        #expect(audioService.currentBGMTrack == "track1")
+        #expect(audioService.isBGMEnabled == true)
+    }
+    
+    @Test func bgmTrackPlaybackDisabled() async throws {
+        let audioService = MockAudioService()
+        
+        // BGMが無効な場合
+        audioService.setBGMEnabled(false)
+        audioService.playBGMTrack("track1", loop: true)
+        
+        #expect(audioService.isPlaying == false)
+        #expect(audioService.currentBGMTrack == nil)
+        #expect(audioService.isBGMEnabled == false)
+    }
+    
+    @Test func bgmToggleOnOff() async throws {
+        let audioService = MockAudioService()
+        
+        // 初期状態: BGM有効
+        #expect(audioService.isBGMEnabled == true)
+        
+        // BGMを無効にする
+        audioService.setBGMEnabled(false)
+        #expect(audioService.isBGMEnabled == false)
+        #expect(audioService.isPlaying == false)
+        
+        // BGMを再び有効にする
+        audioService.setBGMEnabled(true)
+        #expect(audioService.isBGMEnabled == true)
+    }
+    
+    @Test func bgmTrackSwitching() async throws {
+        let audioService = MockAudioService()
+        
+        audioService.setBGMEnabled(true)
+        
+        // Track1を再生
+        audioService.playBGMTrack("track1", loop: true)
+        #expect(audioService.currentBGMTrack == "track1")
+        
+        // Track2に切り替え
+        audioService.playBGMTrack("track2", loop: true)
+        #expect(audioService.currentBGMTrack == "track2")
+        
+        // Track3に切り替え
+        audioService.playBGMTrack("track3", loop: true)
+        #expect(audioService.currentBGMTrack == "track3")
+    }
+    
+    @Test func bgmStopFunctionality() async throws {
+        let audioService = MockAudioService()
+        
+        audioService.setBGMEnabled(true)
+        audioService.playBGMTrack("track1", loop: true)
+        
+        #expect(audioService.isPlaying == true)
+        #expect(audioService.currentBGMTrack == "track1")
+        
+        // BGM停止
+        audioService.stopBGM()
+        
+        #expect(audioService.isPlaying == false)
+        #expect(audioService.currentBGMTrack == nil)
+    }
+}
+
+// MARK: - Settings Tests
+struct SettingsTests {
+    
+    @Test @MainActor func settingsViewModelBGMToggle() async throws {
+        let mockSettingsRepo = MockSettingsRepository()
+        let mockAudioService = MockAudioService()
+        
+        let viewModel = SettingsViewModel(
+            settingsRepository: mockSettingsRepo,
+            audioService: mockAudioService
+        )
+        
+        // 初期状態: BGM有効
+        #expect(viewModel.gameSettings.bgmEnabled == true)
+        
+        // BGMをオフに切り替え
+        viewModel.toggleBGM()
+        #expect(viewModel.gameSettings.bgmEnabled == false)
+        #expect(mockAudioService.isBGMEnabled == false)
+        
+        // BGMを再びオンに切り替え
+        viewModel.toggleBGM()
+        #expect(viewModel.gameSettings.bgmEnabled == true)
+        #expect(mockAudioService.isBGMEnabled == true)
+    }
+    
+    @Test @MainActor func settingsViewModelBGMTrackSelection() async throws {
+        let mockSettingsRepo = MockSettingsRepository()
+        let mockAudioService = MockAudioService()
+        
+        let viewModel = SettingsViewModel(
+            settingsRepository: mockSettingsRepo,
+            audioService: mockAudioService
+        )
+        
+        // Track2に変更
+        viewModel.setBGMTrack("track2")
+        #expect(viewModel.gameSettings.bgmTrack == "track2")
+        #expect(mockAudioService.currentBGMTrack == "track2")
+        
+        // Track3に変更
+        viewModel.setBGMTrack("track3")
+        #expect(viewModel.gameSettings.bgmTrack == "track3")
+        #expect(mockAudioService.currentBGMTrack == "track3")
+    }
+    
+    @Test @MainActor func settingsViewModelSaveSettings() async throws {
+        let mockSettingsRepo = MockSettingsRepository()
+        let mockAudioService = MockAudioService()
+        
+        let viewModel = SettingsViewModel(
+            settingsRepository: mockSettingsRepo,
+            audioService: mockAudioService
+        )
+        
+        // 設定変更
+        viewModel.gameSettings.bgmEnabled = false
+        viewModel.gameSettings.bgmTrack = "track2"
+        viewModel.gameSettings.soundEnabled = false
+        
+        // 設定保存
+        viewModel.saveSettings()
+        
+        // 保存された設定を確認
+        let savedSettings = try mockSettingsRepo.fetchSettings()
+        #expect(savedSettings?.bgmEnabled == false)
+        #expect(savedSettings?.bgmTrack == "track2")
+        #expect(savedSettings?.soundEnabled == false)
+    }
+    
+    @Test @MainActor func settingsViewModelResetToDefaults() async throws {
+        let mockSettingsRepo = MockSettingsRepository()
+        let mockAudioService = MockAudioService()
+        
+        let viewModel = SettingsViewModel(
+            settingsRepository: mockSettingsRepo,
+            audioService: mockAudioService
+        )
+        
+        // 設定を変更
+        viewModel.gameSettings.bgmEnabled = false
+        viewModel.gameSettings.bgmTrack = "track3"
+        viewModel.gameSettings.gameTime = 120.0
+        
+        // デフォルトにリセット
+        viewModel.resetToDefaults()
+        
+        // デフォルト値に戻っているかチェック
+        #expect(viewModel.gameSettings.bgmEnabled == true)
+        #expect(viewModel.gameSettings.bgmTrack == "track1")
+        #expect(viewModel.gameSettings.gameTime == 60.0)
     }
 }

@@ -20,6 +20,8 @@ class GameSettings {
     var vibrationEnabled: Bool
     var gameMode: String
     var isFirstLaunch: Bool
+    var bgmEnabled: Bool
+    var bgmTrack: String
     
     init() {
         self.id = UUID()
@@ -32,5 +34,7 @@ class GameSettings {
         self.vibrationEnabled = true
         self.gameMode = "normal" // "normal" or "numbered"
         self.isFirstLaunch = true
+        self.bgmEnabled = true
+        self.bgmTrack = "track1" // "off", "track1", "track2", "track3"
     }
 }
