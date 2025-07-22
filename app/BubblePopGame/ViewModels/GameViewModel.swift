@@ -26,6 +26,15 @@ class GameViewModel {
     var numberedBubblesCount: Int = 5
     var timePenalty: Double = 0.0
     
+    // 動的難易度システム
+    var currentLevel: Int = 1
+    var levelStartTime: Double = 0.0
+    var currentNumberSet: [Int] = []
+    var currentNumberIndex: Int = 0
+    var perfectChain: Int = 0
+    var speedBonus: Double = 1.0
+    var lastCorrectTime: Date?
+    
     // Services
     private let bubbleService: BubbleService
     let audioService: AudioService
@@ -110,8 +119,16 @@ class GameViewModel {
         
         // 数字順ゲームモード初期化
         if gameSettings.gameMode == "numbered" {
-            nextExpectedNumber = 1
+            // 動的難易度システム初期化
+            currentLevel = 1
+            levelStartTime = 0.0
+            currentNumberSet = generateRandomNumberSet(for: 1)
+            currentNumberIndex = 0
+            nextExpectedNumber = currentNumberSet[0]
             timePenalty = 0.0
+            perfectChain = 0
+            speedBonus = 1.0
+            lastCorrectTime = nil
         }
         
         // シャボン玉生成
@@ -212,18 +229,16 @@ class GameViewModel {
         currentStreak += 1
         bestStreak = max(bestStreak, currentStreak)
         
-        // ボーナススコア計算（数字順の場合は2倍）
-        let baseScore = bubble.number ?? 1
-        let sequenceBonus = baseScore * 2
-        let streakBonus = currentStreak >= 3 ? baseScore : 0
-        let earnedScore = sequenceBonus + streakBonus
-        score += earnedScore
+        // 新しいスコア計算システム（動的ボーナス適用）
+        let earnedScore = calculateScore(for: bubble) * 2 // 数字順ボーナス
+        let streakBonus = currentStreak >= 3 ? earnedScore / 2 : 0
+        score += earnedScore + streakBonus
         
-        // 次の期待番号を更新
-        nextExpectedNumber += 1
-        if nextExpectedNumber > numberedBubblesCount {
-            nextExpectedNumber = 1
-        }
+        // 動的次番号システム
+        advanceToNextNumber()
+        
+        // 動的難易度更新
+        updateDynamicDifficulty()
         
         // 成功エフェクトとサウンド
         effectService.createPopEffect(at: bubble.position, color: .green)
@@ -238,13 +253,18 @@ class GameViewModel {
     }
     
     private func handleIncorrectNumberedBubble(_ bubble: Bubble) {
-        // 時間ペナルティ（5秒減少）
-        let penalty = 5.0
+        // レベルに応じた動的ペナルティ
+        let basePenalty = 3.0
+        let levelPenalty = Double(currentLevel) * 0.5
+        let penalty = basePenalty + levelPenalty
+        
         timePenalty += penalty
         timeRemaining = max(0, timeRemaining - penalty)
         
-        // ストリークリセット
+        // ボーナスリセット
         currentStreak = 0
+        perfectChain = 0
+        speedBonus = max(1.0, speedBonus - 0.2)
         
         // エラーエフェクトとサウンド
         effectService.createPopEffect(at: bubble.position, color: .red)
@@ -290,10 +310,11 @@ class GameViewModel {
     
     private func generateBubbles() {
         if gameSettings.gameMode == "numbered" {
-            bubbles = bubbleService.generateNumberedBubbles(
+            // 動的システム：カスタム数字セットを使用
+            bubbles = bubbleService.generateNumberedBubblesWithCustomSet(
                 count: gameSettings.bubbleCount,
                 screenBounds: screenBounds,
-                numberedCount: numberedBubblesCount
+                numberSet: currentNumberSet
             )
         } else {
             bubbles = bubbleService.generateRandomBubbles(
@@ -325,8 +346,115 @@ class GameViewModel {
         case .normal:
             return 1
         case .numbered:
-            return bubble.number ?? 1
+            let baseScore = bubble.number ?? 1
+            // スピードボーナスとパーフェクトチェインボーナスを適用
+            let bonusMultiplier = speedBonus * (1.0 + Double(perfectChain) * 0.1)
+            return Int(Double(baseScore) * bonusMultiplier)
         }
+    }
+    
+    // MARK: - Dynamic Difficulty System
+    
+    func calculateCurrentLevel() -> Int {
+        let elapsedTime = gameSettings.gameTime - timeRemaining
+        
+        switch elapsedTime {
+        case 0..<15:
+            return 1
+        case 15..<30:
+            return 2
+        case 30..<45:
+            return 3
+        case 45..<60:
+            return 4
+        default:
+            return min(5, Int(elapsedTime / 15) + 1)
+        }
+    }
+    
+    private func getNumberRangeForLevel(_ level: Int) -> (min: Int, max: Int, count: Int) {
+        switch level {
+        case 1:
+            return (min: 1, max: 3, count: 3)
+        case 2:
+            return (min: 1, max: 5, count: 4)
+        case 3:
+            return (min: 1, max: 8, count: 5)
+        case 4:
+            return (min: 1, max: 12, count: 6)
+        default:
+            return (min: 1, max: 15, count: 7)
+        }
+    }
+    
+    func generateRandomNumberSet(for level: Int) -> [Int] {
+        let range = getNumberRangeForLevel(level)
+        var availableNumbers = Array(range.min...range.max)
+        var selectedNumbers: [Int] = []
+        
+        // ランダムに指定個数の数字を選択
+        for _ in 0..<range.count {
+            if let randomIndex = availableNumbers.indices.randomElement() {
+                let number = availableNumbers.remove(at: randomIndex)
+                selectedNumbers.append(number)
+            }
+        }
+        
+        return selectedNumbers.sorted()
+    }
+    
+    private func updateDynamicDifficulty() {
+        let newLevel = calculateCurrentLevel()
+        
+        if newLevel != currentLevel {
+            // レベルアップ処理
+            currentLevel = newLevel
+            levelStartTime = gameSettings.gameTime - timeRemaining
+            currentNumberSet = generateRandomNumberSet(for: currentLevel)
+            currentNumberIndex = 0
+            nextExpectedNumber = currentNumberSet[0]
+            numberedBubblesCount = getNumberRangeForLevel(currentLevel).count
+            
+            // レベルアップエフェクト
+            audioService.playSFX(name: "level_up")
+            effectService.triggerSuccessFeedback()
+            
+            // 新しいレベルでバブル再生成
+            regenerateBubblesForNewLevel()
+        }
+    }
+    
+    private func regenerateBubblesForNewLevel() {
+        // 既存のバブルをクリア（破裂中以外）
+        bubbles.removeAll { !$0.isPopping }
+        
+        // 新しいレベルに適したバブルを生成
+        generateBubbles()
+    }
+    
+    func advanceToNextNumber() {
+        currentNumberIndex += 1
+        
+        if currentNumberIndex >= currentNumberSet.count {
+            // 現在のセットが完了、新しいセットを生成
+            currentNumberSet = generateRandomNumberSet(for: currentLevel)
+            currentNumberIndex = 0
+            perfectChain += 1 // パーフェクトチェインボーナス
+        }
+        
+        nextExpectedNumber = currentNumberSet[currentNumberIndex]
+        
+        // スピードボーナス計算
+        if let lastTime = lastCorrectTime {
+            let responseTime = Date().timeIntervalSince(lastTime)
+            if responseTime < 1.0 { // 1秒以内の場合
+                speedBonus = min(3.0, speedBonus + 0.1)
+            } else {
+                speedBonus = max(1.0, speedBonus - 0.05)
+            }
+        }
+        
+        lastCorrectTime = Date()
     }
     
     private func startGameLoop() {

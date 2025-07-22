@@ -246,8 +246,21 @@ struct GameView: View {
                         
                         Spacer()
                         
-                        VStack(alignment: .center, spacing: 4) {
+                        VStack(alignment: .center, spacing: 2) {
                             if viewModel.gameSettings.gameMode == "numbered" {
+                                // レベル表示
+                                HStack(spacing: 4) {
+                                    Text("Lv.\(viewModel.currentLevel)")
+                                        .font(.caption2)
+                                        .fontWeight(.bold)
+                                        .foregroundColor(.orange)
+                                    if viewModel.perfectChain > 0 {
+                                        Text("×\(viewModel.perfectChain + 1)")
+                                            .font(.caption2)
+                                            .foregroundColor(.green)
+                                    }
+                                }
+                                
                                 Text("次の数字")
                                     .font(.caption)
                                     .foregroundColor(.white.opacity(0.8))
@@ -255,6 +268,13 @@ struct GameView: View {
                                     .font(.largeTitle)
                                     .fontWeight(.bold)
                                     .foregroundColor(.yellow)
+                                
+                                // スピードボーナス表示
+                                if viewModel.speedBonus > 1.0 {
+                                    Text("×\(String(format: "%.1f", viewModel.speedBonus))")
+                                        .font(.caption2)
+                                        .foregroundColor(.cyan)
+                                }
                             } else {
                                 Text("破裂数")
                                     .font(.caption)

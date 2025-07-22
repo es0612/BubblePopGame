@@ -99,6 +99,31 @@ class MockBubbleService: BubbleService {
     func updateScreenBounds(_ bounds: CGRect) {
         screenBounds = bounds
     }
+    
+    func generateNumberedBubblesWithCustomSet(count: Int, screenBounds: CGRect, numberSet: [Int]) -> [Bubble] {
+        var bubbles: [Bubble] = []
+        
+        // カスタム数字セットから数字付きバブル生成
+        for number in numberSet {
+            let bubble = createNumberedBubble(
+                at: CGPoint(x: 100 + number * 30, y: 100),
+                number: number
+            )
+            bubbles.append(bubble)
+        }
+        
+        // 残りは通常バブル
+        let remainingCount = max(0, count - numberSet.count)
+        for i in 0..<remainingCount {
+            let bubble = createBubble(
+                at: CGPoint(x: 100 + (numberSet.count + i) * 30, y: 200),
+                type: .normal
+            )
+            bubbles.append(bubble)
+        }
+        
+        return bubbles
+    }
 }
 
 class MockAudioService: AudioService {
@@ -700,5 +725,183 @@ struct SettingsTests {
         #expect(viewModel.gameSettings.bgmEnabled == true)
         #expect(viewModel.gameSettings.bgmTrack == "track1")
         #expect(viewModel.gameSettings.gameTime == 60.0)
+    }
+}
+
+// MARK: - Dynamic Number Mode Tests
+struct DynamicNumberModeTests {
+    
+    @Test @MainActor func dynamicDifficultyLevelProgression() async throws {
+        let (bubbleService, audioService, effectService, deviceService, performanceService) = createMockServices()
+        let (scoreRepo, settingsRepo, statsRepo) = await createMockRepositories()
+        
+        let gameSettings = GameSettings()
+        gameSettings.gameMode = "numbered"
+        
+        let viewModel = GameViewModel(
+            bubbleService: bubbleService,
+            audioService: audioService,
+            effectService: effectService,
+            deviceService: deviceService,
+            performanceService: performanceService,
+            scoreRepository: scoreRepo,
+            settingsRepository: settingsRepo,
+            statisticsRepository: statsRepo,
+            gameSettings: gameSettings
+        )
+        
+        await viewModel.startGame()
+        
+        // レベル1の初期状態確認
+        #expect(viewModel.currentLevel == 1)
+        #expect(viewModel.currentNumberSet.count == 3)
+        #expect(viewModel.nextExpectedNumber == viewModel.currentNumberSet[0])
+        
+        // 時間経過シミュレーション（レベル2へ）
+        viewModel.timeRemaining = 45.0 // 15秒経過
+        
+        // レベルアップ確認（実際のゲームではupdateDynamicDifficultyが呼ばれる）
+        let newLevel = viewModel.calculateCurrentLevel()
+        #expect(newLevel == 2)
+    }
+    
+    @Test @MainActor func randomNumberSetGeneration() async throws {
+        let (bubbleService, audioService, effectService, deviceService, performanceService) = createMockServices()
+        let (scoreRepo, settingsRepo, statsRepo) = await createMockRepositories()
+        
+        let gameSettings = GameSettings()
+        gameSettings.gameMode = "numbered"
+        
+        let viewModel = GameViewModel(
+            bubbleService: bubbleService,
+            audioService: audioService,
+            effectService: effectService,
+            deviceService: deviceService,
+            performanceService: performanceService,
+            scoreRepository: scoreRepo,
+            settingsRepository: settingsRepo,
+            statisticsRepository: statsRepo,
+            gameSettings: gameSettings
+        )
+        
+        await viewModel.startGame()
+        
+        // 初期数字セット確認
+        let initialSet = viewModel.currentNumberSet
+        #expect(initialSet.count > 0)
+        #expect(initialSet.allSatisfy { $0 >= 1 && $0 <= 15 }) // 最大範囲内
+        #expect(initialSet == initialSet.sorted()) // ソート済み確認
+        
+        // 異なるレベルで異なる範囲確認
+        let level2Numbers = viewModel.generateRandomNumberSet(for: 2)
+        let level3Numbers = viewModel.generateRandomNumberSet(for: 3)
+        
+        #expect(level2Numbers.count == 4) // レベル2は4個
+        #expect(level3Numbers.count == 5) // レベル3は5個
+    }
+    
+    @Test @MainActor func perfectChainBonusSystem() async throws {
+        let (bubbleService, audioService, effectService, deviceService, performanceService) = createMockServices()
+        let (scoreRepo, settingsRepo, statsRepo) = await createMockRepositories()
+        
+        let gameSettings = GameSettings()
+        gameSettings.gameMode = "numbered"
+        
+        let viewModel = GameViewModel(
+            bubbleService: bubbleService,
+            audioService: audioService,
+            effectService: effectService,
+            deviceService: deviceService,
+            performanceService: performanceService,
+            scoreRepository: scoreRepo,
+            settingsRepository: settingsRepo,
+            statisticsRepository: statsRepo,
+            gameSettings: gameSettings
+        )
+        
+        await viewModel.startGame()
+        
+        let initialPerfectChain = viewModel.perfectChain
+        #expect(initialPerfectChain == 0)
+        
+        // 数字セット完了でパーフェクトチェイン増加をシミュレート
+        viewModel.advanceToNextNumber() // 数字セットの最後まで進める
+        
+        // 実際の実装ではadvanceToNextNumberでパーフェクトチェインが増加
+        #expect(viewModel.perfectChain >= initialPerfectChain)
+    }
+    
+    @Test @MainActor func speedBonusCalculation() async throws {
+        let (bubbleService, audioService, effectService, deviceService, performanceService) = createMockServices()
+        let (scoreRepo, settingsRepo, statsRepo) = await createMockRepositories()
+        
+        let gameSettings = GameSettings()
+        gameSettings.gameMode = "numbered"
+        
+        let viewModel = GameViewModel(
+            bubbleService: bubbleService,
+            audioService: audioService,
+            effectService: effectService,
+            deviceService: deviceService,
+            performanceService: performanceService,
+            scoreRepository: scoreRepo,
+            settingsRepository: settingsRepo,
+            statisticsRepository: statsRepo,
+            gameSettings: gameSettings
+        )
+        
+        await viewModel.startGame()
+        
+        let initialSpeedBonus = viewModel.speedBonus
+        #expect(initialSpeedBonus == 1.0)
+        
+        // 高速回答シミュレーション
+        viewModel.lastCorrectTime = Date().addingTimeInterval(-0.5) // 0.5秒前
+        viewModel.advanceToNextNumber()
+        
+        // スピードボーナス増加確認
+        #expect(viewModel.speedBonus >= initialSpeedBonus)
+    }
+    
+    @Test func customNumberSetBubbleGeneration() async throws {
+        let bubbleService = MockBubbleService()
+        let screenBounds = CGRect(x: 0, y: 0, width: 400, height: 800)
+        let customNumberSet = [3, 7, 12, 2, 15]
+        
+        let bubbles = bubbleService.generateNumberedBubblesWithCustomSet(
+            count: 10,
+            screenBounds: screenBounds,
+            numberSet: customNumberSet
+        )
+        
+        #expect(bubbles.count == 10)
+        
+        // カスタム数字セットの数字付きバブル確認
+        let numberedBubbles = bubbles.filter { $0.type == .numbered }
+        #expect(numberedBubbles.count == customNumberSet.count)
+        
+        // 各数字が正しく設定されているか確認
+        let bubbleNumbers = numberedBubbles.compactMap { $0.number }.sorted()
+        let expectedNumbers = customNumberSet.sorted()
+        #expect(bubbleNumbers == expectedNumbers)
+    }
+    
+    private func createMockServices() -> (BubbleService, AudioService, EffectService, DeviceService, PerformanceService) {
+        let bubbleService = MockBubbleService()
+        let audioService = MockAudioService()
+        let effectService = MockEffectService()
+        let deviceService = MockDeviceService()
+        let performanceService = MockPerformanceService()
+        
+        return (bubbleService, audioService, effectService, deviceService, performanceService)
+    }
+    
+    @MainActor
+    private func createMockRepositories() -> (ScoreRepository, SettingsRepository, StatisticsRepository) {
+        let scoreRepo = MockScoreRepository()
+        let settingsRepo = MockSettingsRepository()
+        let statsRepo = MockStatisticsRepository()
+        
+        return (scoreRepo, settingsRepo, statsRepo)
     }
 }

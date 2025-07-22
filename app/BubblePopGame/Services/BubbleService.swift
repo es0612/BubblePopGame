@@ -16,6 +16,7 @@ protocol BubbleService {
     func checkCollisionIndex(at point: CGPoint, in bubbles: [Bubble]) -> Int?
     func generateRandomBubbles(count: Int, screenBounds: CGRect) -> [Bubble]
     func generateNumberedBubbles(count: Int, screenBounds: CGRect, numberedCount: Int) -> [Bubble]
+    func generateNumberedBubblesWithCustomSet(count: Int, screenBounds: CGRect, numberSet: [Int]) -> [Bubble]
     func updateScreenBounds(_ bounds: CGRect)
 }
 
@@ -198,6 +199,37 @@ class BubbleServiceImpl: BubbleService {
         
         // 残りは通常のバブル
         for _ in numberedCount..<count {
+            let x = CGFloat.random(in: margin...(screenBounds.width - margin))
+            let y = CGFloat.random(in: (hudHeight + margin)...(screenBounds.height - margin))
+            let position = CGPoint(x: x, y: y)
+            
+            let bubble = createBubble(at: position, type: .normal)
+            bubbles.append(bubble)
+        }
+        
+        return bubbles
+    }
+    
+    func generateNumberedBubblesWithCustomSet(count: Int, screenBounds: CGRect, numberSet: [Int]) -> [Bubble] {
+        var bubbles: [Bubble] = []
+        
+        // HUD領域（上部150px）とマージン（60px）を除外した生成領域
+        let hudHeight: CGFloat = 150
+        let margin: CGFloat = 60
+        
+        // カスタム数字セットから数字付きバブルを生成
+        for number in numberSet {
+            let x = CGFloat.random(in: margin...(screenBounds.width - margin))
+            let y = CGFloat.random(in: (hudHeight + margin)...(screenBounds.height - margin))
+            let position = CGPoint(x: x, y: y)
+            
+            let bubble = createNumberedBubble(at: position, number: number)
+            bubbles.append(bubble)
+        }
+        
+        // 残りは通常のバブル
+        let remainingCount = max(0, count - numberSet.count)
+        for _ in 0..<remainingCount {
             let x = CGFloat.random(in: margin...(screenBounds.width - margin))
             let y = CGFloat.random(in: (hudHeight + margin)...(screenBounds.height - margin))
             let position = CGPoint(x: x, y: y)
