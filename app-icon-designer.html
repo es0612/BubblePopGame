@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>シャボン玉ゲーム - アプリアイコンデザイナー</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 30px;
+            min-height: 100vh;
+        }
+
+        .canvas-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .canvas-container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+        }
+
+        #iconCanvas {
+            border: 2px solid #e0e7ff;
+            border-radius: 15px;
+            background: white;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .controls-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .panel-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #4338ca;
+            margin-bottom: 25px;
+            text-align: center;
+            background: linear-gradient(45deg, #4338ca, #7c3aed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .control-group {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: rgba(99, 102, 241, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(99, 102, 241, 0.1);
+        }
+
+        .control-label {
+            display: block;
+            font-weight: 600;
+            color: #4338ca;
+            margin-bottom: 10px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .control-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e7ff;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .control-input:focus {
+            outline: none;
+            border-color: #4338ca;
+            box-shadow: 0 0 0 3px rgba(67, 56, 202, 0.1);
+        }
+
+        .slider {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 8px;
+            background: linear-gradient(90deg, #e0e7ff, #4338ca);
+            border-radius: 4px;
+            outline: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(45deg, #4338ca, #7c3aed);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(67, 56, 202, 0.3);
+        }
+
+        .slider::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(45deg, #4338ca, #7c3aed);
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 4px 12px rgba(67, 56, 202, 0.3);
+        }
+
+        .button {
+            background: linear-gradient(45deg, #4338ca, #7c3aed);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin: 10px 0;
+            box-shadow: 0 8px 20px rgba(67, 56, 202, 0.3);
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(67, 56, 202, 0.4);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        .download-button {
+            background: linear-gradient(45deg, #059669, #10b981);
+            box-shadow: 0 8px 20px rgba(5, 150, 105, 0.3);
+        }
+
+        .download-button:hover {
+            box-shadow: 0 12px 25px rgba(5, 150, 105, 0.4);
+        }
+
+        .preset-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .preset-button {
+            padding: 8px;
+            font-size: 12px;
+            background: linear-gradient(45deg, #6366f1, #8b5cf6);
+        }
+
+        .info-box {
+            background: linear-gradient(45deg, #fbbf24, #f59e0b);
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            text-align: center;
+            margin-top: 20px;
+            box-shadow: 0 8px 20px rgba(251, 191, 36, 0.3);
+        }
+
+        .canvas-info {
+            text-align: center;
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .canvas-container {
+                padding: 20px;
+            }
+            
+            #iconCanvas {
+                width: 300px;
+                height: 300px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            #iconCanvas {
+                width: 250px;
+                height: 250px;
+            }
+            
+            .preset-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Canvas Section -->
+        <div class="canvas-section">
+            <div class="canvas-info">
+                シャボン玉ゲーム アプリアイコンデザイナー
+            </div>
+            <div class="canvas-container">
+                <canvas id="iconCanvas" width="512" height="512"></canvas>
+            </div>
+            <button class="button download-button" onclick="downloadIcon()">
+                🎨 アイコンをダウンロード (PNG)
+            </button>
+        </div>
+
+        <!-- Controls Panel -->
+        <div class="controls-panel">
+            <h2 class="panel-title">コントロールパネル</h2>
+            
+            <!-- Preset Designs -->
+            <div class="control-group">
+                <label class="control-label">プリセットデザイン</label>
+                <div class="preset-buttons">
+                    <button class="button preset-button" onclick="applyPreset('classic')">🫧 クラシック</button>
+                    <button class="button preset-button" onclick="applyPreset('vibrant')">🌈 ビビッド</button>
+                    <button class="button preset-button" onclick="applyPreset('minimal')">✨ ミニマル</button>
+                    <button class="button preset-button" onclick="applyPreset('game')">🎮 ゲーム風</button>
+                    <button class="button preset-button" onclick="applyPreset('dreamy')">💫 ドリーミー</button>
+                    <button class="button preset-button" onclick="applyPreset('neon')">⚡ ネオン</button>
+                </div>
+            </div>
+
+            <!-- Bubble Settings -->
+            <div class="control-group">
+                <label class="control-label">シャボン玉設定</label>
+                
+                <label class="control-label">数量</label>
+                <input type="range" class="control-input slider" id="bubbleCount" min="3" max="12" value="7" oninput="updateDesign()">
+                <span id="bubbleCountValue">7</span>
+                
+                <label class="control-label">サイズバリエーション</label>
+                <input type="range" class="control-input slider" id="sizeVariation" min="0.3" max="0.8" step="0.1" value="0.5" oninput="updateDesign()">
+                <span id="sizeVariationValue">0.5</span>
+                
+                <label class="control-label">透明度</label>
+                <input type="range" class="control-input slider" id="bubbleOpacity" min="0.3" max="0.9" step="0.1" value="0.6" oninput="updateDesign()">
+                <span id="bubbleOpacityValue">0.6</span>
+            </div>
+
+            <!-- Colors -->
+            <div class="control-group">
+                <label class="control-label">カラー設定</label>
+                
+                <label class="control-label">虹色の強度</label>
+                <input type="range" class="control-input slider" id="rainbowIntensity" min="0.3" max="1.0" step="0.1" value="0.7" oninput="updateDesign()">
+                <span id="rainbowIntensityValue">0.7</span>
+                
+                <label class="control-label">ハイライト強度</label>
+                <input type="range" class="control-input slider" id="highlightIntensity" min="0.2" max="0.8" step="0.1" value="0.5" oninput="updateDesign()">
+                <span id="highlightIntensityValue">0.5</span>
+            </div>
+
+            <!-- Background -->
+            <div class="control-group">
+                <label class="control-label">背景設定</label>
+                
+                <label class="control-label">カラーテーマ</label>
+                <select class="control-input" id="backgroundTheme" onchange="updateDesign()">
+                    <option value="blue">🔵 ブルー・シアン</option>
+                    <option value="purple">🟣 パープル・ピンク</option>
+                    <option value="green">🟢 グリーン・ミント</option>
+                    <option value="orange">🟠 オレンジ・レッド</option>
+                    <option value="rainbow">🌈 レインボー</option>
+                </select>
+                
+                <label class="control-label">グラデーション強度</label>
+                <input type="range" class="control-input slider" id="backgroundIntensity" min="0.3" max="1.0" step="0.1" value="0.7" oninput="updateDesign()">
+                <span id="backgroundIntensityValue">0.7</span>
+                
+                <label class="control-label">角丸レベル</label>
+                <input type="range" class="control-input slider" id="cornerRadius" min="0" max="120" value="60" oninput="updateDesign()">
+                <span id="cornerRadiusValue">60</span>
+            </div>
+
+            <!-- Actions -->
+            <div class="control-group">
+                <button class="button" onclick="randomizeDesign()">🎲 ランダムデザイン</button>
+                <button class="button" onclick="resetToDefault()">🔄 デフォルトに戻す</button>
+            </div>
+
+            <div class="info-box">
+                💡 <strong>使い方:</strong><br>
+                ✨ プリセットを選んで即座にデザイン変更<br>
+                🎛️ スライダーで細かく調整<br>
+                🎲 ランダムボタンで新しいアイデア<br>
+                📱 完成したら1024x1024のPNG画像をダウンロード！
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Canvas and context
+        const canvas = document.getElementById('iconCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // High-resolution canvas for export (1024x1024)
+        const exportCanvas = document.createElement('canvas');
+        const exportCtx = exportCanvas.getContext('2d');
+        exportCanvas.width = 1024;
+        exportCanvas.height = 1024;
+
+        // Set high resolution for crisp rendering on display canvas
+        const scale = 2;
+        canvas.width = 512 * scale;
+        canvas.height = 512 * scale;
+        canvas.style.width = '512px';
+        canvas.style.height = '512px';
+        ctx.scale(scale, scale);
+
+        // Design parameters
+        let design = {
+            bubbleCount: 7,
+            sizeVariation: 0.5,
+            bubbleOpacity: 0.6,
+            rainbowIntensity: 0.7,
+            highlightIntensity: 0.5,
+            backgroundIntensity: 0.7,
+            cornerRadius: 60,
+            backgroundTheme: 'blue'
+        };
+
+        // Bubble positions and sizes (will be randomized)
+        let bubbles = [];
+
+        // Initialize
+        function init() {
+            generateBubbles();
+            updateDesign();
+            updateControlValues();
+        }
+
+        // Generate random bubble positions and sizes
+        function generateBubbles() {
+            bubbles = [];
+            for (let i = 0; i < design.bubbleCount; i++) {
+                const baseSize = 40 + Math.random() * 80;
+                const sizeVariation = 1 - design.sizeVariation + Math.random() * design.sizeVariation;
+                bubbles.push({
+                    x: 50 + Math.random() * 412,
+                    y: 50 + Math.random() * 412,
+                    radius: baseSize * sizeVariation,
+                    rotation: Math.random() * 360
+                });
+            }
+        }
+
+        // Update all design elements
+        function updateDesign() {
+            // Get current values from controls
+            design.bubbleCount = parseInt(document.getElementById('bubbleCount').value);
+            design.sizeVariation = parseFloat(document.getElementById('sizeVariation').value);
+            design.bubbleOpacity = parseFloat(document.getElementById('bubbleOpacity').value);
+            design.rainbowIntensity = parseFloat(document.getElementById('rainbowIntensity').value);
+            design.highlightIntensity = parseFloat(document.getElementById('highlightIntensity').value);
+            design.backgroundIntensity = parseFloat(document.getElementById('backgroundIntensity').value);
+            design.cornerRadius = parseInt(document.getElementById('cornerRadius').value);
+            design.backgroundTheme = document.getElementById('backgroundTheme').value;
+
+            // Update bubble count if needed
+            if (bubbles.length !== design.bubbleCount) {
+                generateBubbles();
+            }
+
+            // Render to both canvases
+            renderIcon(ctx, 512);
+            renderIcon(exportCtx, 1024);
+            
+            updateControlValues();
+        }
+
+        // Main rendering function
+        function renderIcon(context, size) {
+            const scale = size / 512;
+            
+            // Clear canvas
+            context.clearRect(0, 0, size, size);
+            
+            // Draw background
+            drawBackground(context, size);
+            
+            // Draw bubbles
+            bubbles.forEach(bubble => {
+                drawBubble(context, bubble, scale);
+            });
+        }
+
+        // Draw gradient background
+        function drawBackground(context, size) {
+            // Create rounded rectangle path
+            const radius = design.cornerRadius * (size / 512);
+            
+            context.save();
+            
+            // Create rounded rectangle clipping path
+            context.beginPath();
+            context.moveTo(radius, 0);
+            context.lineTo(size - radius, 0);
+            context.quadraticCurveTo(size, 0, size, radius);
+            context.lineTo(size, size - radius);
+            context.quadraticCurveTo(size, size, size - radius, size);
+            context.lineTo(radius, size);
+            context.quadraticCurveTo(0, size, 0, size - radius);
+            context.lineTo(0, radius);
+            context.quadraticCurveTo(0, 0, radius, 0);
+            context.closePath();
+            context.clip();
+
+            // Create gradient based on theme
+            const gradient = context.createLinearGradient(0, 0, size, size);
+            const intensity = design.backgroundIntensity;
+            
+            switch (design.backgroundTheme) {
+                case 'blue':
+                    gradient.addColorStop(0, `rgba(102, 126, 234, ${intensity})`); // #667eea
+                    gradient.addColorStop(0.3, `rgba(79, 172, 254, ${intensity * 0.9})`); // #4facfe
+                    gradient.addColorStop(0.6, `rgba(0, 242, 254, ${intensity * 0.8})`); // #00f2fe
+                    gradient.addColorStop(1, `rgba(102, 126, 234, ${intensity * 0.7})`); // #667eea
+                    break;
+                case 'purple':
+                    gradient.addColorStop(0, `rgba(139, 92, 246, ${intensity})`); // #8b5cf6
+                    gradient.addColorStop(0.3, `rgba(168, 85, 247, ${intensity * 0.9})`); // #a855f7
+                    gradient.addColorStop(0.6, `rgba(236, 72, 153, ${intensity * 0.8})`); // #ec4899
+                    gradient.addColorStop(1, `rgba(219, 39, 119, ${intensity * 0.7})`); // #db2777
+                    break;
+                case 'green':
+                    gradient.addColorStop(0, `rgba(34, 197, 94, ${intensity})`); // #22c55e
+                    gradient.addColorStop(0.3, `rgba(16, 185, 129, ${intensity * 0.9})`); // #10b981
+                    gradient.addColorStop(0.6, `rgba(6, 182, 212, ${intensity * 0.8})`); // #06b6d4
+                    gradient.addColorStop(1, `rgba(14, 165, 233, ${intensity * 0.7})`); // #0ea5e9
+                    break;
+                case 'orange':
+                    gradient.addColorStop(0, `rgba(251, 146, 60, ${intensity})`); // #fb923c
+                    gradient.addColorStop(0.3, `rgba(249, 115, 22, ${intensity * 0.9})`); // #f97316
+                    gradient.addColorStop(0.6, `rgba(239, 68, 68, ${intensity * 0.8})`); // #ef4444
+                    gradient.addColorStop(1, `rgba(220, 38, 127, ${intensity * 0.7})`); // #dc267f
+                    break;
+                case 'rainbow':
+                    gradient.addColorStop(0, `rgba(255, 0, 128, ${intensity})`);
+                    gradient.addColorStop(0.2, `rgba(255, 128, 0, ${intensity * 0.9})`);
+                    gradient.addColorStop(0.4, `rgba(128, 255, 0, ${intensity * 0.8})`);
+                    gradient.addColorStop(0.6, `rgba(0, 255, 128, ${intensity * 0.7})`);
+                    gradient.addColorStop(0.8, `rgba(0, 128, 255, ${intensity * 0.8})`);
+                    gradient.addColorStop(1, `rgba(128, 0, 255, ${intensity * 0.9})`);
+                    break;
+            }
+
+            context.fillStyle = gradient;
+            context.fillRect(0, 0, size, size);
+            
+            context.restore();
+        }
+
+        // Draw individual bubble
+        function drawBubble(context, bubble, scale) {
+            const x = bubble.x * scale;
+            const y = bubble.y * scale;
+            const radius = bubble.radius * scale;
+            
+            context.save();
+            context.translate(x, y);
+            context.rotate((bubble.rotation * Math.PI) / 180);
+
+            // Create rainbow gradient for border
+            const rainbowGradient = createRainbowGradient(context, radius);
+            
+            // Draw main bubble circle with rainbow border
+            context.beginPath();
+            context.arc(0, 0, radius, 0, Math.PI * 2);
+            context.strokeStyle = rainbowGradient;
+            context.lineWidth = 4 * scale;
+            context.stroke();
+
+            // Fill with transparent radial gradient
+            const fillGradient = context.createRadialGradient(-radius * 0.3, -radius * 0.3, 0, 0, 0, radius);
+            fillGradient.addColorStop(0, `rgba(255, 255, 255, ${design.bubbleOpacity * 0.3})`);
+            fillGradient.addColorStop(0.3, `rgba(255, 255, 255, ${design.bubbleOpacity * 0.15})`);
+            fillGradient.addColorStop(0.7, `rgba(135, 206, 250, ${design.bubbleOpacity * 0.1})`);
+            fillGradient.addColorStop(1, `rgba(100, 149, 237, ${design.bubbleOpacity * 0.05})`);
+            
+            context.fillStyle = fillGradient;
+            context.fill();
+
+            // Add highlight effect
+            const highlightRadius = radius * 0.4;
+            const highlightGradient = context.createRadialGradient(
+                -radius * 0.25, -radius * 0.25, 0,
+                -radius * 0.25, -radius * 0.25, highlightRadius
+            );
+            highlightGradient.addColorStop(0, `rgba(255, 255, 255, ${design.highlightIntensity})`);
+            highlightGradient.addColorStop(0.5, `rgba(255, 255, 255, ${design.highlightIntensity * 0.3})`);
+            highlightGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+            context.beginPath();
+            context.arc(-radius * 0.25, -radius * 0.25, highlightRadius, 0, Math.PI * 2);
+            context.fillStyle = highlightGradient;
+            context.fill();
+
+            // Add secondary highlight
+            const secondaryHighlight = radius * 0.2;
+            context.beginPath();
+            context.arc(radius * 0.3, radius * 0.3, secondaryHighlight, 0, Math.PI * 2);
+            const secondaryGradient = context.createRadialGradient(
+                radius * 0.3, radius * 0.3, 0,
+                radius * 0.3, radius * 0.3, secondaryHighlight
+            );
+            secondaryGradient.addColorStop(0, `rgba(173, 216, 230, ${design.highlightIntensity * 0.6})`);
+            secondaryGradient.addColorStop(1, 'rgba(173, 216, 230, 0)');
+            context.fillStyle = secondaryGradient;
+            context.fill();
+
+            context.restore();
+        }
+
+        // Create rainbow gradient for bubble borders
+        function createRainbowGradient(context, radius) {
+            const gradient = context.createLinearGradient(-radius, -radius, radius, radius);
+            const intensity = design.rainbowIntensity;
+            
+            gradient.addColorStop(0, `rgba(255, 0, 0, ${intensity})`);     // Red
+            gradient.addColorStop(0.17, `rgba(255, 165, 0, ${intensity})`); // Orange
+            gradient.addColorStop(0.33, `rgba(255, 255, 0, ${intensity})`); // Yellow
+            gradient.addColorStop(0.5, `rgba(0, 255, 0, ${intensity})`);    // Green
+            gradient.addColorStop(0.67, `rgba(0, 0, 255, ${intensity})`);   // Blue
+            gradient.addColorStop(0.83, `rgba(75, 0, 130, ${intensity})`);  // Indigo
+            gradient.addColorStop(1, `rgba(238, 130, 238, ${intensity})`);  // Violet
+            
+            return gradient;
+        }
+
+        // Update control value displays
+        function updateControlValues() {
+            document.getElementById('bubbleCountValue').textContent = design.bubbleCount;
+            document.getElementById('sizeVariationValue').textContent = design.sizeVariation;
+            document.getElementById('bubbleOpacityValue').textContent = design.bubbleOpacity;
+            document.getElementById('rainbowIntensityValue').textContent = design.rainbowIntensity;
+            document.getElementById('highlightIntensityValue').textContent = design.highlightIntensity;
+            document.getElementById('backgroundIntensityValue').textContent = design.backgroundIntensity;
+            document.getElementById('cornerRadiusValue').textContent = design.cornerRadius;
+        }
+
+        // Apply preset designs
+        function applyPreset(presetName) {
+            switch (presetName) {
+                case 'classic':
+                    design = {
+                        bubbleCount: 7,
+                        sizeVariation: 0.5,
+                        bubbleOpacity: 0.6,
+                        rainbowIntensity: 0.7,
+                        highlightIntensity: 0.5,
+                        backgroundIntensity: 0.7,
+                        cornerRadius: 60
+                    };
+                    break;
+                case 'vibrant':
+                    design = {
+                        bubbleCount: 10,
+                        sizeVariation: 0.7,
+                        bubbleOpacity: 0.8,
+                        rainbowIntensity: 1.0,
+                        highlightIntensity: 0.7,
+                        backgroundIntensity: 0.9,
+                        cornerRadius: 40
+                    };
+                    break;
+                case 'minimal':
+                    design = {
+                        bubbleCount: 4,
+                        sizeVariation: 0.3,
+                        bubbleOpacity: 0.4,
+                        rainbowIntensity: 0.4,
+                        highlightIntensity: 0.3,
+                        backgroundIntensity: 0.5,
+                        cornerRadius: 80
+                    };
+                    break;
+                case 'game':
+                    design = {
+                        bubbleCount: 12,
+                        sizeVariation: 0.8,
+                        bubbleOpacity: 0.7,
+                        rainbowIntensity: 0.9,
+                        highlightIntensity: 0.6,
+                        backgroundIntensity: 0.8,
+                        cornerRadius: 20
+                    };
+                    break;
+                case 'dreamy':
+                    design = {
+                        bubbleCount: 6,
+                        sizeVariation: 0.4,
+                        bubbleOpacity: 0.5,
+                        rainbowIntensity: 0.5,
+                        highlightIntensity: 0.8,
+                        backgroundIntensity: 0.6,
+                        cornerRadius: 100
+                    };
+                    break;
+                case 'neon':
+                    design = {
+                        bubbleCount: 9,
+                        sizeVariation: 0.6,
+                        bubbleOpacity: 0.9,
+                        rainbowIntensity: 1.0,
+                        highlightIntensity: 0.4,
+                        backgroundIntensity: 1.0,
+                        cornerRadius: 10
+                    };
+                    break;
+            }
+            
+            // Update control inputs
+            Object.keys(design).forEach(key => {
+                const element = document.getElementById(key);
+                if (element) {
+                    element.value = design[key];
+                }
+            });
+            
+            generateBubbles();
+            updateDesign();
+        }
+
+        // Randomize design
+        function randomizeDesign() {
+            const themes = ['blue', 'purple', 'green', 'orange', 'rainbow'];
+            
+            design.bubbleCount = Math.floor(Math.random() * 10) + 3;
+            design.sizeVariation = Math.random() * 0.5 + 0.3;
+            design.bubbleOpacity = Math.random() * 0.6 + 0.3;
+            design.rainbowIntensity = Math.random() * 0.7 + 0.3;
+            design.highlightIntensity = Math.random() * 0.6 + 0.2;
+            design.backgroundIntensity = Math.random() * 0.7 + 0.3;
+            design.cornerRadius = Math.floor(Math.random() * 121);
+            design.backgroundTheme = themes[Math.floor(Math.random() * themes.length)];
+            
+            // Update control inputs
+            Object.keys(design).forEach(key => {
+                const element = document.getElementById(key);
+                if (element) {
+                    element.value = design[key];
+                }
+            });
+            
+            generateBubbles();
+            updateDesign();
+        }
+
+        // Reset to default
+        function resetToDefault() {
+            applyPreset('classic');
+        }
+
+        // Download icon as PNG
+        function downloadIcon() {
+            const link = document.createElement('a');
+            link.download = 'bubble-game-icon-1024x1024.png';
+            link.href = exportCanvas.toDataURL('image/png');
+            link.click();
+        }
+
+        // Initialize the application
+        init();
+    </script>
+</body>
+</html>

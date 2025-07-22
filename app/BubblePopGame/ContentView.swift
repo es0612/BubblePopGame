@@ -371,37 +371,74 @@ struct BubbleView: View {
     
     var body: some View {
         ZStack {
-            // メインのシャボン玉
+            // メインのシャボン玉（虹色の縁）
             Circle()
-                .fill(
-                    RadialGradient(
+                .strokeBorder(
+                    AngularGradient(
                         colors: [
-                            bubble.color.accessible().opacity(0.6),
-                            bubble.color.accessible().opacity(bubble.alpha),
-                            bubble.color.accessible().opacity(0.8)
+                            Color.red.opacity(0.7),
+                            Color.orange.opacity(0.7),
+                            Color.yellow.opacity(0.7),
+                            Color.green.opacity(0.7),
+                            Color.blue.opacity(0.7),
+                            Color.purple.opacity(0.7),
+                            Color.red.opacity(0.7)
                         ],
-                        center: UnitPoint(x: 0.3, y: 0.3),
-                        startRadius: 0,
-                        endRadius: bubble.radius
-                    )
+                        center: .center,
+                        angle: .degrees(bubble.animationPhase * 20)
+                    ),
+                    lineWidth: 2
+                )
+                .background(
+                    Circle()
+                        .fill(
+                            RadialGradient(
+                                colors: [
+                                    Color.clear,
+                                    bubble.color.accessible().opacity(0.15),
+                                    bubble.color.accessible().opacity(0.3),
+                                    Color.white.opacity(0.1)
+                                ],
+                                center: UnitPoint(x: 0.3, y: 0.3),
+                                startRadius: 0,
+                                endRadius: bubble.radius * 1.2
+                            )
+                        )
                 )
                 .frame(width: bubble.radius * 2, height: bubble.radius * 2)
             
-            // ハイライト効果
+            // ハイライト効果（強化版）
             Circle()
                 .fill(
                     RadialGradient(
                         colors: [
-                            Color.white.opacity(0.4),
+                            Color.white.opacity(0.8),
+                            Color.white.opacity(0.3),
                             Color.white.opacity(0.1),
                             Color.clear
                         ],
-                        center: UnitPoint(x: 0.2, y: 0.2),
+                        center: UnitPoint(x: 0.25, y: 0.25),
                         startRadius: 0,
-                        endRadius: bubble.radius * 0.6
+                        endRadius: bubble.radius * 0.5
                     )
                 )
-                .frame(width: bubble.radius * 1.2, height: bubble.radius * 1.2)
+                .frame(width: bubble.radius * 0.8, height: bubble.radius * 0.8)
+            
+            // 反射光効果
+            Circle()
+                .fill(
+                    RadialGradient(
+                        colors: [
+                            Color.white.opacity(0.6),
+                            Color.cyan.opacity(0.2),
+                            Color.clear
+                        ],
+                        center: UnitPoint(x: 0.75, y: 0.75),
+                        startRadius: 0,
+                        endRadius: bubble.radius * 0.3
+                    )
+                )
+                .frame(width: bubble.radius * 0.6, height: bubble.radius * 0.6)
             
             // 数字表示（番号付きシャボン玉の場合）
             if bubble.type == .numbered, let number = bubble.number {
@@ -412,14 +449,20 @@ struct BubbleView: View {
             }
         }
         .position(bubble.position)
-        .scaleEffect(bubble.isPopping ? (1.0 - bubble.popAnimationProgress) : 1)
-        .opacity(bubble.isPopping ? (1.0 - bubble.popAnimationProgress) : bubble.alpha)
+        .scaleEffect(bubble.isPopping ? (1.2 - bubble.popAnimationProgress * 1.2) : 1)
+        .opacity(bubble.isPopping ? (1.0 - bubble.popAnimationProgress * bubble.popAnimationProgress) : bubble.alpha)
+        .blur(radius: bubble.isPopping ? bubble.popAnimationProgress * 3 : 0)
         .rotation3DEffect(
-            .degrees(bubble.animationPhase * 10),
-            axis: (x: 0, y: 1, z: 0)
+            .degrees(bubble.animationPhase * 5),
+            axis: (x: 0, y: 0, z: 1)
+        )
+        .scaleEffect(1.0 + sin(bubble.animationPhase * .pi * 0.5) * 0.05)
+        .offset(
+            x: sin(bubble.animationPhase * .pi * 0.3) * 3,
+            y: cos(bubble.animationPhase * .pi * 0.25) * 2
         )
         .animation(.easeOut(duration: 0.3), value: bubble.isPopping)
-        .animation(.easeInOut(duration: 2).repeatForever(autoreverses: true), value: bubble.animationPhase)
+        .animation(.easeInOut(duration: 3).repeatForever(autoreverses: true), value: bubble.animationPhase)
         .accessibilityElement()
         .accessibilityLabel(bubble.type == .numbered ? "数字 \(bubble.number ?? 0) のシャボン玉" : "シャボン玉")
         .accessibilityHint("タップすると破裂します")
