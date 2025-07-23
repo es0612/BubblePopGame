@@ -23,6 +23,22 @@ class GameSettings {
     var bgmEnabled: Bool
     var bgmTrack: String
     
+    // 数字モード設定
+    var numberedModeMaxLevel: Int
+    var numberedModeProgressive: Bool
+    var numberedModeLevelInterval: Double
+    var numberedModeMaxRange: Int
+    var numberedModeStartRange: Int
+    
+    // ボーナス設定
+    var speedBonusEnabled: Bool
+    var speedBonusMultiplier: Double
+    var perfectChainEnabled: Bool
+    var perfectChainMultiplier: Double
+    
+    // 特殊ルール
+    var numberedModeSpecialRule: String
+    
     init() {
         self.id = UUID()
         self.bubbleCount = 20
@@ -36,5 +52,21 @@ class GameSettings {
         self.isFirstLaunch = true
         self.bgmEnabled = true
         self.bgmTrack = "track1" // "off", "track1", "track2", "track3"
+        
+        // 数字モード設定のデフォルト値（バランス調整済み）
+        self.numberedModeMaxLevel = 7 // 最大レベルを7に調整（より長く楽しめる）
+        self.numberedModeProgressive = true
+        self.numberedModeLevelInterval = 12.0 // 12秒間隔（よりテンポ良く）
+        self.numberedModeMaxRange = 20 // 範囲を20に拡大（後半の難易度向上）
+        self.numberedModeStartRange = 4 // 開始範囲を4に調整（初心者に優しく）
+        
+        // ボーナス設定のデフォルト値（バランス調整済み）
+        self.speedBonusEnabled = true
+        self.speedBonusMultiplier = 2.5 // 倍率を2.5に調整（適度な報酬）
+        self.perfectChainEnabled = true
+        self.perfectChainMultiplier = 0.15 // 0.15に調整（チェインボーナス強化）
+        
+        // 特殊ルールのデフォルト値
+        self.numberedModeSpecialRule = "normal" // "normal", "reverse", "double", "random"
     }
 }

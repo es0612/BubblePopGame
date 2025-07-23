@@ -126,8 +126,10 @@ class GameViewModel {
             currentNumberIndex = 0
             nextExpectedNumber = currentNumberSet[0]
             timePenalty = 0.0
-            perfectChain = 0
-            speedBonus = 1.0
+            
+            // 設定に基づいてボーナス初期化
+            perfectChain = gameSettings.perfectChainEnabled ? 0 : 0
+            speedBonus = gameSettings.speedBonusEnabled ? 1.0 : 1.0
             lastCorrectTime = nil
         }
         
@@ -263,8 +265,12 @@ class GameViewModel {
         
         // ボーナスリセット
         currentStreak = 0
-        perfectChain = 0
-        speedBonus = max(1.0, speedBonus - 0.2)
+        if gameSettings.perfectChainEnabled {
+            perfectChain = 0
+        }
+        if gameSettings.speedBonusEnabled {
+            speedBonus = max(1.0, speedBonus - 0.2)
+        }
         
         // エラーエフェクトとサウンド
         effectService.createPopEffect(at: bubble.position, color: .red)
@@ -347,8 +353,19 @@ class GameViewModel {
             return 1
         case .numbered:
             let baseScore = bubble.number ?? 1
-            // スピードボーナスとパーフェクトチェインボーナスを適用
-            let bonusMultiplier = speedBonus * (1.0 + Double(perfectChain) * 0.1)
+            var bonusMultiplier = 1.0
+            
+            // スピードボーナス適用（設定で有効な場合のみ）
+            if gameSettings.speedBonusEnabled {
+                bonusMultiplier *= speedBonus
+            }
+            
+            // パーフェクトチェインボーナス適用（設定で有効な場合のみ）
+            if gameSettings.perfectChainEnabled {
+                let chainMultiplier = gameSettings.perfectChainMultiplier
+                bonusMultiplier *= (1.0 + Double(perfectChain) * chainMultiplier)
+            }
+            
             return Int(Double(baseScore) * bonusMultiplier)
         }
     }
@@ -356,51 +373,76 @@ class GameViewModel {
     // MARK: - Dynamic Difficulty System
     
     func calculateCurrentLevel() -> Int {
-        let elapsedTime = gameSettings.gameTime - timeRemaining
+        // プログレッシブ難易度が無効の場合は常にレベル1
+        guard gameSettings.numberedModeProgressive else { return 1 }
         
-        switch elapsedTime {
-        case 0..<15:
-            return 1
-        case 15..<30:
-            return 2
-        case 30..<45:
-            return 3
-        case 45..<60:
-            return 4
-        default:
-            return min(5, Int(elapsedTime / 15) + 1)
-        }
+        let elapsedTime = gameSettings.gameTime - timeRemaining
+        let levelInterval = gameSettings.numberedModeLevelInterval
+        let maxLevel = gameSettings.numberedModeMaxLevel
+        
+        let calculatedLevel = Int(elapsedTime / levelInterval) + 1
+        return min(maxLevel, calculatedLevel)
     }
     
     private func getNumberRangeForLevel(_ level: Int) -> (min: Int, max: Int, count: Int) {
-        switch level {
-        case 1:
-            return (min: 1, max: 3, count: 3)
-        case 2:
-            return (min: 1, max: 5, count: 4)
-        case 3:
-            return (min: 1, max: 8, count: 5)
-        case 4:
-            return (min: 1, max: 12, count: 6)
-        default:
-            return (min: 1, max: 15, count: 7)
-        }
+        let startRange = gameSettings.numberedModeStartRange
+        let maxRange = gameSettings.numberedModeMaxRange
+        let maxLevel = gameSettings.numberedModeMaxLevel
+        
+        // レベルに応じた動的範囲計算
+        let rangePerLevel = max(1, (maxRange - startRange) / maxLevel)
+        let currentMax = min(maxRange, startRange + (level - 1) * rangePerLevel)
+        let count = min(10, startRange + level - 1) // 最大10個まで
+        
+        return (min: 1, max: currentMax, count: count)
     }
     
     func generateRandomNumberSet(for level: Int) -> [Int] {
         let range = getNumberRangeForLevel(level)
-        var availableNumbers = Array(range.min...range.max)
         var selectedNumbers: [Int] = []
         
-        // ランダムに指定個数の数字を選択
-        for _ in 0..<range.count {
-            if let randomIndex = availableNumbers.indices.randomElement() {
-                let number = availableNumbers.remove(at: randomIndex)
-                selectedNumbers.append(number)
+        // 特殊ルールに基づいて数字を生成
+        switch gameSettings.numberedModeSpecialRule {
+        case "reverse":
+            // 逆順：大きい数字から小さい数字へ
+            var availableNumbers = Array(Array(range.min...range.max).reversed())
+            for _ in 0..<range.count {
+                if let randomIndex = availableNumbers.indices.randomElement() {
+                    let number = availableNumbers.remove(at: randomIndex)
+                    selectedNumbers.append(number)
+                }
             }
+            return selectedNumbers.sorted(by: >)
+            
+        case "double":
+            // 2倍数モード：2,4,6,8...
+            let evenNumbers = Array(stride(from: 2, through: range.max, by: 2))
+            let shuffled = evenNumbers.shuffled()
+            selectedNumbers = Array(shuffled.prefix(min(range.count, shuffled.count)))
+            return selectedNumbers.sorted()
+            
+        case "random":
+            // ランダム順序：表示順序をランダムに
+            var availableNumbers = Array(range.min...range.max)
+            for _ in 0..<range.count {
+                if let randomIndex = availableNumbers.indices.randomElement() {
+                    let number = availableNumbers.remove(at: randomIndex)
+                    selectedNumbers.append(number)
+                }
+            }
+            return selectedNumbers // ソートしない（ランダム順序を保持）
+            
+        default:
+            // 通常モード：ランダム選択後ソート
+            var availableNumbers = Array(range.min...range.max)
+            for _ in 0..<range.count {
+                if let randomIndex = availableNumbers.indices.randomElement() {
+                    let number = availableNumbers.remove(at: randomIndex)
+                    selectedNumbers.append(number)
+                }
+            }
+            return selectedNumbers.sorted()
         }
-        
-        return selectedNumbers.sorted()
     }
     
     private func updateDynamicDifficulty() {
@@ -439,16 +481,22 @@ class GameViewModel {
             // 現在のセットが完了、新しいセットを生成
             currentNumberSet = generateRandomNumberSet(for: currentLevel)
             currentNumberIndex = 0
-            perfectChain += 1 // パーフェクトチェインボーナス
+            
+            // パーフェクトチェインボーナス（設定で有効な場合のみ）
+            if gameSettings.perfectChainEnabled {
+                perfectChain += 1
+            }
         }
         
         nextExpectedNumber = currentNumberSet[currentNumberIndex]
         
-        // スピードボーナス計算
-        if let lastTime = lastCorrectTime {
+        // スピードボーナス計算（設定で有効な場合のみ）
+        if gameSettings.speedBonusEnabled, let lastTime = lastCorrectTime {
             let responseTime = Date().timeIntervalSince(lastTime)
+            let maxMultiplier = gameSettings.speedBonusMultiplier
+            
             if responseTime < 1.0 { // 1秒以内の場合
-                speedBonus = min(3.0, speedBonus + 0.1)
+                speedBonus = min(maxMultiplier, speedBonus + 0.1)
             } else {
                 speedBonus = max(1.0, speedBonus - 0.05)
             }

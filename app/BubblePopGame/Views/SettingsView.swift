@@ -145,6 +145,129 @@ struct SettingsView: View {
                         }
                     }
                     
+                    // 数字モード設定セクション
+                    if viewModel.gameSettings.gameMode == "numbered" {
+                        SettingsSection(title: "数字モード設定") {
+                            VStack(spacing: 15) {
+                                SettingsRow(
+                                    icon: "chart.line.uptrend.xyaxis",
+                                    title: "プログレッシブ難易度",
+                                    iconColor: .orange
+                                ) {
+                                    Toggle("", isOn: $viewModel.gameSettings.numberedModeProgressive)
+                                }
+                                
+                                if viewModel.gameSettings.numberedModeProgressive {
+                                    SettingsRow(
+                                        icon: "timer.square",
+                                        title: "レベル進行間隔",
+                                        iconColor: .orange
+                                    ) {
+                                        VStack(spacing: 5) {
+                                            HStack {
+                                                Text("\(Int(viewModel.gameSettings.numberedModeLevelInterval))秒")
+                                                    .font(.caption)
+                                                    .foregroundColor(.secondary)
+                                            }
+                                            Slider(
+                                                value: $viewModel.gameSettings.numberedModeLevelInterval,
+                                                in: 10...30,
+                                                step: 5
+                                            )
+                                        }
+                                    }
+                                    
+                                    SettingsRow(
+                                        icon: "number.square",
+                                        title: "最大レベル",
+                                        iconColor: .orange
+                                    ) {
+                                        HStack {
+                                            Stepper(
+                                                "Lv.\(viewModel.gameSettings.numberedModeMaxLevel)",
+                                                value: $viewModel.gameSettings.numberedModeMaxLevel,
+                                                in: 3...10
+                                            )
+                                        }
+                                    }
+                                }
+                                
+                                SettingsRow(
+                                    icon: "123.rectangle.fill",
+                                    title: "数字範囲",
+                                    iconColor: .blue
+                                ) {
+                                    VStack(spacing: 5) {
+                                        HStack {
+                                            Text("1〜\(viewModel.gameSettings.numberedModeMaxRange)")
+                                                .font(.caption)
+                                                .foregroundColor(.secondary)
+                                        }
+                                        Slider(
+                                            value: Binding(
+                                                get: { Double(viewModel.gameSettings.numberedModeMaxRange) },
+                                                set: { viewModel.gameSettings.numberedModeMaxRange = Int($0) }
+                                            ),
+                                            in: 5...50,
+                                            step: 5
+                                        )
+                                    }
+                                }
+                                
+                                SettingsRow(
+                                    icon: "speedometer",
+                                    title: "スピードボーナス",
+                                    iconColor: .cyan
+                                ) {
+                                    Toggle("", isOn: $viewModel.gameSettings.speedBonusEnabled)
+                                }
+                                
+                                if viewModel.gameSettings.speedBonusEnabled {
+                                    SettingsRow(
+                                        icon: "multiply.circle",
+                                        title: "スピードボーナス倍率",
+                                        iconColor: .cyan
+                                    ) {
+                                        VStack(spacing: 5) {
+                                            HStack {
+                                                Text("×\(String(format: "%.1f", viewModel.gameSettings.speedBonusMultiplier))")
+                                                    .font(.caption)
+                                                    .foregroundColor(.secondary)
+                                            }
+                                            Slider(
+                                                value: $viewModel.gameSettings.speedBonusMultiplier,
+                                                in: 1.5...5.0,
+                                                step: 0.5
+                                            )
+                                        }
+                                    }
+                                }
+                                
+                                SettingsRow(
+                                    icon: "link",
+                                    title: "パーフェクトチェイン",
+                                    iconColor: .green
+                                ) {
+                                    Toggle("", isOn: $viewModel.gameSettings.perfectChainEnabled)
+                                }
+                                
+                                SettingsRow(
+                                    icon: "sparkles",
+                                    title: "特殊ルール",
+                                    iconColor: .purple
+                                ) {
+                                    Picker("特殊ルール", selection: $viewModel.gameSettings.numberedModeSpecialRule) {
+                                        Text("通常").tag("normal")
+                                        Text("逆順").tag("reverse")
+                                        Text("2倍数").tag("double")
+                                        Text("ランダム").tag("random")
+                                    }
+                                    .pickerStyle(MenuPickerStyle())
+                                }
+                            }
+                        }
+                    }
+                    
                     // システム設定セクション
                     SettingsSection(title: "システム設定") {
                         VStack(spacing: 15) {
