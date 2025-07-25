@@ -101,23 +101,52 @@ class AudioServiceImpl: AudioService {
         
         // ファイル名をマッピング
         let fileName: String
+        let resourceName: String
         switch track {
         case "track1":
             fileName = "1.mp3"
+            resourceName = "1"
         case "track2":
             fileName = "2.mp3"
+            resourceName = "2"
         case "track3":
             fileName = "3.mp3"
+            resourceName = "3"
         default:
             print("Unknown BGM track: \(track)")
             return
         }
         
-        // バンドルからファイルを取得
-        guard let bundlePath = Bundle.main.path(forResource: fileName.components(separatedBy: ".").first, 
-                                              ofType: "mp3", inDirectory: "Bgm"),
-              let url = URL(string: "file://\(bundlePath)") else {
-            print("BGM file not found: \(fileName)")
+        // バンドルからファイルを取得（複数の方法で試行）
+        var url: URL?
+        
+        // 方法1: メインバンドルから直接検索（最も可能性が高い）
+        if let bundlePath = Bundle.main.path(forResource: resourceName, ofType: "mp3") {
+            url = URL(fileURLWithPath: bundlePath)
+            print("🔍 Found BGM file in main bundle: \(bundlePath)")
+        }
+        // 方法2: Bgmディレクトリ内からファイルを検索
+        else if let bundlePath = Bundle.main.path(forResource: resourceName, ofType: "mp3", inDirectory: "Bgm") {
+            url = URL(fileURLWithPath: bundlePath)
+            print("🔍 Found BGM file in Bgm directory: \(bundlePath)")
+        }
+        // 方法3: Bgmディレクトリでファイルタイプにextensionを含めて検索
+        else if let bundlePath = Bundle.main.path(forResource: fileName, ofType: nil, inDirectory: "Bgm") {
+            url = URL(fileURLWithPath: bundlePath)
+            print("🔍 Found BGM file with full name: \(bundlePath)")
+        }
+        
+        guard let audioURL = url else {
+            print("❌ BGM file not found: \(fileName)")
+            print("📁 Bundle contents debug:")
+            let bundlePath = Bundle.main.bundlePath
+            print("   Bundle path: \(bundlePath)")
+            if let resourcePath = Bundle.main.resourcePath {
+                print("   Resource path: \(resourcePath)")
+                // Bgmディレクトリの存在確認
+                let bgmPath = "\(resourcePath)/Bgm"
+                print("   Bgm directory exists: \(FileManager.default.fileExists(atPath: bgmPath))")
+            }
             // フォールバック: システム音で代用
             generateSynthesizedBGM()
             return
@@ -125,7 +154,7 @@ class AudioServiceImpl: AudioService {
         
         do {
             // AVAudioPlayerを作成して再生
-            bgmAudioPlayer = try AVAudioPlayer(contentsOf: url)
+            bgmAudioPlayer = try AVAudioPlayer(contentsOf: audioURL)
             bgmAudioPlayer?.numberOfLoops = loop ? -1 : 0  // -1は無限ループ
             bgmAudioPlayer?.volume = Float(bgmVolume * masterVolume * (isMuted ? 0.0 : 1.0))
             
@@ -134,11 +163,11 @@ class AudioServiceImpl: AudioService {
                 _currentBGMTrack = track
                 print("🎵 Playing BGM track: \(track) (\(fileName))")
             } else {
-                print("Failed to play BGM track: \(track)")
+                print("❌ Failed to play BGM track: \(track)")
                 generateSynthesizedBGM() // フォールバック
             }
         } catch {
-            print("Error loading BGM file \(fileName): \(error)")
+            print("❌ Error loading BGM file \(fileName): \(error)")
             generateSynthesizedBGM() // フォールバック
         }
     }

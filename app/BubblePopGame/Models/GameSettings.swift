@@ -70,3 +70,4 @@ class GameSettings {
         self.numberedModeSpecialRule = "normal" // "normal", "reverse", "double", "random"
     }
 }
+

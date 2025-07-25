@@ -31,6 +31,28 @@ struct TutorialView: View {
                     }
                 }
                 
+                // スキップボタン（右上に配置）
+                VStack {
+                    HStack {
+                        Spacer()
+                        Button("スキップ") {
+                            skipTutorial()
+                        }
+                        .font(.title3)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.blue)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 10)
+                        .background(Color.blue.opacity(0.1))
+                        .cornerRadius(8)
+                        .accessibilityLabel("スキップ")
+                        .accessibilityHint("チュートリアルをスキップしてメニューに移動します")
+                    }
+                    .padding(.top, 10)
+                    .padding(.horizontal, 20)
+                    Spacer()
+                }
+                
                 // Tutorial Content
                 VStack(spacing: 40) {
                     // Progress indicator
@@ -379,6 +401,21 @@ struct TutorialView: View {
             }
         }
         return nil
+    }
+    
+    private func skipTutorial() {
+        // 初回起動フラグを無効にする
+        gameViewModel.gameSettings.isFirstLaunch = false
+        
+        // 設定を保存
+        do {
+            try gameViewModel.saveGameSettings()
+        } catch {
+            print("Failed to save tutorial skip: \(error)")
+        }
+        
+        // メニュー画面に遷移
+        gameViewModel.gameState = .menu
     }
     
     private func completeTutorial() {

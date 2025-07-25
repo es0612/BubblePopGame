@@ -152,6 +152,7 @@ struct MenuView: View {
                         .background(Color.blue.accessible())
                         .cornerRadius(10)
                 }
+                .accessibilityElement(children: .ignore)
                 .accessibilityLabel("ゲーム開始")
                 .accessibilityHint("タップするとゲームが開始されます")
                 .accessibilityAddTraits(.isButton)
@@ -169,6 +170,7 @@ struct MenuView: View {
                         .background(Color.blue.accessible().opacity(0.1))
                         .cornerRadius(10)
                 }
+                .accessibilityElement(children: .ignore)
                 .accessibilityLabel("設定")
                 .accessibilityHint("ゲームの設定を変更できます")
                 .accessibilityAddTraits(.isButton)
@@ -187,6 +189,7 @@ struct MenuView: View {
                         .background(Color.purple.accessible().opacity(0.1))
                         .cornerRadius(10)
                 }
+                .accessibilityElement(children: .ignore)
                 .accessibilityLabel("ハイスコア")
                 .accessibilityHint("過去のハイスコアを確認できます")
                 .accessibilityAddTraits(.isButton)
