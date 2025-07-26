@@ -153,6 +153,7 @@ struct MenuView: View {
                         .cornerRadius(10)
                 }
                 .accessibilityElement(children: .ignore)
+                .accessibilityIdentifier("mainMenuGameStart")
                 .accessibilityLabel("ゲーム開始")
                 .accessibilityHint("タップするとゲームが開始されます")
                 .accessibilityAddTraits(.isButton)
@@ -171,6 +172,7 @@ struct MenuView: View {
                         .cornerRadius(10)
                 }
                 .accessibilityElement(children: .ignore)
+                .accessibilityIdentifier("mainMenuSettings")
                 .accessibilityLabel("設定")
                 .accessibilityHint("ゲームの設定を変更できます")
                 .accessibilityAddTraits(.isButton)
@@ -190,6 +192,7 @@ struct MenuView: View {
                         .cornerRadius(10)
                 }
                 .accessibilityElement(children: .ignore)
+                .accessibilityIdentifier("mainMenuHighScore")
                 .accessibilityLabel("ハイスコア")
                 .accessibilityHint("過去のハイスコアを確認できます")
                 .accessibilityAddTraits(.isButton)
@@ -811,6 +814,7 @@ struct PauseOverlayView: View {
                         .cornerRadius(15)
                         .shadow(radius: 3)
                     }
+                    .accessibilityIdentifier("pauseEndButton")
                     .accessibilityLabel("終了")
                     .accessibilityHint("ゲームを終了してメニューに戻ります")
                     .accessibilityAddTraits(.isButton)

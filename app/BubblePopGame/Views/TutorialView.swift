@@ -92,7 +92,7 @@ struct TutorialView: View {
                             .cornerRadius(10)
                         }
                         
-                        Button(currentStep == totalSteps - 1 ? "ゲーム開始" : "次へ") {
+                        Button(currentStep == totalSteps - 1 ? "チュートリアル完了" : "次へ") {
                             withAnimation(.easeInOut(duration: 0.3)) {
                                 if currentStep == totalSteps - 1 {
                                     completeTutorial()
@@ -107,6 +107,7 @@ struct TutorialView: View {
                         .padding()
                         .frame(maxWidth: .infinity)
                         .background(canProceed ? Color.blue : Color.gray)
+                        .accessibilityIdentifier(currentStep == totalSteps - 1 ? "tutorialComplete" : "tutorialNext")
                         .cornerRadius(10)
                         .disabled(!canProceed)
                     }
