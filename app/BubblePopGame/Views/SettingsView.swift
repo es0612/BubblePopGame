@@ -9,7 +9,9 @@ import SwiftUI
 
 struct SettingsView: View {
     @Bindable var viewModel: SettingsViewModel
+    let gameViewModel: GameViewModel?
     let onDismiss: () -> Void
+    @State private var showingResetConfirmation = false
     
     var body: some View {
         NavigationView {
@@ -111,12 +113,15 @@ struct SettingsView: View {
                                         Text("0")
                                             .font(.caption)
                                             .foregroundColor(.secondary)
-                                        Slider(value: $viewModel.bgmVolume, in: 0...1, step: 0.1)
+                                        Slider(value: $viewModel.gameSettings.bgmVolume, in: 0...1, step: 0.1)
+                                            .onChange(of: viewModel.gameSettings.bgmVolume) { _, _ in
+                                                viewModel.saveSettings()
+                                            }
                                         Text("100")
                                             .font(.caption)
                                             .foregroundColor(.secondary)
                                     }
-                                    Text("\(Int(viewModel.bgmVolume * 100))%")
+                                    Text("\(Int(viewModel.gameSettings.bgmVolume * 100))%")
                                         .font(.caption2)
                                         .foregroundColor(.secondary)
                                 }
@@ -132,12 +137,15 @@ struct SettingsView: View {
                                         Text("0")
                                             .font(.caption)
                                             .foregroundColor(.secondary)
-                                        Slider(value: $viewModel.sfxVolume, in: 0...1, step: 0.1)
+                                        Slider(value: $viewModel.gameSettings.sfxVolume, in: 0...1, step: 0.1)
+                                            .onChange(of: viewModel.gameSettings.sfxVolume) { _, _ in
+                                                viewModel.saveSettings()
+                                            }
                                         Text("100")
                                             .font(.caption)
                                             .foregroundColor(.secondary)
                                     }
-                                    Text("\(Int(viewModel.sfxVolume * 100))%")
+                                    Text("\(Int(viewModel.gameSettings.sfxVolume * 100))%")
                                         .font(.caption2)
                                         .foregroundColor(.secondary)
                                 }
@@ -281,12 +289,28 @@ struct SettingsView: View {
                                     set: { _ in viewModel.toggleVibration() }
                                 ))
                             }
+                            
+                            SettingsRow(
+                                icon: "questionmark.circle",
+                                title: "チュートリアルを再表示",
+                                iconColor: .blue
+                            ) {
+                                Button("表示") {
+                                    showTutorial()
+                                }
+                                .font(.body)
+                                .foregroundColor(.blue)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(Color.blue.opacity(0.1))
+                                .cornerRadius(8)
+                            }
                         }
                     }
                     
                     // リセットボタン
                     Button(action: {
-                        viewModel.resetToDefaults()
+                        showingResetConfirmation = true
                     }) {
                         HStack {
                             Image(systemName: "arrow.counterclockwise")
@@ -315,6 +339,22 @@ struct SettingsView: View {
                 }
             }
         }
+        .alert("設定リセット確認", isPresented: $showingResetConfirmation) {
+            Button("キャンセル", role: .cancel) { }
+            Button("リセット", role: .destructive) {
+                viewModel.resetToDefaults()
+            }
+        } message: {
+            Text("すべての設定をデフォルト値に戻します。この操作は取り消せません。")
+        }
+    }
+    
+    private func showTutorial() {
+        guard let gameViewModel = gameViewModel else { return }
+        
+        // チュートリアルを表示するためにゲーム状態を変更
+        gameViewModel.gameState = .tutorial
+        onDismiss()
     }
 }
 
@@ -380,7 +420,7 @@ struct SettingsRow<Content: View>: View {
 }
 
 #Preview {
-    SettingsView(viewModel: SettingsViewModel()) {
+    SettingsView(viewModel: SettingsViewModel(), gameViewModel: nil) {
         // Dismiss action for preview
     }
 }

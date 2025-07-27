@@ -22,6 +22,8 @@ class GameSettings {
     var isFirstLaunch: Bool
     var bgmEnabled: Bool
     var bgmTrack: String
+    var bgmVolume: Double
+    var sfxVolume: Double
     
     // 数字モード設定
     var numberedModeMaxLevel: Int
@@ -52,6 +54,8 @@ class GameSettings {
         self.isFirstLaunch = true
         self.bgmEnabled = true
         self.bgmTrack = "track1" // "off", "track1", "track2", "track3"
+        self.bgmVolume = 0.7
+        self.sfxVolume = 0.8
         
         // 数字モード設定のデフォルト値（バランス調整済み）
         self.numberedModeMaxLevel = 7 // 最大レベルを7に調整（より長く楽しめる）

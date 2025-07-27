@@ -33,7 +33,7 @@ struct ContentView: View {
                         GameOverView(viewModel: gameViewModel)
                     case .settings:
                         if let settingsViewModel = settingsViewModel {
-                            SettingsView(viewModel: settingsViewModel) {
+                            SettingsView(viewModel: settingsViewModel, gameViewModel: gameViewModel) {
                                 gameViewModel.gameState = .menu
                             }
                         } else {
@@ -60,6 +60,13 @@ struct ContentView: View {
                 // 画面サイズ変更時（回転等）
                 if let gameViewModel = gameViewModel {
                     gameViewModel.updateScreenBounds(newSize)
+                }
+            }
+            .onChange(of: gameViewModel?.gameState) { _, newState in
+                // ゲーム状態変更時の処理
+                if let gameViewModel = gameViewModel, newState == .menu {
+                    // メニューに戻ったときのBGM自動再開
+                    resumeBGMOnMenuReturn(gameViewModel: gameViewModel)
                 }
             }
         }
@@ -117,6 +124,27 @@ struct ContentView: View {
         }
         
         self.gameViewModel = viewModel
+    }
+    
+    private func resumeBGMOnMenuReturn(gameViewModel: GameViewModel) {
+        // BGMが有効でトラックが設定されているが現在再生されていない場合に再開
+        let settings = gameViewModel.gameSettings
+        let audioService = gameViewModel.audioService
+        
+        if settings.bgmEnabled && 
+           settings.bgmTrack != "off" && 
+           !audioService.isPlaying && 
+           !audioService.isPaused {
+            
+            print("🎵 メニュー復帰時にBGMを自動再開: \(settings.bgmTrack)")
+            audioService.playBGMTrack(settings.bgmTrack, loop: true)
+        } else if settings.bgmEnabled && 
+                  settings.bgmTrack != "off" && 
+                  audioService.isPaused {
+            
+            print("🎵 メニュー復帰時にBGMを再開（ポーズ解除）")
+            audioService.resumeBGM()
+        }
     }
 }
 
@@ -494,7 +522,7 @@ struct GameOverView: View {
                 Text("ゲーム終了")
                     .font(.largeTitle)
                     .fontWeight(.bold)
-                    .foregroundColor(.red)
+                    .foregroundColor(.red.accessible())
                 
                 Text("お疲れ様でした！")
                     .font(.headline)
@@ -503,14 +531,14 @@ struct GameOverView: View {
             
             // スコア表示セクション
             VStack(spacing: 20) {
-                ScoreCard(title: "最終スコア", value: "\(viewModel.score)", color: .orange)
+                ScoreCard(title: "最終スコア", value: "\(viewModel.score)", color: .orange.accessible())
                 
                 HStack(spacing: 15) {
-                    ScoreCard(title: "破裂数", value: "\(viewModel.bubblesPopped)", color: .blue)
-                    ScoreCard(title: "最大連鎖", value: "\(viewModel.bestStreak)", color: .purple)
+                    ScoreCard(title: "破裂数", value: "\(viewModel.bubblesPopped)", color: .blue.accessible())
+                    ScoreCard(title: "最大連鎖", value: "\(viewModel.bestStreak)", color: .purple.accessible())
                 }
                 
-                ScoreCard(title: "正確率", value: String(format: "%.1f%%", viewModel.calculateAccuracy() * 100), color: .green)
+                ScoreCard(title: "正確率", value: String(format: "%.1f%%", viewModel.calculateAccuracy() * 100), color: .green.accessible())
             }
             
             // ボタン群
@@ -590,7 +618,7 @@ struct GameOverView: View {
         }
         .padding()
         .background(
-            LinearGradient(colors: [.red.opacity(0.3), .orange.opacity(0.1)], 
+            LinearGradient(colors: [.red.accessible().opacity(0.3), .orange.accessible().opacity(0.1)], 
                           startPoint: .top, endPoint: .bottom)
         )
     }
@@ -612,7 +640,7 @@ struct ScoreCard: View {
                 .foregroundColor(color)
         }
         .padding()
-        .background(Color.white.opacity(0.8))
+        .background(Color(.systemBackground).opacity(0.9))
         .cornerRadius(10)
         .shadow(radius: 2)
     }
@@ -845,7 +873,7 @@ struct PauseOverlayView: View {
                 gameViewModel.endGame()
             }
         } message: {
-            Text("本当にゲームを終了しますか？\n進行状況は保存されません。")
+            Text("本当にゲームを終了しますか？\n現在のゲームが終了します。")
         }
     }
 }
@@ -860,7 +888,7 @@ struct HighScoreView: View {
             Text("ハイスコア")
                 .font(.largeTitle)
                 .fontWeight(.bold)
-                .foregroundColor(.purple)
+                .foregroundColor(.purple.accessible())
                 .padding()
             
             // ゲームモード選択
@@ -900,13 +928,13 @@ struct HighScoreView: View {
                 .foregroundColor(.white)
                 .padding()
                 .frame(maxWidth: .infinity)
-                .background(Color.purple)
+                .background(Color.purple.accessible())
                 .cornerRadius(10)
             }
             .padding(.horizontal)
         }
         .background(
-            LinearGradient(colors: [.purple.opacity(0.3), .pink.opacity(0.1)], 
+            LinearGradient(colors: [.purple.accessible().opacity(0.3), .pink.accessible().opacity(0.1)], 
                           startPoint: .top, endPoint: .bottom)
         )
         .onAppear {
@@ -973,7 +1001,7 @@ struct HighScoreRow: View {
             }
         }
         .padding()
-        .background(Color.white.opacity(0.8))
+        .background(Color(.systemBackground).opacity(0.9))
         .cornerRadius(12)
         .shadow(radius: 2)
     }

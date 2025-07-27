@@ -11,8 +11,6 @@ import Foundation
 @MainActor
 class SettingsViewModel {
     var gameSettings: GameSettings
-    var bgmVolume: Double = 0.7
-    var sfxVolume: Double = 0.8
     
     private let settingsRepository: SettingsRepository?
     private let audioService: AudioService?
@@ -90,7 +88,7 @@ class SettingsViewModel {
         }
         
         // 音量設定を適用
-        audioService.setBGMVolume(Float(bgmVolume))
-        audioService.setSFXVolume(Float(sfxVolume))
+        audioService.setBGMVolume(Float(gameSettings.bgmVolume))
+        audioService.setSFXVolume(Float(gameSettings.sfxVolume))
     }
 }

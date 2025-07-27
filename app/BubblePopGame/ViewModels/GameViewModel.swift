@@ -169,7 +169,7 @@ class GameViewModel {
         gameState = .gameOver
         stopGameLoop()
         stopGameTimer()
-        audioService.stopAllSounds()
+        audioService.fadeOutBGM(duration: 1.0)
         
         // ゲームオーバー音とフィードバック
         audioService.playSFX(name: "game_over")
@@ -486,6 +486,9 @@ class GameViewModel {
             if gameSettings.perfectChainEnabled {
                 perfectChain += 1
             }
+            
+            // 新しい数字セットのバブルを画面に表示
+            regenerateBubblesForNewLevel()
         }
         
         nextExpectedNumber = currentNumberSet[currentNumberIndex]

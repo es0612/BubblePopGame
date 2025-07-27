@@ -171,9 +171,8 @@ class BubbleServiceImpl: BubbleService {
             let y = CGFloat.random(in: (hudHeight + margin)...(screenBounds.height - margin))
             let position = CGPoint(x: x, y: y)
             
-            // 10%の確率で数字タイプ、90%で通常タイプ
-            let bubbleType: BubbleType = Double.random(in: 0...1) < 0.1 ? .numbered : .normal
-            let bubble = createBubble(at: position, type: bubbleType)
+            // 通常モードでは通常タイプのみ生成
+            let bubble = createBubble(at: position, type: .normal)
             bubbles.append(bubble)
         }
         

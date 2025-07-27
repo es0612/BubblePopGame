@@ -104,8 +104,9 @@ struct TutorialView: View {
                         .font(.title3)
                         .fontWeight(.semibold)
                         .foregroundColor(.white)
-                        .padding()
-                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 16)
+                        .frame(maxWidth: .infinity, minHeight: 50)
                         .background(canProceed ? Color.blue : Color.gray)
                         .accessibilityIdentifier(currentStep == totalSteps - 1 ? "tutorialComplete" : "tutorialNext")
                         .cornerRadius(10)
@@ -358,9 +359,14 @@ struct TutorialView: View {
         showTapHint = false
         tutorialScore = 0
         
-        // 中央にシンプルなシャボン玉を1つ作成
+        // 画面の下部4分の1の領域に配置（文字と重複しないよう）
+        let screenHeight = gameViewModel.screenBounds.height
+        let screenWidth = gameViewModel.screenBounds.width
+        let bubbleY = screenHeight * 0.75 // 画面の下部4分の1
+        let bubbleX = screenWidth * 0.5   // 画面の中央
+        
         let centerBubble = Bubble(
-            position: CGPoint(x: 200, y: 400),
+            position: CGPoint(x: bubbleX, y: bubbleY),
             velocity: CGVector.zero,
             radius: 50,
             type: .normal,

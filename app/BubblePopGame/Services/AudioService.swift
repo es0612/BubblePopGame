@@ -19,9 +19,13 @@ protocol AudioService {
     func toggleMute()
     func stopAllSounds()
     func stopBGM()
+    func fadeOutBGM(duration: TimeInterval)
+    func pauseBGM()
+    func resumeBGM()
     var isPlaying: Bool { get }
     var isBGMEnabled: Bool { get }
     var currentBGMTrack: String? { get }
+    var isPaused: Bool { get }
 }
 
 class AudioServiceImpl: AudioService {
@@ -39,6 +43,8 @@ class AudioServiceImpl: AudioService {
     private var bgmAudioPlayer: AVAudioPlayer?
     private var _isBGMEnabled: Bool = true
     private var _currentBGMTrack: String?
+    private var _isPaused: Bool = false
+    private var fadingTimer: Timer?
     
     var isPlaying: Bool {
         return bgmAudioPlayer?.isPlaying ?? false
@@ -50,6 +56,10 @@ class AudioServiceImpl: AudioService {
     
     var currentBGMTrack: String? {
         return _currentBGMTrack
+    }
+    
+    var isPaused: Bool {
+        return _isPaused
     }
     
     init() {
@@ -218,15 +228,59 @@ class AudioServiceImpl: AudioService {
     }
     
     func stopBGM() {
+        fadingTimer?.invalidate()
+        fadingTimer = nil
         bgmAudioPlayer?.stop()
         bgmPlayer.stop()
         _currentBGMTrack = nil
+        _isPaused = false
+    }
+    
+    func fadeOutBGM(duration: TimeInterval) {
+        guard let player = bgmAudioPlayer, player.isPlaying else { return }
+        
+        fadingTimer?.invalidate()
+        
+        let originalVolume = player.volume
+        let steps = 20
+        let stepDuration = duration / Double(steps)
+        let volumeStep = originalVolume / Float(steps)
+        
+        var currentStep = 0
+        
+        fadingTimer = Timer.scheduledTimer(withTimeInterval: stepDuration, repeats: true) { [weak self] timer in
+            currentStep += 1
+            let newVolume = originalVolume - (volumeStep * Float(currentStep))
+            
+            if currentStep >= steps || newVolume <= 0 {
+                timer.invalidate()
+                self?.fadingTimer = nil
+                self?.stopBGM()
+            } else {
+                player.volume = newVolume
+            }
+        }
+    }
+    
+    func pauseBGM() {
+        bgmAudioPlayer?.pause()
+        _isPaused = true
+    }
+    
+    func resumeBGM() {
+        if _isPaused && bgmAudioPlayer != nil {
+            bgmAudioPlayer?.play()
+            _isPaused = false
+        }
     }
     
     func stopAllSounds() {
+        fadingTimer?.invalidate()
+        fadingTimer = nil
         bgmAudioPlayer?.stop()
         bgmPlayer.stop()
         _currentBGMTrack = nil
+        _isPaused = false
         for player in sfxPlayers.values {
             player.stop()
         }
