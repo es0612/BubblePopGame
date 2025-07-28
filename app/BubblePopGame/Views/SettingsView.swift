@@ -299,11 +299,12 @@ struct SettingsView: View {
                                     showTutorial()
                                 }
                                 .font(.body)
-                                .foregroundColor(.blue)
+                                .foregroundColor(gameViewModel != nil ? .blue : .gray)
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 6)
-                                .background(Color.blue.opacity(0.1))
+                                .background((gameViewModel != nil ? Color.blue : Color.gray).opacity(0.1))
                                 .cornerRadius(8)
+                                .disabled(gameViewModel == nil)
                             }
                         }
                     }
@@ -350,7 +351,10 @@ struct SettingsView: View {
     }
     
     private func showTutorial() {
-        guard let gameViewModel = gameViewModel else { return }
+        guard let gameViewModel = gameViewModel else {
+            print("⚠️ GameViewModel is not available for tutorial display")
+            return
+        }
         
         // チュートリアルを表示するためにゲーム状態を変更
         gameViewModel.gameState = .tutorial

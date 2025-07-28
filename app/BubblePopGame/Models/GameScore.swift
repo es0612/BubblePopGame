@@ -17,8 +17,9 @@ class GameScore {
     var gameMode: String
     var playDate: Date
     var gameDuration: TimeInterval
+    var gameTimeLimit: TimeInterval // 制限時間
     
-    init(score: Int, bubblesPopped: Int, accuracy: Double, gameMode: String, playDate: Date, gameDuration: TimeInterval) {
+    init(score: Int, bubblesPopped: Int, accuracy: Double, gameMode: String, playDate: Date, gameDuration: TimeInterval, gameTimeLimit: TimeInterval = 60.0) {
         self.id = UUID()
         self.score = score
         self.bubblesPopped = bubblesPopped
@@ -26,5 +27,6 @@ class GameScore {
         self.gameMode = gameMode
         self.playDate = playDate
         self.gameDuration = gameDuration
+        self.gameTimeLimit = gameTimeLimit
     }
 }

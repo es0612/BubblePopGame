@@ -67,6 +67,13 @@ struct ContentView: View {
                 if let gameViewModel = gameViewModel, newState == .menu {
                     // メニューに戻ったときのBGM自動再開
                     resumeBGMOnMenuReturn(gameViewModel: gameViewModel)
+                    
+                    // 設定の同期確認（チュートリアル完了後の同期）
+                    do {
+                        try gameViewModel.reloadGameSettings()
+                    } catch {
+                        print("Failed to reload settings: \(error)")
+                    }
                 }
             }
         }
@@ -94,10 +101,19 @@ struct ContentView: View {
         // ゲーム設定読み込み
         let gameSettings: GameSettings
         do {
-            gameSettings = try settingsRepository.fetchSettings() ?? GameSettings()
+            if let existingSettings = try settingsRepository.fetchSettings() {
+                gameSettings = existingSettings
+            } else {
+                // 初回起動時のみ新しい設定を作成して保存
+                let newSettings = GameSettings()
+                try settingsRepository.saveSettings(newSettings)
+                gameSettings = newSettings
+            }
         } catch {
             print("Failed to load settings: \(error)")
-            gameSettings = GameSettings()
+            // エラー時も初回起動として扱う
+            let newSettings = GameSettings()
+            gameSettings = newSettings
         }
         
         // SettingsViewModel作成
@@ -882,6 +898,8 @@ struct HighScoreView: View {
     let gameViewModel: GameViewModel
     @State private var highScores: [GameScore] = []
     @State private var selectedMode: String = "normal"
+    @State private var selectedTimeLimit: Double = 60.0
+    @State private var availableTimeLimits: [Double] = [60.0]
     
     var body: some View {
         VStack(spacing: 20) {
@@ -891,15 +909,39 @@ struct HighScoreView: View {
                 .foregroundColor(.purple.accessible())
                 .padding()
             
-            // ゲームモード選択
-            Picker("ゲームモード", selection: $selectedMode) {
-                Text("通常").tag("normal")
-                Text("数字順").tag("numbered")
-            }
-            .pickerStyle(SegmentedPickerStyle())
-            .padding(.horizontal)
-            .onChange(of: selectedMode) { _, newMode in
-                loadHighScores(for: newMode)
+            VStack(spacing: 15) {
+                // ゲームモード選択
+                Picker("ゲームモード", selection: $selectedMode) {
+                    Text("通常").tag("normal")
+                    Text("数字順").tag("numbered")
+                }
+                .pickerStyle(SegmentedPickerStyle())
+                .padding(.horizontal)
+                .onChange(of: selectedMode) { _, newMode in
+                    loadHighScores(for: newMode, timeLimit: selectedTimeLimit)
+                }
+                
+                // 制限時間選択
+                if availableTimeLimits.count > 1 {
+                    HStack {
+                        Text("制限時間:")
+                            .font(.headline)
+                            .foregroundColor(.primary)
+                        
+                        Picker("制限時間", selection: $selectedTimeLimit) {
+                            ForEach(availableTimeLimits, id: \.self) { timeLimit in
+                                Text("\(Int(timeLimit))秒").tag(timeLimit)
+                            }
+                        }
+                        .pickerStyle(MenuPickerStyle())
+                        .onChange(of: selectedTimeLimit) { _, newTimeLimit in
+                            loadHighScores(for: selectedMode, timeLimit: newTimeLimit)
+                        }
+                        
+                        Spacer()
+                    }
+                    .padding(.horizontal)
+                }
             }
             
             // スコアリスト
@@ -938,13 +980,27 @@ struct HighScoreView: View {
                           startPoint: .top, endPoint: .bottom)
         )
         .onAppear {
-            loadHighScores(for: selectedMode)
+            loadAvailableTimeLimits()
+            loadHighScores(for: selectedMode, timeLimit: selectedTimeLimit)
         }
     }
     
-    private func loadHighScores(for mode: String) {
+    private func loadAvailableTimeLimits() {
         do {
-            highScores = try gameViewModel.scoreRepository.fetchScoresByMode(mode)
+            let times = try gameViewModel.scoreRepository.fetchAvailableGameTimes()
+            availableTimeLimits = times.isEmpty ? [60.0] : times
+            if !availableTimeLimits.contains(selectedTimeLimit) {
+                selectedTimeLimit = availableTimeLimits.first ?? 60.0
+            }
+        } catch {
+            print("Failed to load available time limits: \(error)")
+            availableTimeLimits = [60.0]
+        }
+    }
+    
+    private func loadHighScores(for mode: String, timeLimit: Double) {
+        do {
+            highScores = try gameViewModel.scoreRepository.fetchScoresByModeAndTime(mode, gameTime: timeLimit)
         } catch {
             print("Failed to load high scores: \(error)")
             highScores = []
@@ -991,6 +1047,18 @@ struct HighScoreRow: View {
                     Spacer()
                     
                     Text("正確率: \(String(format: "%.1f%%", score.accuracy * 100))")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                
+                HStack {
+                    Text("制限時間: \(Int(score.gameTimeLimit))秒")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    
+                    Spacer()
+                    
+                    Text("プレイ時間: \(String(format: "%.1f秒", score.gameDuration))")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }

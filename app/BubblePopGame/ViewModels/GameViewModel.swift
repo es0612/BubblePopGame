@@ -21,6 +21,10 @@ class GameViewModel {
     var currentStreak: Int = 0
     var bestStreak: Int = 0
     
+    // 正確率計算用カウンター
+    var totalTaps: Int = 0
+    var successfulTaps: Int = 0
+    
     // 数字順ゲームモード専用
     var nextExpectedNumber: Int = 1
     var numberedBubblesCount: Int = 5
@@ -117,6 +121,10 @@ class GameViewModel {
         currentStreak = 0
         bestStreak = 0
         
+        // 正確率計算用カウンターをリセット
+        totalTaps = 0
+        successfulTaps = 0
+        
         // 数字順ゲームモード初期化
         if gameSettings.gameMode == "numbered" {
             // 動的難易度システム初期化
@@ -185,11 +193,17 @@ class GameViewModel {
     func handleBubbleTap(at location: CGPoint) {
         guard gameState == .playing else { return }
         
+        // 総タップ数をカウント
+        totalTaps += 1
+        
         // タッチ応答性監視開始
         let touchStartTime = CACurrentMediaTime()
         
         if let hitBubbleIndex = bubbleService.checkCollisionIndex(at: location, in: bubbles) {
             var hitBubble = bubbles[hitBubbleIndex]
+            
+            // 成功タップをカウント
+            successfulTaps += 1
             
             // 数字順ゲームモードでの順序チェック
             if gameSettings.gameMode == "numbered" && hitBubble.type == .numbered {
@@ -199,7 +213,8 @@ class GameViewModel {
                         handleCorrectNumberedBubble(hitBubble, at: hitBubbleIndex)
                         return
                     } else {
-                        // 間違った順序
+                        // 間違った順序（成功タップだが間違った順序なので、successfulTapsを1減らす）
+                        successfulTaps -= 1
                         handleIncorrectNumberedBubble(hitBubble)
                         return
                     }
@@ -562,11 +577,12 @@ class GameViewModel {
     private func saveScore() {
         let gameScore = GameScore(
             score: score,
-            bubblesPopped: gameSettings.bubbleCount - bubbles.count + score,
+            bubblesPopped: bubblesPopped,
             accuracy: calculateAccuracy(),
             gameMode: gameSettings.gameMode,
             playDate: Date(),
-            gameDuration: gameSettings.gameTime - timeRemaining
+            gameDuration: gameSettings.gameTime - timeRemaining,
+            gameTimeLimit: gameSettings.gameTime
         )
         
         do {
@@ -579,8 +595,7 @@ class GameViewModel {
     }
     
     func calculateAccuracy() -> Double {
-        let totalBubbles = gameSettings.bubbleCount - bubbles.count + score
-        return totalBubbles > 0 ? Double(score) / Double(totalBubbles) : 0.0
+        return totalTaps > 0 ? Double(successfulTaps) / Double(totalTaps) : 0.0
     }
     
     private func removeBubblesOutOfBounds() {
@@ -627,6 +642,13 @@ class GameViewModel {
     /// ゲーム設定を保存する
     func saveGameSettings() throws {
         try settingsRepository.saveSettings(gameSettings)
+    }
+    
+    /// ゲーム設定を再読み込みする
+    func reloadGameSettings() throws {
+        if let loadedSettings = try settingsRepository.fetchSettings() {
+            gameSettings = loadedSettings
+        }
     }
     
     deinit {

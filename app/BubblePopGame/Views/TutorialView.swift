@@ -519,10 +519,10 @@ struct TutorialBubbleView: View {
 // プレビュー用のMockクラス
 class ScoreRepositoryMock: ScoreRepository {
     func saveScore(_ score: GameScore) throws {}
-    func fetchAllScores() throws -> [GameScore] { return [] }
-    func fetchScoresByMode(_ mode: String) throws -> [GameScore] { return [] }
-    func fetchTopScores(limit: Int) throws -> [GameScore] { return [] }
     func fetchHighScores(limit: Int) throws -> [GameScore] { return [] }
+    func fetchScoresByMode(_ mode: String) throws -> [GameScore] { return [] }
+    func fetchScoresByModeAndTime(_ mode: String, gameTime: Double) throws -> [GameScore] { return [] }
+    func fetchAvailableGameTimes() throws -> [Double] { return [60.0] }
     func deleteScore(_ score: GameScore) throws {}
 }
 

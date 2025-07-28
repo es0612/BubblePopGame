@@ -50,7 +50,10 @@ class SettingsViewModel {
     }
     
     func resetToDefaults() {
+        // チュートリアル完了状態は保持する
+        let wasFirstLaunch = gameSettings.isFirstLaunch
         gameSettings = GameSettings()
+        gameSettings.isFirstLaunch = wasFirstLaunch
         saveSettings()
     }
     
