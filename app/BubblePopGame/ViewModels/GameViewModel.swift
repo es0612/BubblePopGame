@@ -647,7 +647,30 @@ class GameViewModel {
     /// ゲーム設定を再読み込みする
     func reloadGameSettings() throws {
         if let loadedSettings = try settingsRepository.fetchSettings() {
-            gameSettings = loadedSettings
+            // 既存オブジェクトのプロパティを同期（SwiftDataの追跡を維持）
+            gameSettings.bubbleCount = loadedSettings.bubbleCount
+            gameSettings.gameTime = loadedSettings.gameTime
+            gameSettings.bubbleMinRadius = loadedSettings.bubbleMinRadius
+            gameSettings.bubbleMaxRadius = loadedSettings.bubbleMaxRadius
+            gameSettings.animationSpeed = loadedSettings.animationSpeed
+            gameSettings.soundEnabled = loadedSettings.soundEnabled
+            gameSettings.vibrationEnabled = loadedSettings.vibrationEnabled
+            gameSettings.gameMode = loadedSettings.gameMode
+            gameSettings.isFirstLaunch = loadedSettings.isFirstLaunch
+            gameSettings.bgmEnabled = loadedSettings.bgmEnabled
+            gameSettings.bgmTrack = loadedSettings.bgmTrack
+            gameSettings.bgmVolume = loadedSettings.bgmVolume
+            gameSettings.sfxVolume = loadedSettings.sfxVolume
+            gameSettings.numberedModeMaxLevel = loadedSettings.numberedModeMaxLevel
+            gameSettings.numberedModeProgressive = loadedSettings.numberedModeProgressive
+            gameSettings.numberedModeLevelInterval = loadedSettings.numberedModeLevelInterval
+            gameSettings.numberedModeMaxRange = loadedSettings.numberedModeMaxRange
+            gameSettings.numberedModeStartRange = loadedSettings.numberedModeStartRange
+            gameSettings.speedBonusEnabled = loadedSettings.speedBonusEnabled
+            gameSettings.speedBonusMultiplier = loadedSettings.speedBonusMultiplier
+            gameSettings.perfectChainEnabled = loadedSettings.perfectChainEnabled
+            gameSettings.perfectChainMultiplier = loadedSettings.perfectChainMultiplier
+            gameSettings.numberedModeSpecialRule = loadedSettings.numberedModeSpecialRule
         }
     }
     

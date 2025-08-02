@@ -52,8 +52,35 @@ class SettingsViewModel {
     func resetToDefaults() {
         // チュートリアル完了状態は保持する
         let wasFirstLaunch = gameSettings.isFirstLaunch
-        gameSettings = GameSettings()
+        
+        // 既存オブジェクトのプロパティを個別に更新（SwiftDataの追跡を維持）
+        let defaultSettings = GameSettings()
+        gameSettings.bubbleCount = defaultSettings.bubbleCount
+        gameSettings.gameTime = defaultSettings.gameTime
+        gameSettings.bubbleMinRadius = defaultSettings.bubbleMinRadius
+        gameSettings.bubbleMaxRadius = defaultSettings.bubbleMaxRadius
+        gameSettings.animationSpeed = defaultSettings.animationSpeed
+        gameSettings.soundEnabled = defaultSettings.soundEnabled
+        gameSettings.vibrationEnabled = defaultSettings.vibrationEnabled
+        gameSettings.gameMode = defaultSettings.gameMode
+        gameSettings.bgmEnabled = defaultSettings.bgmEnabled
+        gameSettings.bgmTrack = defaultSettings.bgmTrack
+        gameSettings.bgmVolume = defaultSettings.bgmVolume
+        gameSettings.sfxVolume = defaultSettings.sfxVolume
+        gameSettings.numberedModeMaxLevel = defaultSettings.numberedModeMaxLevel
+        gameSettings.numberedModeProgressive = defaultSettings.numberedModeProgressive
+        gameSettings.numberedModeLevelInterval = defaultSettings.numberedModeLevelInterval
+        gameSettings.numberedModeMaxRange = defaultSettings.numberedModeMaxRange
+        gameSettings.numberedModeStartRange = defaultSettings.numberedModeStartRange
+        gameSettings.speedBonusEnabled = defaultSettings.speedBonusEnabled
+        gameSettings.speedBonusMultiplier = defaultSettings.speedBonusMultiplier
+        gameSettings.perfectChainEnabled = defaultSettings.perfectChainEnabled
+        gameSettings.perfectChainMultiplier = defaultSettings.perfectChainMultiplier
+        gameSettings.numberedModeSpecialRule = defaultSettings.numberedModeSpecialRule
+        
+        // チュートリアル完了状態を復元
         gameSettings.isFirstLaunch = wasFirstLaunch
+        
         saveSettings()
     }
     

@@ -26,14 +26,18 @@ class SettingsRepositoryImpl: SettingsRepository {
     func saveSettings(_ settings: GameSettings) throws {
         let context = modelContainer.mainContext
         
-        // 既存の設定があれば削除
-        let descriptor = FetchDescriptor<GameSettings>()
-        let existingSettings = try context.fetch(descriptor)
-        for existing in existingSettings {
-            context.delete(existing)
+        // 設定がまだコンテキストに追加されていない場合のみ追加
+        if settings.modelContext == nil {
+            // 既存の設定があれば削除してから新しい設定を追加
+            let descriptor = FetchDescriptor<GameSettings>()
+            let existingSettings = try context.fetch(descriptor)
+            for existing in existingSettings {
+                context.delete(existing)
+            }
+            context.insert(settings)
         }
         
-        context.insert(settings)
+        // SwiftDataは自動的に変更を追跡するため、明示的な保存で永続化
         try context.save()
     }
     
