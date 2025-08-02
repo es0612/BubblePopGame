@@ -34,7 +34,10 @@ struct ContentView: View {
                     case .settings:
                         if let settingsViewModel = settingsViewModel {
                             SettingsView(viewModel: settingsViewModel, gameViewModel: gameViewModel) {
-                                gameViewModel.gameState = .menu
+                                // チュートリアル状態の場合はメニューに戻さない
+                                if gameViewModel.gameState != .tutorial {
+                                    gameViewModel.gameState = .menu
+                                }
                             }
                         } else {
                             ProgressView("設定読み込み中...")
