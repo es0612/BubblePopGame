@@ -194,7 +194,7 @@ class AudioServiceImpl: AudioService {
     }
     
     func playSFX(name: String) {
-        // 効果音の種類に応じてシステム音で代用
+        // 効果音の種類に応じてシステム音で代用（音量調整対応）
         switch name {
         case "bubble_pop":
             generatePopSound()
@@ -202,6 +202,10 @@ class AudioServiceImpl: AudioService {
             generateButtonSound()
         case "game_over":
             generateGameOverSound()
+        case "error_sound":
+            generateErrorSound()
+        case "level_up":
+            generateLevelUpSound()
         default:
             print("Playing SFX: \(name)")
         }
@@ -305,20 +309,42 @@ class AudioServiceImpl: AudioService {
     }
     
     private func generatePopSound() {
-        // シャボン玉破裂音をシミュレート
-        AudioServicesPlaySystemSound(1306) // Pop sound
-        print("🎵 Pop sound")
+        // シャボン玉破裂音をシミュレート（音量調整対応）
+        if !isMuted && sfxVolume > 0 {
+            AudioServicesPlaySystemSound(1306) // Pop sound
+        }
+        print("🎵 Pop sound (volume: \(sfxVolume))")  
     }
     
     private func generateButtonSound() {
-        // ボタンタップ音をシミュレート
-        AudioServicesPlaySystemSound(1104) // Click sound
-        print("🎵 Button sound")
+        // ボタンタップ音をシミュレート（音量調整対応）
+        if !isMuted && sfxVolume > 0 {
+            AudioServicesPlaySystemSound(1104) // Click sound
+        }
+        print("🎵 Button sound (volume: \(sfxVolume))")
     }
     
     private func generateGameOverSound() {
-        // ゲームオーバー音をシミュレート
-        AudioServicesPlaySystemSound(1322) // Anticipate sound
-        print("🎵 Game over sound")
+        // ゲームオーバー音をシミュレート（音量調整対応）
+        if !isMuted && sfxVolume > 0 {
+            AudioServicesPlaySystemSound(1322) // Anticipate sound
+        }
+        print("🎵 Game over sound (volume: \(sfxVolume))")
+    }
+    
+    private func generateErrorSound() {
+        // エラー音をシミュレート（音量調整対応）
+        if !isMuted && sfxVolume > 0 {
+            AudioServicesPlaySystemSound(1521) // Error sound
+        }
+        print("🎵 Error sound (volume: \(sfxVolume))")
+    }
+    
+    private func generateLevelUpSound() {
+        // レベルアップ音をシミュレート（音量調整対応）
+        if !isMuted && sfxVolume > 0 {
+            AudioServicesPlaySystemSound(1315) // Success sound
+        }
+        print("🎵 Level up sound (volume: \(sfxVolume))")
     }
 }

@@ -180,8 +180,12 @@ class GameViewModel {
         audioService.fadeOutBGM(duration: 1.0)
         
         // ゲームオーバー音とフィードバック
-        audioService.playSFX(name: "game_over")
-        effectService.triggerErrorFeedback()
+        if gameSettings.soundEnabled {
+            audioService.playSFX(name: "game_over")
+        }
+        if gameSettings.vibrationEnabled {
+            effectService.triggerErrorFeedback()
+        }
         
         // スコア保存
         saveScore()
@@ -259,8 +263,12 @@ class GameViewModel {
         
         // 成功エフェクトとサウンド
         effectService.createPopEffect(at: bubble.position, color: .green)
-        audioService.playSFX(name: "bubble_pop")
-        effectService.triggerSuccessFeedback()
+        if gameSettings.soundEnabled {
+            audioService.playSFX(name: "bubble_pop")
+        }
+        if gameSettings.vibrationEnabled {
+            effectService.triggerSuccessFeedback()
+        }
         
         // 破裂アニメーション後に削除
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
@@ -289,8 +297,12 @@ class GameViewModel {
         
         // エラーエフェクトとサウンド
         effectService.createPopEffect(at: bubble.position, color: .red)
-        audioService.playSFX(name: "error_sound")
-        effectService.triggerErrorFeedback()
+        if gameSettings.soundEnabled {
+            audioService.playSFX(name: "error_sound")
+        }
+        if gameSettings.vibrationEnabled {
+            effectService.triggerErrorFeedback()
+        }
         
         // バブルは削除しない（正しい順序まで残る）
     }
@@ -315,12 +327,16 @@ class GameViewModel {
         
         // エフェクトとサウンド
         effectService.createPopEffect(at: bubble.position, color: bubble.color)
-        audioService.playSFX(name: "bubble_pop")
+        if gameSettings.soundEnabled {
+            audioService.playSFX(name: "bubble_pop")
+        }
         
         // タイプ別の触覚フィードバック
-        let feedbackIntensity: UIImpactFeedbackGenerator.FeedbackStyle = 
-            bubble.type == .numbered ? .heavy : .light
-        effectService.triggerHapticFeedback(intensity: feedbackIntensity)
+        if gameSettings.vibrationEnabled {
+            let feedbackIntensity: UIImpactFeedbackGenerator.FeedbackStyle = 
+                bubble.type == .numbered ? .heavy : .light
+            effectService.triggerHapticFeedback(intensity: feedbackIntensity)
+        }
         
         // 破裂アニメーション後に削除（0.3秒後）
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
@@ -473,8 +489,12 @@ class GameViewModel {
             numberedBubblesCount = getNumberRangeForLevel(currentLevel).count
             
             // レベルアップエフェクト
-            audioService.playSFX(name: "level_up")
-            effectService.triggerSuccessFeedback()
+            if gameSettings.soundEnabled {
+                audioService.playSFX(name: "level_up")
+            }
+            if gameSettings.vibrationEnabled {
+                effectService.triggerSuccessFeedback()
+            }
             
             // 新しいレベルでバブル再生成
             regenerateBubblesForNewLevel()
