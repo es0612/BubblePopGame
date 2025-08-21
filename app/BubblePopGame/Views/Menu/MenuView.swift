@@ -18,19 +18,19 @@ struct MenuView: View {
             let spacing: CGFloat = isIPad ? 60 : 40
             
             VStack(spacing: spacing) {
-            Text("シャボン玉消しゲーム")
+            Text(NSLocalizedString("game_title", comment: "Game title"))
                 .font(.largeTitle)
                 .fontWeight(.bold)
                 .foregroundColor(Color.blue.accessible())
-                .accessibilityLabel("シャボン玉消しゲーム")
-                .accessibilityHint("ゲームのメインタイトルです")
+                .accessibilityLabel(NSLocalizedString("accessibility_game_title", comment: "Game title accessibility"))
+                .accessibilityHint(NSLocalizedString("accessibility_game_title_hint", comment: "Game title hint"))
             
             VStack(spacing: 20) {
                 Button(action: {
                     gameViewModel.startGame()
                     gameViewModel.audioService.playSFX(name: "button_tap")
                 }) {
-                    Text("ゲーム開始")
+                    Text(NSLocalizedString("menu_start_game", comment: "Start game button"))
                         .font(.title2)
                         .fontWeight(.semibold)
                         .foregroundColor(.white)
@@ -41,15 +41,15 @@ struct MenuView: View {
                 }
                 .accessibilityElement(children: .ignore)
                 .accessibilityIdentifier("mainMenuGameStart")
-                .accessibilityLabel("ゲーム開始")
-                .accessibilityHint("タップするとゲームが開始されます")
+                .accessibilityLabel(NSLocalizedString("accessibility_start_game", comment: "Start game accessibility"))
+                .accessibilityHint(NSLocalizedString("accessibility_start_game_hint", comment: "Start game hint"))
                 .accessibilityAddTraits(.isButton)
                 
                 Button(action: {
                     gameViewModel.gameState = .settings
                     gameViewModel.audioService.playSFX(name: "button_tap")
                 }) {
-                    Text("設定")
+                    Text(NSLocalizedString("menu_settings", comment: "Settings button"))
                         .font(.title2)
                         .fontWeight(.semibold)
                         .foregroundColor(Color.blue.accessible())
@@ -60,8 +60,8 @@ struct MenuView: View {
                 }
                 .accessibilityElement(children: .ignore)
                 .accessibilityIdentifier("mainMenuSettings")
-                .accessibilityLabel("設定")
-                .accessibilityHint("ゲームの設定を変更できます")
+                .accessibilityLabel(NSLocalizedString("accessibility_settings", comment: "Settings accessibility"))
+                .accessibilityHint(NSLocalizedString("accessibility_settings_hint", comment: "Settings hint"))
                 .accessibilityAddTraits(.isButton)
                 
                 // ハイスコア表示ボタン
@@ -69,7 +69,7 @@ struct MenuView: View {
                     gameViewModel.gameState = .highScore
                     gameViewModel.audioService.playSFX(name: "button_tap")
                 }) {
-                    Text("ハイスコア")
+                    Text(NSLocalizedString("menu_high_score", comment: "High score button"))
                         .font(.title2)
                         .fontWeight(.semibold)
                         .foregroundColor(Color.purple.accessible())
@@ -80,8 +80,8 @@ struct MenuView: View {
                 }
                 .accessibilityElement(children: .ignore)
                 .accessibilityIdentifier("mainMenuHighScore")
-                .accessibilityLabel("ハイスコア")
-                .accessibilityHint("過去のハイスコアを確認できます")
+                .accessibilityLabel(NSLocalizedString("accessibility_high_score", comment: "High score accessibility"))
+                .accessibilityHint(NSLocalizedString("accessibility_high_score_hint", comment: "High score hint"))
                 .accessibilityAddTraits(.isButton)
             }
             .padding(.horizontal, 40)

@@ -31,7 +31,7 @@ struct GameView: View {
                 VStack {
                     HStack {
                         VStack(alignment: .leading, spacing: 4) {
-                            Text("スコア")
+                            Text(NSLocalizedString("game_score", comment: "Score label"))
                                 .font(.caption)
                                 .foregroundColor(.white.opacity(0.8))
                             Text("\(viewModel.score)")
@@ -39,13 +39,13 @@ struct GameView: View {
                                 .fontWeight(.bold)
                                 .foregroundColor(.white)
                             if viewModel.currentStreak >= 3 {
-                                Text("連鎖: \(viewModel.currentStreak)")
+                                Text(String(format: NSLocalizedString("game_chain", comment: "Chain label"), viewModel.currentStreak))
                                     .font(.caption2)
                                     .foregroundColor(.yellow)
                             }
                         }
                         .accessibilityElement(children: .combine)
-                        .accessibilityLabel("現在のスコア \(viewModel.score)ポイント\(viewModel.currentStreak >= 3 ? ", \(viewModel.currentStreak)連鎖" : "")")
+                        .accessibilityLabel(NSLocalizedString("accessibility_current_score", comment: "Current score accessibility").replacingOccurrences(of: "%d", with: "\(viewModel.score)") + (viewModel.currentStreak >= 3 ? String(format: NSLocalizedString("accessibility_chain_info", comment: "Chain info accessibility"), viewModel.currentStreak) : ""))
                         
                         Spacer()
                         
@@ -53,18 +53,18 @@ struct GameView: View {
                             if viewModel.gameSettings.gameMode == "numbered" {
                                 // レベル表示
                                 HStack(spacing: 4) {
-                                    Text("Lv.\(viewModel.currentLevel)")
+                                    Text(String(format: NSLocalizedString("game_level", comment: "Level label"), viewModel.currentLevel))
                                         .font(.caption2)
                                         .fontWeight(.bold)
                                         .foregroundColor(.orange)
                                     if viewModel.perfectChain > 0 {
-                                        Text("×\(viewModel.perfectChain + 1)")
+                                        Text(String(format: NSLocalizedString("multiplier_format", comment: "Multiplier format"), Double(viewModel.perfectChain + 1)))
                                             .font(.caption2)
                                             .foregroundColor(.green)
                                     }
                                 }
                                 
-                                Text("次の数字")
+                                Text(NSLocalizedString("game_next_number", comment: "Next number label"))
                                     .font(.caption)
                                     .foregroundColor(.white.opacity(0.8))
                                 Text("\(viewModel.nextExpectedNumber)")
@@ -74,12 +74,12 @@ struct GameView: View {
                                 
                                 // スピードボーナス表示
                                 if viewModel.speedBonus > 1.0 {
-                                    Text("×\(String(format: "%.1f", viewModel.speedBonus))")
+                                    Text(String(format: NSLocalizedString("multiplier_format", comment: "Speed bonus multiplier"), viewModel.speedBonus))
                                         .font(.caption2)
                                         .foregroundColor(.cyan)
                                 }
                             } else {
-                                Text("破裂数")
+                                Text(NSLocalizedString("game_bubbles_popped", comment: "Bubbles popped label"))
                                     .font(.caption)
                                     .foregroundColor(.white.opacity(0.8))
                                 Text("\(viewModel.bubblesPopped)")
@@ -89,21 +89,21 @@ struct GameView: View {
                             }
                         }
                         .accessibilityElement(children: .combine)
-                        .accessibilityLabel(viewModel.gameSettings.gameMode == "numbered" ? "次にタップする数字 \(viewModel.nextExpectedNumber)" : "破裂させたバブル数 \(viewModel.bubblesPopped)個")
+                        .accessibilityLabel(viewModel.gameSettings.gameMode == "numbered" ? String(format: NSLocalizedString("accessibility_next_number", comment: "Next number accessibility"), viewModel.nextExpectedNumber) : String(format: NSLocalizedString("accessibility_bubbles_popped", comment: "Bubbles popped accessibility"), viewModel.bubblesPopped))
                         
                         Spacer()
                         
                         VStack(alignment: .trailing, spacing: 4) {
-                            Text("残り時間")
+                            Text(NSLocalizedString("game_time_remaining", comment: "Time remaining label"))
                                 .font(.caption)
                                 .foregroundColor(.white.opacity(0.8))
-                            Text("\(Int(viewModel.timeRemaining))秒")
+                            Text(String(format: NSLocalizedString("seconds_format", comment: "Seconds format"), Int(viewModel.timeRemaining)))
                                 .font(.title)
                                 .fontWeight(.bold)
                                 .foregroundColor(viewModel.timeRemaining <= 10 ? .red : .white)
                         }
                         .accessibilityElement(children: .combine)
-                        .accessibilityLabel("残り時間 \(Int(viewModel.timeRemaining))秒\(viewModel.timeRemaining <= 10 ? "、時間が少なくなっています" : "")")
+                        .accessibilityLabel(String(format: NSLocalizedString("accessibility_time_remaining", comment: "Time remaining accessibility"), Int(viewModel.timeRemaining)) + (viewModel.timeRemaining <= 10 ? NSLocalizedString("accessibility_time_warning", comment: "Time warning accessibility") : ""))
                         
                         // ポーズボタンをHUD領域に移動
                         if viewModel.gameState == .playing {
@@ -117,8 +117,8 @@ struct GameView: View {
                                     .background(Color.black.opacity(0.5))
                                     .clipShape(Circle())
                             }
-                            .accessibilityLabel("ポーズ")
-                            .accessibilityHint("ゲームを一時停止します")
+                            .accessibilityLabel(NSLocalizedString("accessibility_pause", comment: "Pause accessibility"))
+                            .accessibilityHint(NSLocalizedString("accessibility_pause_hint", comment: "Pause hint accessibility"))
                             .accessibilityAddTraits(.isButton)
                         }
                     }

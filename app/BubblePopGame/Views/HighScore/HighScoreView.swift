@@ -16,7 +16,7 @@ struct HighScoreView: View {
     
     var body: some View {
         VStack(spacing: 20) {
-            Text("ハイスコア")
+            Text(NSLocalizedString("highscore_title", comment: "High score title"))
                 .font(.largeTitle)
                 .fontWeight(.bold)
                 .foregroundColor(.purple.accessible())
@@ -24,9 +24,9 @@ struct HighScoreView: View {
             
             VStack(spacing: 15) {
                 // ゲームモード選択
-                Picker("ゲームモード", selection: $selectedMode) {
-                    Text("通常").tag("normal")
-                    Text("数字順").tag("numbered")
+                Picker(NSLocalizedString("settings_game_mode", comment: "Game mode picker"), selection: $selectedMode) {
+                    Text(NSLocalizedString("highscore_normal_mode", comment: "Normal mode tab")).tag("normal")
+                    Text(NSLocalizedString("highscore_numbered_mode", comment: "Numbered mode tab")).tag("numbered")
                 }
                 .pickerStyle(SegmentedPickerStyle())
                 .padding(.horizontal)
@@ -37,13 +37,13 @@ struct HighScoreView: View {
                 // 制限時間選択
                 if availableTimeLimits.count > 1 {
                     HStack {
-                        Text("制限時間:")
+                        Text(NSLocalizedString("highscore_time_limit", comment: "Time limit label"))
                             .font(.headline)
                             .foregroundColor(.primary)
                         
                         Picker("制限時間", selection: $selectedTimeLimit) {
                             ForEach(availableTimeLimits, id: \.self) { timeLimit in
-                                Text("\(Int(timeLimit))秒").tag(timeLimit)
+                                Text(String(format: NSLocalizedString("seconds_format", comment: "Seconds format"), Int(timeLimit))).tag(timeLimit)
                             }
                         }
                         .pickerStyle(MenuPickerStyle())
@@ -76,7 +76,7 @@ struct HighScoreView: View {
             }) {
                 HStack {
                     Image(systemName: "house")
-                    Text("メニューに戻る")
+                    Text(NSLocalizedString("menu_back_to_menu", comment: "Back to menu button"))
                 }
                 .font(.title3)
                 .fontWeight(.semibold)

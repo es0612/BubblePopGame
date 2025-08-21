@@ -1,0 +1,150 @@
+/* 
+ * English Localization for BubblePopGame
+ */
+
+// MARK: - Common
+"ok" = "OK";
+"cancel" = "Cancel";
+"close" = "Close";
+"back" = "Back";
+"next" = "Next";
+"complete" = "Complete";
+"skip" = "Skip";
+"reset" = "Reset";
+
+// MARK: - Menu Screen
+"game_title" = "Bubble Pop Game";
+"menu_start_game" = "Start Game";
+"menu_settings" = "Settings";
+"menu_high_score" = "High Score";
+"menu_back_to_menu" = "Back to Menu";
+
+// MARK: - Game Screen
+"game_score" = "Score";
+"game_time_remaining" = "Time Left";
+"game_bubbles_popped" = "Bubbles Popped";
+"game_next_number" = "Next Number";
+"game_level" = "Lv.%d";
+"game_chain" = "Chain: %d";
+"game_pause" = "Pause";
+"game_seconds_unit" = "sec";
+"game_pieces_unit" = "";
+
+// MARK: - Game Over Screen  
+"gameover_title" = "Game Over";
+"gameover_congratulations" = "Great job!";
+"gameover_final_score" = "Final Score";
+"gameover_bubbles_count" = "Bubbles Popped";
+"gameover_max_chain" = "Max Chain";
+"gameover_accuracy" = "Accuracy";
+"gameover_play_again" = "Play Again";
+"gameover_detailed_stats" = "Detailed Stats";
+"gameover_play_time" = "Play Time";
+"gameover_avg_reaction" = "Avg Reaction Time";
+"gameover_bubble_density" = "Bubble Density";
+"gameover_stats_title" = "Game Statistics";
+
+// MARK: - High Score Screen
+"highscore_title" = "High Score";
+"highscore_normal_mode" = "Normal";
+"highscore_numbered_mode" = "Numbered";
+"highscore_time_limit" = "Time Limit:";
+
+// MARK: - Settings Screen
+"settings_title" = "Settings";
+"settings_game_section" = "Game Settings";
+"settings_audio_section" = "Audio Settings";
+"settings_numbered_mode_section" = "Numbered Mode Settings";
+"settings_system_section" = "System Settings";
+
+"settings_game_mode" = "Game Mode";
+"settings_normal_mode" = "Normal Mode";
+"settings_numbered_mode" = "Numbered Mode";
+"settings_time_limit" = "Time Limit";
+"settings_bubble_count" = "Bubble Count";
+
+"settings_sound_effects" = "Sound Effects";
+"settings_bgm" = "BGM";
+"settings_bgm_selection" = "BGM Selection";
+"settings_bgm_volume" = "BGM Volume";
+"settings_sfx_volume" = "SFX Volume";
+"settings_bgm_track1" = "Track 1";
+"settings_bgm_track2" = "Track 2";
+"settings_bgm_track3" = "Track 3";
+
+"settings_progressive_difficulty" = "Progressive Difficulty";
+"settings_level_interval" = "Level Progression Interval";
+"settings_max_level" = "Max Level";
+"settings_number_range" = "Number Range";
+"settings_speed_bonus" = "Speed Bonus";
+"settings_speed_bonus_multiplier" = "Speed Bonus Multiplier";
+"settings_perfect_chain" = "Perfect Chain";
+"settings_special_rule" = "Special Rule";
+"settings_special_normal" = "Normal";
+"settings_special_reverse" = "Reverse";
+"settings_special_double" = "Doubles";
+"settings_special_random" = "Random";
+
+"settings_vibration" = "Vibration";
+"settings_show_tutorial" = "Show Tutorial Again";
+"settings_show_button" = "Show";
+"settings_reset_settings" = "Reset Settings";
+"settings_reset_confirmation_title" = "Reset Settings Confirmation";
+"settings_reset_confirmation_message" = "All settings will be reset to default values. This action cannot be undone.";
+
+// MARK: - Tutorial Screen
+"tutorial_welcome" = "Welcome!";
+"tutorial_welcome_subtitle" = "to Bubble Pop Game";
+"tutorial_welcome_description" = "Tap beautiful bubbles to pop them and aim for high scores.\n\nLet's start by learning the basics.";
+
+"tutorial_objective_title" = "Game Objective";
+"tutorial_time_limit" = "Time Limit: 60 seconds";
+"tutorial_tap_bubbles" = "Tap bubbles to pop them";
+"tutorial_get_score" = "Get as many points as possible";
+"tutorial_chain_bonus" = "Chain pops for bonus points";
+
+"tutorial_practice_title" = "Let's try it!";
+"tutorial_practice_instruction" = "Try tapping the bubble below";
+"tutorial_tap_here" = "Tap here!";
+"tutorial_excellent" = "Excellent!";
+"tutorial_practice_description" = "Now you know how to pop bubbles.\nIn the actual game, bubbles float all over the screen.";
+
+"tutorial_modes_title" = "Game Modes";
+"tutorial_normal_mode_title" = "Normal Mode";
+"tutorial_normal_mode_description" = "You can freely tap and pop any bubbles.";
+"tutorial_numbered_mode_title" = "Numbered Mode";
+"tutorial_numbered_mode_description" = "Tap bubbles with numbers in order from 1. Correct order gives double points, wrong order gives penalty.";
+"tutorial_ready_message" = "Ready to start the game!";
+"tutorial_complete_button" = "Complete Tutorial";
+
+// MARK: - Pause Screen
+"pause_title" = "Paused";
+"pause_resume" = "Resume";
+"pause_restart" = "Restart";
+"pause_quit" = "Quit";
+
+// MARK: - Units and Formatting
+"seconds_format" = "%d sec";
+"pieces_format" = "%d";
+"level_format" = "Lv.%d";
+"percentage_format" = "%.1f%%";
+"multiplier_format" = "×%.1f";
+"range_format" = "1-%d";
+
+// MARK: - Accessibility
+"accessibility_game_title" = "Bubble Pop Game";
+"accessibility_game_title_hint" = "Main title of the game";
+"accessibility_start_game" = "Start Game";
+"accessibility_start_game_hint" = "Tap to start the game";
+"accessibility_settings" = "Settings";
+"accessibility_settings_hint" = "Change game settings";
+"accessibility_high_score" = "High Score";
+"accessibility_high_score_hint" = "View past high scores";
+"accessibility_pause" = "Pause";
+"accessibility_pause_hint" = "Pause the game";
+"accessibility_current_score" = "Current score %d points";
+"accessibility_chain_info" = ", %d chain";
+"accessibility_next_number" = "Next number to tap %d";
+"accessibility_bubbles_popped" = "Bubbles popped %d";
+"accessibility_time_remaining" = "Time remaining %d seconds";
+"accessibility_time_warning" = ", time is running low";

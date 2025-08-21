@@ -1,0 +1,150 @@
+/* 
+ * Japanese Localization for BubblePopGame
+ */
+
+// MARK: - Common
+"ok" = "OK";
+"cancel" = "キャンセル";
+"close" = "閉じる";
+"back" = "戻る";
+"next" = "次へ";
+"complete" = "完了";
+"skip" = "スキップ";
+"reset" = "リセット";
+
+// MARK: - Menu Screen
+"game_title" = "シャボン玉消しゲーム";
+"menu_start_game" = "ゲーム開始";
+"menu_settings" = "設定";
+"menu_high_score" = "ハイスコア";
+"menu_back_to_menu" = "メニューに戻る";
+
+// MARK: - Game Screen
+"game_score" = "スコア";
+"game_time_remaining" = "残り時間";
+"game_bubbles_popped" = "破裂数";
+"game_next_number" = "次の数字";
+"game_level" = "Lv.%d";
+"game_chain" = "連鎖: %d";
+"game_pause" = "ポーズ";
+"game_seconds_unit" = "秒";
+"game_pieces_unit" = "個";
+
+// MARK: - Game Over Screen  
+"gameover_title" = "ゲーム終了";
+"gameover_congratulations" = "お疲れ様でした！";
+"gameover_final_score" = "最終スコア";
+"gameover_bubbles_count" = "破裂数";
+"gameover_max_chain" = "最大連鎖";
+"gameover_accuracy" = "正確率";
+"gameover_play_again" = "もう一度プレイ";
+"gameover_detailed_stats" = "詳細統計";
+"gameover_play_time" = "プレイ時間";
+"gameover_avg_reaction" = "平均反応速度";
+"gameover_bubble_density" = "シャボン玉密度";
+"gameover_stats_title" = "ゲーム統計";
+
+// MARK: - High Score Screen
+"highscore_title" = "ハイスコア";
+"highscore_normal_mode" = "通常";
+"highscore_numbered_mode" = "数字順";
+"highscore_time_limit" = "制限時間:";
+
+// MARK: - Settings Screen
+"settings_title" = "設定";
+"settings_game_section" = "ゲーム設定";
+"settings_audio_section" = "音響設定";
+"settings_numbered_mode_section" = "数字モード設定";
+"settings_system_section" = "システム設定";
+
+"settings_game_mode" = "ゲームモード";
+"settings_normal_mode" = "通常モード";
+"settings_numbered_mode" = "数字順モード";
+"settings_time_limit" = "制限時間";
+"settings_bubble_count" = "シャボン玉の数";
+
+"settings_sound_effects" = "効果音";
+"settings_bgm" = "BGM";
+"settings_bgm_selection" = "BGM選択";
+"settings_bgm_volume" = "BGM音量";
+"settings_sfx_volume" = "効果音音量";
+"settings_bgm_track1" = "トラック1";
+"settings_bgm_track2" = "トラック2";
+"settings_bgm_track3" = "トラック3";
+
+"settings_progressive_difficulty" = "プログレッシブ難易度";
+"settings_level_interval" = "レベル進行間隔";
+"settings_max_level" = "最大レベル";
+"settings_number_range" = "数字範囲";
+"settings_speed_bonus" = "スピードボーナス";
+"settings_speed_bonus_multiplier" = "スピードボーナス倍率";
+"settings_perfect_chain" = "パーフェクトチェイン";
+"settings_special_rule" = "特殊ルール";
+"settings_special_normal" = "通常";
+"settings_special_reverse" = "逆順";
+"settings_special_double" = "2倍数";
+"settings_special_random" = "ランダム";
+
+"settings_vibration" = "バイブレーション";
+"settings_show_tutorial" = "チュートリアルを再表示";
+"settings_show_button" = "表示";
+"settings_reset_settings" = "設定をリセット";
+"settings_reset_confirmation_title" = "設定リセット確認";
+"settings_reset_confirmation_message" = "すべての設定をデフォルト値に戻します。この操作は取り消せません。";
+
+// MARK: - Tutorial Screen
+"tutorial_welcome" = "ようこそ！";
+"tutorial_welcome_subtitle" = "シャボン玉消しゲームへ";
+"tutorial_welcome_description" = "美しいシャボン玉をタップして割り、高スコアを目指すゲームです。\n\nまずは基本的な遊び方を覚えましょう。";
+
+"tutorial_objective_title" = "ゲームの目標";
+"tutorial_time_limit" = "制限時間: 60秒";
+"tutorial_tap_bubbles" = "シャボン玉をタップして割る";
+"tutorial_get_score" = "できるだけ多くのスコアを獲得";
+"tutorial_chain_bonus" = "連続で割るとボーナス";
+
+"tutorial_practice_title" = "実際にやってみよう！";
+"tutorial_practice_instruction" = "下のシャボン玉をタップしてみてください";
+"tutorial_tap_here" = "ここをタップ！";
+"tutorial_excellent" = "素晴らしい！";
+"tutorial_practice_description" = "これでシャボン玉の割り方がわかりましたね。\n実際のゲームでは画面いっぱいにシャボン玉が浮かんでいます。";
+
+"tutorial_modes_title" = "ゲームモード";
+"tutorial_normal_mode_title" = "通常モード";
+"tutorial_normal_mode_description" = "すべてのシャボン玉を自由にタップして割ることができます。";
+"tutorial_numbered_mode_title" = "数字順モード";
+"tutorial_numbered_mode_description" = "シャボン玉に表示された数字を1から順番にタップします。正しい順序で割ると2倍のポイント、間違えるとペナルティがあります。";
+"tutorial_ready_message" = "準備ができたらゲームを開始しましょう！";
+"tutorial_complete_button" = "チュートリアル完了";
+
+// MARK: - Pause Screen
+"pause_title" = "一時停止";
+"pause_resume" = "再開";
+"pause_restart" = "やり直し";
+"pause_quit" = "終了";
+
+// MARK: - Units and Formatting
+"seconds_format" = "%d秒";
+"pieces_format" = "%d個";
+"level_format" = "Lv.%d";
+"percentage_format" = "%.1f%%";
+"multiplier_format" = "×%.1f";
+"range_format" = "1〜%d";
+
+// MARK: - Accessibility
+"accessibility_game_title" = "シャボン玉消しゲーム";
+"accessibility_game_title_hint" = "ゲームのメインタイトルです";
+"accessibility_start_game" = "ゲーム開始";
+"accessibility_start_game_hint" = "タップするとゲームが開始されます";
+"accessibility_settings" = "設定";
+"accessibility_settings_hint" = "ゲームの設定を変更できます";
+"accessibility_high_score" = "ハイスコア";
+"accessibility_high_score_hint" = "過去のハイスコアを確認できます";
+"accessibility_pause" = "ポーズ";
+"accessibility_pause_hint" = "ゲームを一時停止します";
+"accessibility_current_score" = "現在のスコア %dポイント";
+"accessibility_chain_info" = ", %d連鎖";
+"accessibility_next_number" = "次にタップする数字 %d";
+"accessibility_bubbles_popped" = "破裂させたバブル数 %d個";
+"accessibility_time_remaining" = "残り時間 %d秒";
+"accessibility_time_warning" = "、時間が少なくなっています";

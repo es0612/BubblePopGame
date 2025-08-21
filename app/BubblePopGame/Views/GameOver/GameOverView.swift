@@ -15,26 +15,26 @@ struct GameOverView: View {
         VStack(spacing: 30) {
             // ゲーム終了タイトル
             VStack(spacing: 10) {
-                Text("ゲーム終了")
+                Text(NSLocalizedString("gameover_title", comment: "Game over title"))
                     .font(.largeTitle)
                     .fontWeight(.bold)
                     .foregroundColor(.red.accessible())
                 
-                Text("お疲れ様でした！")
+                Text(NSLocalizedString("gameover_congratulations", comment: "Congratulations message"))
                     .font(.headline)
                     .foregroundColor(.secondary)
             }
             
             // スコア表示セクション
             VStack(spacing: 20) {
-                ScoreCard(title: "最終スコア", value: "\(viewModel.score)", color: .orange.accessible())
+                ScoreCard(title: NSLocalizedString("gameover_final_score", comment: "Final score title"), value: "\(viewModel.score)", color: .orange.accessible())
                 
                 HStack(spacing: 15) {
-                    ScoreCard(title: "破裂数", value: "\(viewModel.bubblesPopped)", color: .blue.accessible())
-                    ScoreCard(title: "最大連鎖", value: "\(viewModel.bestStreak)", color: .purple.accessible())
+                    ScoreCard(title: NSLocalizedString("gameover_bubbles_count", comment: "Bubbles count title"), value: "\(viewModel.bubblesPopped)", color: .blue.accessible())
+                    ScoreCard(title: NSLocalizedString("gameover_max_chain", comment: "Max chain title"), value: "\(viewModel.bestStreak)", color: .purple.accessible())
                 }
                 
-                ScoreCard(title: "正確率", value: String(format: "%.1f%%", viewModel.calculateAccuracy() * 100), color: .green.accessible())
+                ScoreCard(title: NSLocalizedString("gameover_accuracy", comment: "Accuracy title"), value: String(format: NSLocalizedString("percentage_format", comment: "Percentage format"), viewModel.calculateAccuracy() * 100), color: .green.accessible())
             }
             
             // ボタン群
@@ -45,7 +45,7 @@ struct GameOverView: View {
                 }) {
                     HStack {
                         Image(systemName: "arrow.clockwise")
-                        Text("もう一度プレイ")
+                        Text(NSLocalizedString("gameover_play_again", comment: "Play again button"))
                     }
                     .font(.title2)
                     .fontWeight(.semibold)
@@ -62,7 +62,7 @@ struct GameOverView: View {
                 }) {
                     HStack {
                         Image(systemName: "house")
-                        Text("メニューに戻る")
+                        Text(NSLocalizedString("menu_back_to_menu", comment: "Back to menu button"))
                     }
                     .font(.title2)
                     .fontWeight(.semibold)
@@ -79,7 +79,7 @@ struct GameOverView: View {
                 }) {
                     HStack {
                         Image(systemName: "chart.bar")
-                        Text("詳細統計")
+                        Text(NSLocalizedString("gameover_detailed_stats", comment: "Detailed stats button"))
                     }
                     .font(.title3)
                     .fontWeight(.semibold)
@@ -94,14 +94,14 @@ struct GameOverView: View {
             
             if showingStats {
                 VStack(spacing: 10) {
-                    Text("ゲーム統計")
+                    Text(NSLocalizedString("gameover_stats_title", comment: "Game statistics title"))
                         .font(.headline)
                         .foregroundColor(.primary)
                     
                     VStack(spacing: 8) {
-                        StatRow(label: "プレイ時間", value: String(format: "%.1f秒", 60.0 - viewModel.timeRemaining))
-                        StatRow(label: "平均反応速度", value: viewModel.bubblesPopped > 0 ? String(format: "%.2f秒/個", (60.0 - viewModel.timeRemaining) / Double(viewModel.bubblesPopped)) : "N/A")
-                        StatRow(label: "シャボン玉密度", value: String(format: "%.1f個/秒", Double(viewModel.bubblesPopped) / max(1, 60.0 - viewModel.timeRemaining)))
+                        StatRow(label: NSLocalizedString("gameover_play_time", comment: "Play time label"), value: String(format: NSLocalizedString("seconds_format", comment: "Seconds format with decimal"), 60.0 - viewModel.timeRemaining))
+                        StatRow(label: NSLocalizedString("gameover_avg_reaction", comment: "Average reaction time label"), value: viewModel.bubblesPopped > 0 ? String(format: "%.2f" + NSLocalizedString("game_seconds_unit", comment: "Seconds unit") + "/" + NSLocalizedString("game_pieces_unit", comment: "Pieces unit"), (60.0 - viewModel.timeRemaining) / Double(viewModel.bubblesPopped)) : "N/A")
+                        StatRow(label: NSLocalizedString("gameover_bubble_density", comment: "Bubble density label"), value: String(format: "%.1f" + NSLocalizedString("game_pieces_unit", comment: "Pieces unit") + "/" + NSLocalizedString("game_seconds_unit", comment: "Seconds unit"), Double(viewModel.bubblesPopped) / max(1, 60.0 - viewModel.timeRemaining)))
                     }
                 }
                 .padding()

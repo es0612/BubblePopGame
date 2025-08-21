@@ -18,27 +18,27 @@ struct SettingsView: View {
             ScrollView {
                 VStack(spacing: 25) {
                     // ゲーム設定セクション
-                    SettingsSection(title: "ゲーム設定") {
+                    SettingsSection(title: NSLocalizedString("settings_game_section", comment: "Game settings section")) {
                         VStack(spacing: 15) {
                             SettingsRow(
                                 icon: "gamecontroller.fill",
-                                title: "ゲームモード",
+                                title: NSLocalizedString("settings_game_mode", comment: "Game mode setting"),
                                 iconColor: .purple
                             ) {
-                                Picker("ゲームモード", selection: $viewModel.gameSettings.gameMode) {
-                                    Text("通常モード").tag("normal")
-                                    Text("数字順モード").tag("numbered")
+                                Picker(NSLocalizedString("settings_game_mode", comment: "Game mode picker"), selection: $viewModel.gameSettings.gameMode) {
+                                    Text(NSLocalizedString("settings_normal_mode", comment: "Normal mode option")).tag("normal")
+                                    Text(NSLocalizedString("settings_numbered_mode", comment: "Numbered mode option")).tag("numbered")
                                 }
                                 .pickerStyle(SegmentedPickerStyle())
                             }
                             
                             SettingsRow(
                                 icon: "timer",
-                                title: "制限時間",
+                                title: NSLocalizedString("settings_time_limit", comment: "Time limit setting"),
                                 iconColor: .red
                             ) {
                                 HStack {
-                                    Stepper("\(Int(viewModel.gameSettings.gameTime))秒", 
+                                    Stepper(String(format: NSLocalizedString("seconds_format", comment: "Seconds format"), Int(viewModel.gameSettings.gameTime)), 
                                            value: $viewModel.gameSettings.gameTime, 
                                            in: 30...180, 
                                            step: 15)
@@ -47,11 +47,11 @@ struct SettingsView: View {
                             
                             SettingsRow(
                                 icon: "bubble.middle.bottom.fill",
-                                title: "シャボン玉の数",
+                                title: NSLocalizedString("settings_bubble_count", comment: "Bubble count setting"),
                                 iconColor: .blue
                             ) {
                                 HStack {
-                                    Stepper("\(viewModel.gameSettings.bubbleCount)個", 
+                                    Stepper(String(format: NSLocalizedString("pieces_format", comment: "Pieces format"), viewModel.gameSettings.bubbleCount), 
                                            value: $viewModel.gameSettings.bubbleCount, 
                                            in: 10...50, 
                                            step: 5)
@@ -61,11 +61,11 @@ struct SettingsView: View {
                     }
                     
                     // 音響設定セクション
-                    SettingsSection(title: "音響設定") {
+                    SettingsSection(title: NSLocalizedString("settings_audio_section", comment: "Audio settings section")) {
                         VStack(spacing: 15) {
                             SettingsRow(
                                 icon: "speaker.wave.3.fill",
-                                title: "効果音",
+                                title: NSLocalizedString("settings_sound_effects", comment: "Sound effects setting"),
                                 iconColor: .orange
                             ) {
                                 Toggle("", isOn: Binding(
@@ -76,7 +76,7 @@ struct SettingsView: View {
                             
                             SettingsRow(
                                 icon: "music.note",
-                                title: "BGM",
+                                title: NSLocalizedString("settings_bgm", comment: "BGM setting"),
                                 iconColor: .green
                             ) {
                                 Toggle("", isOn: Binding(
@@ -88,16 +88,16 @@ struct SettingsView: View {
                             if viewModel.gameSettings.bgmEnabled {
                                 SettingsRow(
                                     icon: "music.note.list",
-                                    title: "BGM選択",
+                                    title: NSLocalizedString("settings_bgm_selection", comment: "BGM selection setting"),
                                     iconColor: .green
                                 ) {
-                                    Picker("BGMトラック", selection: Binding(
+                                    Picker(NSLocalizedString("settings_bgm_selection", comment: "BGM track picker"), selection: Binding(
                                         get: { viewModel.gameSettings.bgmTrack },
                                         set: { viewModel.setBGMTrack($0) }
                                     )) {
-                                        Text("トラック1").tag("track1")
-                                        Text("トラック2").tag("track2")  
-                                        Text("トラック3").tag("track3")
+                                        Text(NSLocalizedString("settings_bgm_track1", comment: "BGM track 1")).tag("track1")
+                                        Text(NSLocalizedString("settings_bgm_track2", comment: "BGM track 2")).tag("track2")  
+                                        Text(NSLocalizedString("settings_bgm_track3", comment: "BGM track 3")).tag("track3")
                                     }
                                     .pickerStyle(SegmentedPickerStyle())
                                 }
@@ -105,7 +105,7 @@ struct SettingsView: View {
                             
                             SettingsRow(
                                 icon: "music.quarternote.3",
-                                title: "BGM音量",
+                                title: NSLocalizedString("settings_bgm_volume", comment: "BGM volume setting"),
                                 iconColor: .green
                             ) {
                                 VStack(spacing: 5) {
@@ -126,7 +126,7 @@ struct SettingsView: View {
                             
                             SettingsRow(
                                 icon: "waveform",
-                                title: "効果音音量",
+                                title: NSLocalizedString("settings_sfx_volume", comment: "SFX volume setting"),
                                 iconColor: .orange
                             ) {
                                 VStack(spacing: 5) {
@@ -149,11 +149,11 @@ struct SettingsView: View {
                     
                     // 数字モード設定セクション
                     if viewModel.gameSettings.gameMode == "numbered" {
-                        SettingsSection(title: "数字モード設定") {
+                        SettingsSection(title: NSLocalizedString("settings_numbered_mode_section", comment: "Numbered mode settings section")) {
                             VStack(spacing: 15) {
                                 SettingsRow(
                                     icon: "chart.line.uptrend.xyaxis",
-                                    title: "プログレッシブ難易度",
+                                    title: NSLocalizedString("settings_progressive_difficulty", comment: "Progressive difficulty setting"),
                                     iconColor: .orange
                                 ) {
                                     Toggle("", isOn: $viewModel.gameSettings.numberedModeProgressive)
@@ -162,12 +162,12 @@ struct SettingsView: View {
                                 if viewModel.gameSettings.numberedModeProgressive {
                                     SettingsRow(
                                         icon: "timer.square",
-                                        title: "レベル進行間隔",
+                                        title: NSLocalizedString("settings_level_interval", comment: "Level interval setting"),
                                         iconColor: .orange
                                     ) {
                                         VStack(spacing: 5) {
                                             HStack {
-                                                Text("\(Int(viewModel.gameSettings.numberedModeLevelInterval))秒")
+                                                Text(String(format: NSLocalizedString("seconds_format", comment: "Seconds format"), Int(viewModel.gameSettings.numberedModeLevelInterval)))
                                                     .font(.caption)
                                                     .foregroundColor(.secondary)
                                             }
@@ -181,12 +181,12 @@ struct SettingsView: View {
                                     
                                     SettingsRow(
                                         icon: "number.square",
-                                        title: "最大レベル",
+                                        title: NSLocalizedString("settings_max_level", comment: "Max level setting"),
                                         iconColor: .orange
                                     ) {
                                         HStack {
                                             Stepper(
-                                                "Lv.\(viewModel.gameSettings.numberedModeMaxLevel)",
+                                                String(format: NSLocalizedString("level_format", comment: "Level format"), viewModel.gameSettings.numberedModeMaxLevel),
                                                 value: $viewModel.gameSettings.numberedModeMaxLevel,
                                                 in: 3...10
                                             )
@@ -196,12 +196,12 @@ struct SettingsView: View {
                                 
                                 SettingsRow(
                                     icon: "123.rectangle.fill",
-                                    title: "数字範囲",
+                                    title: NSLocalizedString("settings_number_range", comment: "Number range setting"),
                                     iconColor: .blue
                                 ) {
                                     VStack(spacing: 5) {
                                         HStack {
-                                            Text("1〜\(viewModel.gameSettings.numberedModeMaxRange)")
+                                            Text(String(format: NSLocalizedString("range_format", comment: "Range format"), viewModel.gameSettings.numberedModeMaxRange))
                                                 .font(.caption)
                                                 .foregroundColor(.secondary)
                                         }
@@ -218,7 +218,7 @@ struct SettingsView: View {
                                 
                                 SettingsRow(
                                     icon: "speedometer",
-                                    title: "スピードボーナス",
+                                    title: NSLocalizedString("settings_speed_bonus", comment: "Speed bonus setting"),
                                     iconColor: .cyan
                                 ) {
                                     Toggle("", isOn: $viewModel.gameSettings.speedBonusEnabled)
@@ -227,12 +227,12 @@ struct SettingsView: View {
                                 if viewModel.gameSettings.speedBonusEnabled {
                                     SettingsRow(
                                         icon: "multiply.circle",
-                                        title: "スピードボーナス倍率",
+                                        title: NSLocalizedString("settings_speed_bonus_multiplier", comment: "Speed bonus multiplier setting"),
                                         iconColor: .cyan
                                     ) {
                                         VStack(spacing: 5) {
                                             HStack {
-                                                Text("×\(String(format: "%.1f", viewModel.gameSettings.speedBonusMultiplier))")
+                                                Text(String(format: NSLocalizedString("multiplier_format", comment: "Multiplier format"), viewModel.gameSettings.speedBonusMultiplier))
                                                     .font(.caption)
                                                     .foregroundColor(.secondary)
                                             }
@@ -247,7 +247,7 @@ struct SettingsView: View {
                                 
                                 SettingsRow(
                                     icon: "link",
-                                    title: "パーフェクトチェイン",
+                                    title: NSLocalizedString("settings_perfect_chain", comment: "Perfect chain setting"),
                                     iconColor: .green
                                 ) {
                                     Toggle("", isOn: $viewModel.gameSettings.perfectChainEnabled)
@@ -255,14 +255,14 @@ struct SettingsView: View {
                                 
                                 SettingsRow(
                                     icon: "sparkles",
-                                    title: "特殊ルール",
+                                    title: NSLocalizedString("settings_special_rule", comment: "Special rule setting"),
                                     iconColor: .purple
                                 ) {
-                                    Picker("特殊ルール", selection: $viewModel.gameSettings.numberedModeSpecialRule) {
-                                        Text("通常").tag("normal")
-                                        Text("逆順").tag("reverse")
-                                        Text("2倍数").tag("double")
-                                        Text("ランダム").tag("random")
+                                    Picker(NSLocalizedString("settings_special_rule", comment: "Special rule picker"), selection: $viewModel.gameSettings.numberedModeSpecialRule) {
+                                        Text(NSLocalizedString("settings_special_normal", comment: "Normal special rule")).tag("normal")
+                                        Text(NSLocalizedString("settings_special_reverse", comment: "Reverse special rule")).tag("reverse")
+                                        Text(NSLocalizedString("settings_special_double", comment: "Double special rule")).tag("double")
+                                        Text(NSLocalizedString("settings_special_random", comment: "Random special rule")).tag("random")
                                     }
                                     .pickerStyle(MenuPickerStyle())
                                 }
@@ -271,11 +271,11 @@ struct SettingsView: View {
                     }
                     
                     // システム設定セクション
-                    SettingsSection(title: "システム設定") {
+                    SettingsSection(title: NSLocalizedString("settings_system_section", comment: "System settings section")) {
                         VStack(spacing: 15) {
                             SettingsRow(
                                 icon: "iphone.radiowaves.left.and.right",
-                                title: "バイブレーション",
+                                title: NSLocalizedString("settings_vibration", comment: "Vibration setting"),
                                 iconColor: .purple
                             ) {
                                 Toggle("", isOn: Binding(
@@ -286,10 +286,10 @@ struct SettingsView: View {
                             
                             SettingsRow(
                                 icon: "questionmark.circle",
-                                title: "チュートリアルを再表示",
+                                title: NSLocalizedString("settings_show_tutorial", comment: "Show tutorial setting"),
                                 iconColor: .blue
                             ) {
-                                Button("表示") {
+                                Button(NSLocalizedString("settings_show_button", comment: "Show button")) {
                                     showTutorial()
                                 }
                                 .font(.body)
@@ -309,7 +309,7 @@ struct SettingsView: View {
                     }) {
                         HStack {
                             Image(systemName: "arrow.counterclockwise")
-                            Text("設定をリセット")
+                            Text(NSLocalizedString("settings_reset_settings", comment: "Reset settings button"))
                         }
                         .font(.headline)
                         .foregroundColor(.white)
@@ -323,24 +323,24 @@ struct SettingsView: View {
                 .padding(.horizontal, 20)
                 .padding(.vertical, 10)
             }
-            .navigationTitle("設定")
+            .navigationTitle(NSLocalizedString("settings_title", comment: "Settings title"))
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("完了") {
+                    Button(NSLocalizedString("complete", comment: "Done button")) {
                         viewModel.saveSettings()
                         onDismiss()
                     }
                 }
             }
         }
-        .alert("設定リセット確認", isPresented: $showingResetConfirmation) {
-            Button("キャンセル", role: .cancel) { }
-            Button("リセット", role: .destructive) {
+        .alert(NSLocalizedString("settings_reset_confirmation_title", comment: "Reset confirmation title"), isPresented: $showingResetConfirmation) {
+            Button(NSLocalizedString("cancel", comment: "Cancel button"), role: .cancel) { }
+            Button(NSLocalizedString("reset", comment: "Reset button"), role: .destructive) {
                 viewModel.resetToDefaults()
             }
         } message: {
-            Text("すべての設定をデフォルト値に戻します。この操作は取り消せません。")
+            Text(NSLocalizedString("settings_reset_confirmation_message", comment: "Reset confirmation message"))
         }
     }
     

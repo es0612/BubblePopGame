@@ -14,7 +14,7 @@ struct PauseOverlayView: View {
     
     var body: some View {
         VStack(spacing: 30) {
-            Text("ポーズ中")
+            Text(NSLocalizedString("pause_title", comment: "Pause title"))
                 .font(.largeTitle)
                 .fontWeight(.bold)
                 .foregroundColor(.white)
@@ -27,7 +27,7 @@ struct PauseOverlayView: View {
                 }) {
                     HStack {
                         Image(systemName: "play.circle.fill")
-                        Text("再開")
+                        Text(NSLocalizedString("pause_resume", comment: "Resume button"))
                     }
                     .font(.title2)
                     .fontWeight(.semibold)
@@ -38,8 +38,8 @@ struct PauseOverlayView: View {
                     .cornerRadius(15)
                     .shadow(radius: 3)
                 }
-                .accessibilityLabel("再開")
-                .accessibilityHint("ゲームを再開します")
+                .accessibilityLabel(NSLocalizedString("pause_resume", comment: "Resume accessibility"))
+                .accessibilityHint("Resume the game")
                 .accessibilityAddTraits(.isButton)
                 
                 // 終了ボタン（2.5秒遅延で表示）
@@ -49,7 +49,7 @@ struct PauseOverlayView: View {
                     }) {
                         HStack {
                             Image(systemName: "stop.circle.fill")
-                            Text("終了")
+                            Text(NSLocalizedString("pause_quit", comment: "Quit button"))
                         }
                         .font(.title3)
                         .fontWeight(.semibold)
@@ -61,8 +61,8 @@ struct PauseOverlayView: View {
                         .shadow(radius: 3)
                     }
                     .accessibilityIdentifier("pauseEndButton")
-                    .accessibilityLabel("終了")
-                    .accessibilityHint("ゲームを終了してメニューに戻ります")
+                    .accessibilityLabel(NSLocalizedString("pause_quit", comment: "Quit accessibility"))
+                    .accessibilityHint("End the game and return to menu")
                     .accessibilityAddTraits(.isButton)
                     .transition(.opacity.combined(with: .scale))
                 }
@@ -83,15 +83,15 @@ struct PauseOverlayView: View {
             showExitButton = false
             showExitConfirmation = false
         }
-        .alert("ゲーム終了確認", isPresented: $showExitConfirmation) {
-            Button("キャンセル", role: .cancel) {
+        .alert("Confirm Game Exit", isPresented: $showExitConfirmation) {
+            Button(NSLocalizedString("cancel", comment: "Cancel button"), role: .cancel) {
                 showExitConfirmation = false
             }
-            Button("終了", role: .destructive) {
+            Button(NSLocalizedString("pause_quit", comment: "Quit button"), role: .destructive) {
                 gameViewModel.endGame()
             }
         } message: {
-            Text("本当にゲームを終了しますか？\n現在のゲームが終了します。")
+            Text("Are you sure you want to quit the game?\nThe current game will be ended.")
         }
     }
 }

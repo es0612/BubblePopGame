@@ -35,7 +35,7 @@ struct TutorialView: View {
                 VStack {
                     HStack {
                         Spacer()
-                        Button("スキップ") {
+                        Button(NSLocalizedString("skip", comment: "Skip button")) {
                             skipTutorial()
                         }
                         .font(.title3)
@@ -45,8 +45,8 @@ struct TutorialView: View {
                         .padding(.vertical, 10)
                         .background(Color.blue.opacity(0.1))
                         .cornerRadius(8)
-                        .accessibilityLabel("スキップ")
-                        .accessibilityHint("チュートリアルをスキップしてメニューに移動します")
+                        .accessibilityLabel(NSLocalizedString("skip", comment: "Skip accessibility"))
+                        .accessibilityHint("Skip tutorial and go to menu")
                     }
                     .padding(.top, 10)
                     .padding(.horizontal, 20)
@@ -78,7 +78,7 @@ struct TutorialView: View {
                     // Navigation Buttons
                     HStack(spacing: 20) {
                         if currentStep > 0 {
-                            Button("戻る") {
+                            Button(NSLocalizedString("back", comment: "Back button")) {
                                 withAnimation(.easeInOut(duration: 0.3)) {
                                     previousStep()
                                 }
@@ -92,7 +92,7 @@ struct TutorialView: View {
                             .cornerRadius(10)
                         }
                         
-                        Button(currentStep == totalSteps - 1 ? "チュートリアル完了" : "次へ") {
+                        Button(currentStep == totalSteps - 1 ? NSLocalizedString("tutorial_complete_button", comment: "Complete tutorial button") : NSLocalizedString("next", comment: "Next button")) {
                             withAnimation(.easeInOut(duration: 0.3)) {
                                 if currentStep == totalSteps - 1 {
                                     completeTutorial()
@@ -159,16 +159,16 @@ struct TutorialView: View {
                 .font(.system(size: 80))
                 .foregroundColor(.blue)
             
-            Text("ようこそ！")
+            Text(NSLocalizedString("tutorial_welcome", comment: "Welcome title"))
                 .font(.largeTitle)
                 .fontWeight(.bold)
                 .foregroundColor(.primary)
             
-            Text("シャボン玉消しゲームへ")
+            Text(NSLocalizedString("tutorial_welcome_subtitle", comment: "Welcome subtitle"))
                 .font(.title2)
                 .foregroundColor(.secondary)
             
-            Text("美しいシャボン玉をタップして割り、高スコアを目指すゲームです。\n\nまずは基本的な遊び方を覚えましょう。")
+            Text(NSLocalizedString("tutorial_welcome_description", comment: "Welcome description"))
                 .font(.body)
                 .multilineTextAlignment(.center)
                 .foregroundColor(.primary)
@@ -182,7 +182,7 @@ struct TutorialView: View {
                 .font(.system(size: 60))
                 .foregroundColor(.orange)
             
-            Text("ゲームの目標")
+            Text(NSLocalizedString("tutorial_objective_title", comment: "Objective title"))
                 .font(.title)
                 .fontWeight(.bold)
                 .foregroundColor(.primary)
@@ -191,28 +191,28 @@ struct TutorialView: View {
                 HStack {
                     Image(systemName: "timer")
                         .foregroundColor(.red)
-                    Text("制限時間: 60秒")
+                    Text(NSLocalizedString("tutorial_time_limit", comment: "Time limit info"))
                         .font(.title3)
                 }
                 
                 HStack {
                     Image(systemName: "hand.point.up.fill")
                         .foregroundColor(.blue)
-                    Text("シャボン玉をタップして割る")
+                    Text(NSLocalizedString("tutorial_tap_bubbles", comment: "Tap bubbles info"))
                         .font(.title3)
                 }
                 
                 HStack {
                     Image(systemName: "star.fill")
                         .foregroundColor(.yellow)
-                    Text("できるだけ多くのスコアを獲得")
+                    Text(NSLocalizedString("tutorial_get_score", comment: "Get score info"))
                         .font(.title3)
                 }
                 
                 HStack {
                     Image(systemName: "bolt.fill")
                         .foregroundColor(.purple)
-                    Text("連続で割るとボーナス")
+                    Text(NSLocalizedString("tutorial_chain_bonus", comment: "Chain bonus info"))
                         .font(.title3)
                 }
             }
@@ -222,14 +222,14 @@ struct TutorialView: View {
     
     private var practiceStep: some View {
         VStack(spacing: 20) {
-            Text("実際にやってみよう！")
+            Text(NSLocalizedString("tutorial_practice_title", comment: "Practice title"))
                 .font(.title)
                 .fontWeight(.bold)
                 .foregroundColor(.primary)
             
             if !hasCompletedTap {
                 VStack(spacing: 15) {
-                    Text("下のシャボン玉をタップしてみてください")
+                    Text(NSLocalizedString("tutorial_practice_instruction", comment: "Practice instruction"))
                         .font(.title3)
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
@@ -240,7 +240,7 @@ struct TutorialView: View {
                                 .foregroundColor(.blue)
                                 .scaleEffect(showTapHint ? 1.2 : 1.0)
                                 .animation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true), value: showTapHint)
-                            Text("ここをタップ！")
+                            Text(NSLocalizedString("tutorial_tap_here", comment: "Tap here text"))
                                 .font(.headline)
                                 .foregroundColor(.blue)
                         }
@@ -252,16 +252,16 @@ struct TutorialView: View {
                         .font(.system(size: 60))
                         .foregroundColor(.green)
                     
-                    Text("素晴らしい！")
+                    Text(NSLocalizedString("tutorial_excellent", comment: "Excellent text"))
                         .font(.title2)
                         .fontWeight(.bold)
                         .foregroundColor(.green)
                     
-                    Text("スコア: \(tutorialScore)")
+                    Text(String(format: NSLocalizedString("game_score", comment: "Score label") + ": %d", tutorialScore))
                         .font(.title3)
                         .foregroundColor(.primary)
                     
-                    Text("これでシャボン玉の割り方がわかりましたね。\n実際のゲームでは画面いっぱいにシャボン玉が浮かんでいます。")
+                    Text(NSLocalizedString("tutorial_practice_description", comment: "Practice description"))
                         .font(.body)
                         .multilineTextAlignment(.center)
                         .foregroundColor(.secondary)
@@ -276,7 +276,7 @@ struct TutorialView: View {
                 .font(.system(size: 60))
                 .foregroundColor(.purple)
             
-            Text("ゲームモード")
+            Text(NSLocalizedString("tutorial_modes_title", comment: "Game modes title"))
                 .font(.title)
                 .fontWeight(.bold)
                 .foregroundColor(.primary)
@@ -286,11 +286,11 @@ struct TutorialView: View {
                     HStack {
                         Image(systemName: "circle")
                             .foregroundColor(.blue)
-                        Text("通常モード")
+                        Text(NSLocalizedString("tutorial_normal_mode_title", comment: "Normal mode title"))
                             .font(.title3)
                             .fontWeight(.semibold)
                     }
-                    Text("すべてのシャボン玉を自由にタップして割ることができます。")
+                    Text(NSLocalizedString("tutorial_normal_mode_description", comment: "Normal mode description"))
                         .font(.body)
                         .foregroundColor(.secondary)
                         .padding(.leading, 25)
@@ -300,11 +300,11 @@ struct TutorialView: View {
                     HStack {
                         Image(systemName: "123.rectangle")
                             .foregroundColor(.orange)
-                        Text("数字順モード")
+                        Text(NSLocalizedString("tutorial_numbered_mode_title", comment: "Numbered mode title"))
                             .font(.title3)
                             .fontWeight(.semibold)
                     }
-                    Text("シャボン玉に表示された数字を1から順番にタップします。正しい順序で割ると2倍のポイント、間違えるとペナルティがあります。")
+                    Text(NSLocalizedString("tutorial_numbered_mode_description", comment: "Numbered mode description"))
                         .font(.body)
                         .foregroundColor(.secondary)
                         .padding(.leading, 25)
@@ -312,7 +312,7 @@ struct TutorialView: View {
             }
             .padding(.horizontal, 20)
             
-            Text("準備ができたらゲームを開始しましょう！")
+            Text(NSLocalizedString("tutorial_ready_message", comment: "Ready message"))
                 .font(.headline)
                 .foregroundColor(.primary)
                 .padding(.top, 10)
