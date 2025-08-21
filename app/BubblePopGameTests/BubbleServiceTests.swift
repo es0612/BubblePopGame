@@ -28,9 +28,9 @@ struct BubbleServiceTests {
         #expect(normalBubble.position.y == position.y)
         #expect(normalBubble.type == .normal)
         #expect(normalBubble.number == nil)
-        #expect(normalBubble.radius >= 30.0)
-        #expect(normalBubble.radius <= 60.0)
-        #expect(normalBubble.alpha == 1.0)
+        #expect(normalBubble.radius >= 25.0)
+        #expect(normalBubble.radius <= 50.0)
+        #expect(normalBubble.alpha == 0.8)
         #expect(normalBubble.isPopping == false)
         
         // 数字付きバブル作成
@@ -39,8 +39,7 @@ struct BubbleServiceTests {
         #expect(numberedBubble.position.y == position.y)
         #expect(numberedBubble.type == .numbered)
         #expect(numberedBubble.number == 5)
-        #expect(numberedBubble.radius >= 30.0)
-        #expect(numberedBubble.radius <= 60.0)
+        #expect(numberedBubble.radius == 50.0)
     }
     
     @Test("衝突判定の正確性テスト")

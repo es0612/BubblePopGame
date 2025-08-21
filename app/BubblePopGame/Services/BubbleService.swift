@@ -13,7 +13,7 @@ protocol BubbleService {
     func createNumberedBubble(at position: CGPoint, number: Int) -> Bubble
     func updateBubbles(_ bubbles: inout [Bubble])
     func checkCollision(at point: CGPoint, in bubbles: [Bubble]) -> Bubble?
-    func checkCollisionIndex(at point: CGPoint, in bubbles: [Bubble]) -> Int?
+    func checkCollisionIndex(at point: CGPoint, in bubbles: [Bubble]) -> Int
     func generateRandomBubbles(count: Int, screenBounds: CGRect) -> [Bubble]
     func generateNumberedBubbles(count: Int, screenBounds: CGRect, numberedCount: Int) -> [Bubble]
     func generateNumberedBubblesWithCustomSet(count: Int, screenBounds: CGRect, numberSet: [Int]) -> [Bubble]
@@ -151,12 +151,12 @@ class BubbleServiceImpl: BubbleService {
         }
     }
     
-    func checkCollisionIndex(at point: CGPoint, in bubbles: [Bubble]) -> Int? {
+    func checkCollisionIndex(at point: CGPoint, in bubbles: [Bubble]) -> Int {
         return bubbles.firstIndex { bubble in
             guard !bubble.isPopping else { return false }
             let distance = sqrt(pow(point.x - bubble.position.x, 2) + pow(point.y - bubble.position.y, 2))
             return distance <= bubble.radius
-        }
+        } ?? -1
     }
     
     func generateRandomBubbles(count: Int, screenBounds: CGRect) -> [Bubble] {

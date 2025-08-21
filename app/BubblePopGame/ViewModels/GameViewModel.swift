@@ -203,7 +203,8 @@ class GameViewModel {
         // タッチ応答性監視開始
         let touchStartTime = CACurrentMediaTime()
         
-        if let hitBubbleIndex = bubbleService.checkCollisionIndex(at: location, in: bubbles) {
+        let hitBubbleIndex = bubbleService.checkCollisionIndex(at: location, in: bubbles)
+        if hitBubbleIndex != -1 {
             var hitBubble = bubbles[hitBubbleIndex]
             
             // 成功タップをカウント
