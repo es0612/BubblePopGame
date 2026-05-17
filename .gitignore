@@ -5,6 +5,10 @@
 ## User settings
 xcuserdata/
 
+## Build artifacts (xcodebuild -derivedDataPath で生成される一時生成物)
+build/
+DerivedData/
+
 ## Obj-C/Swift specific
 *.hmap
 
