@@ -99,3 +99,17 @@ app/BubblePopGame/
 - `main` には直接コミットしない。`feature/issue-N-pr-X-<topic>` のような名前で feature branch を切る
 - `build/` と `DerivedData/` は `.gitignore` 済み（`xcodebuild -derivedDataPath build/DerivedData` 利用時の生成物）
 - PR タイトルは `fix:` / `feat:` / `chore:` プレフィックス、本文に Test plan の手動確認チェックリストを含める
+
+## セッション終了時の振り返り運用
+
+開発を進めるほどフローが洗練されていく「複利」を生む仕組み:
+
+- **`session-retrospective` skill**（グローバル）が用意されている。ユーザーが「終わり」「お疲れ」「振り返って」等を発話すると自動発動
+- **Stop hook**（`.claude/hooks/stop-retrospective-reminder.sh`、`.claude/settings.local.json` で登録）が、直近2時間でコミット3件以上 かつ 最終リマインドから1時間以上経過時に「振り返りませんか?」とリマインド
+- 振り返り skill は、セッション中の学びを以下に振り分けて反映:
+  - **プロジェクト知識** → CLAUDE.md（このファイル）に追記
+  - **未完了/別途対応事項** → GitHub Issue 化（`gh issue create`）
+  - **ユーザー嗜好** → memory に保存
+- これを継続することで、次セッションは前回の学びを最初から踏まえて動ける（同じ罠を踏まない／同じ手順を3回繰り返さない）
+
+⚠️ **stateファイル** `.claude/.last-retrospective-reminder` は `.gitignore` 対象（hookが書き込むタイムスタンプ）

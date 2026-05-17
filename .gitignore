@@ -9,6 +9,9 @@ xcuserdata/
 build/
 DerivedData/
 
+## Claude Code hook state files
+.claude/.last-retrospective-reminder
+
 ## Obj-C/Swift specific
 *.hmap
 
