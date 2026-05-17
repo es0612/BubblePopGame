@@ -9,7 +9,7 @@ import SwiftUI
 
 struct GameView: View {
     let viewModel: GameViewModel
-    @State private var particleEffectView = ParticleEffectView()
+    @State private var particleEffectViewModel = ParticleEffectViewModel()
     
     var body: some View {
         GeometryReader { geometry in
@@ -25,7 +25,7 @@ struct GameView: View {
                 .animation(.spring(response: 0.5, dampingFraction: 0.8), value: viewModel.bubbles.count)
                 
                 // Particle Effects
-                particleEffectView
+                ParticleEffectView(viewModel: particleEffectViewModel)
                 
                 // HUD
                 VStack {
@@ -131,7 +131,7 @@ struct GameView: View {
                     .padding(.horizontal)
                     
                     // プログレスバー（時間）
-                    ProgressView(value: viewModel.timeRemaining, total: 60.0)
+                    ProgressView(value: viewModel.timeRemaining, total: viewModel.gameSettings.gameTime)
                         .progressViewStyle(LinearProgressViewStyle())
                         .scaleEffect(x: 1, y: 2, anchor: .center)
                         .accentColor(viewModel.timeRemaining <= 10 ? .red : .cyan)
@@ -153,7 +153,7 @@ struct GameView: View {
             )
             .onAppear {
                 viewModel.updateScreenBounds(geometry.frame(in: .local))
-                viewModel.setupParticleEffectView(particleEffectView)
+                viewModel.setupParticleEffectViewModel(particleEffectViewModel)
                 if viewModel.gameState != .playing {
                     viewModel.startGame()
                 }

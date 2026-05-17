@@ -17,6 +17,7 @@ protocol EffectService {
     func triggerErrorFeedback()
 }
 
+@MainActor
 class EffectServiceImpl: EffectService {
     private let lightFeedback: UIImpactFeedbackGenerator
     private let mediumFeedback: UIImpactFeedbackGenerator
@@ -24,7 +25,7 @@ class EffectServiceImpl: EffectService {
     private let selectionFeedback: UISelectionFeedbackGenerator
     private let notificationFeedback: UINotificationFeedbackGenerator
     
-    var particleEffectView: ParticleEffectView?
+    var particleEffectViewModel: ParticleEffectViewModel?
     
     init() {
         self.lightFeedback = UIImpactFeedbackGenerator(style: .light)
@@ -43,7 +44,7 @@ class EffectServiceImpl: EffectService {
     
     func createPopEffect(at position: CGPoint, color: Color) {
         // パーティクルエフェクトを作成
-        particleEffectView?.addEffect(at: position, color: color)
+        particleEffectViewModel?.addEffect(at: position, color: color)
         print("🎆 Pop effect created at: \(position)")
     }
     
