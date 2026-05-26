@@ -5,6 +5,13 @@
 ## User settings
 xcuserdata/
 
+## Build artifacts (xcodebuild -derivedDataPath で生成される一時生成物)
+build/
+DerivedData/
+
+## Claude Code hook state files
+.claude/.last-retrospective-reminder
+
 ## Obj-C/Swift specific
 *.hmap
 

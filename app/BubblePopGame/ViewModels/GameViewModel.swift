@@ -16,7 +16,7 @@ class GameViewModel {
     var score: Int = 0
     var timeRemaining: Double = 60.0
     var bubbles: [Bubble] = []
-    var screenBounds: CGRect = CGRect(x: 0, y: 0, width: 393, height: 852) // iPhone標準サイズ
+    var screenBounds: CGRect = .zero
     var bubblesPopped: Int = 0
     var currentStreak: Int = 0
     var bestStreak: Int = 0
@@ -107,13 +107,19 @@ class GameViewModel {
         }
     }
     
-    func setupParticleEffectView(_ particleEffectView: ParticleEffectView) {
+    func setupParticleEffectViewModel(_ viewModel: ParticleEffectViewModel) {
         if let effectServiceImpl = effectService as? EffectServiceImpl {
-            effectServiceImpl.particleEffectView = particleEffectView
+            effectServiceImpl.particleEffectViewModel = viewModel
         }
     }
     
     func startGame() {
+        // screenBounds 未設定（View マウント前）の場合はバブル生成を遅延
+        // GameView.onAppear で updateScreenBounds → startGame の順に呼ばれる
+        guard screenBounds != .zero else {
+            return
+        }
+
         gameState = .playing
         score = 0
         timeRemaining = gameSettings.gameTime

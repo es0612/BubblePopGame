@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import UIKit
 
 struct AccessibilityUtils {
     
@@ -128,7 +129,7 @@ struct AccessibilityUtils {
 
 extension EnvironmentValues {
     var isHighContrastEnabled: Bool {
-        false // 簡略化：常にfalseとする（実際のアプリでは適切に実装）
+        UIAccessibility.isDarkerSystemColorsEnabled
     }
     
     var isReduceMotionEnabled: Bool {

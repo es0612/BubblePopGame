@@ -99,9 +99,9 @@ struct GameOverView: View {
                         .foregroundColor(.primary)
                     
                     VStack(spacing: 8) {
-                        StatRow(label: NSLocalizedString("gameover_play_time", comment: "Play time label"), value: String(format: NSLocalizedString("seconds_format", comment: "Seconds format with decimal"), 60.0 - viewModel.timeRemaining))
-                        StatRow(label: NSLocalizedString("gameover_avg_reaction", comment: "Average reaction time label"), value: viewModel.bubblesPopped > 0 ? String(format: "%.2f" + NSLocalizedString("game_seconds_unit", comment: "Seconds unit") + "/" + NSLocalizedString("game_pieces_unit", comment: "Pieces unit"), (60.0 - viewModel.timeRemaining) / Double(viewModel.bubblesPopped)) : "N/A")
-                        StatRow(label: NSLocalizedString("gameover_bubble_density", comment: "Bubble density label"), value: String(format: "%.1f" + NSLocalizedString("game_pieces_unit", comment: "Pieces unit") + "/" + NSLocalizedString("game_seconds_unit", comment: "Seconds unit"), Double(viewModel.bubblesPopped) / max(1, 60.0 - viewModel.timeRemaining)))
+                        StatRow(label: NSLocalizedString("gameover_play_time", comment: "Play time label"), value: String(format: NSLocalizedString("seconds_format", comment: "Seconds format with decimal"), viewModel.gameSettings.gameTime - viewModel.timeRemaining))
+                        StatRow(label: NSLocalizedString("gameover_avg_reaction", comment: "Average reaction time label"), value: viewModel.bubblesPopped > 0 ? String(format: "%.2f" + NSLocalizedString("game_seconds_unit", comment: "Seconds unit") + "/" + NSLocalizedString("game_pieces_unit", comment: "Pieces unit"), (viewModel.gameSettings.gameTime - viewModel.timeRemaining) / Double(viewModel.bubblesPopped)) : "N/A")
+                        StatRow(label: NSLocalizedString("gameover_bubble_density", comment: "Bubble density label"), value: String(format: "%.1f" + NSLocalizedString("game_pieces_unit", comment: "Pieces unit") + "/" + NSLocalizedString("game_seconds_unit", comment: "Seconds unit"), Double(viewModel.bubblesPopped) / max(1, viewModel.gameSettings.gameTime - viewModel.timeRemaining)))
                     }
                 }
                 .padding()
