@@ -135,13 +135,18 @@ struct ContentView: View {
             gameSettings: gameSettings
         )
         
+        // GameView マウント前でも MenuView の Start ボタン経由で startGame() が
+        // 呼ばれる経路があるため、ここで screenBounds を初期化しておく。
+        // （GameViewModel.startGame() の guard が .zero で early-return する）
+        viewModel.updateScreenBounds(CGRect(origin: .zero, size: screenSize))
+
         // 初回起動時はチュートリアル、そうでなければメニュー
         if gameSettings.isFirstLaunch {
             viewModel.gameState = .tutorial
         } else {
             viewModel.gameState = .menu
         }
-        
+
         self.gameViewModel = viewModel
     }
     

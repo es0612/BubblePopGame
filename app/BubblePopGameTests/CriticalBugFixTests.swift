@@ -74,6 +74,23 @@ struct CriticalBugFixTests {
                 "screenBounds 設定後 startGame でバブル生成される")
     }
 
+    @Test("MenuView 経路（GameView マウント前）でも startGame で playing に遷移する")
+    func startGameTransitionsToPlayingFromMenuPath() throws {
+        // 再現シナリオ: ContentView.setupDependencies が screenBounds を
+        // セットしてから gameState を割り当てる、という契約。
+        // この契約が満たされていれば、ユーザーが MenuView の Start ボタン押下時
+        // （GameView.onAppear が走る前）でも startGame() が機能する。
+        let vm = try Self.makeViewModel()
+        vm.updateScreenBounds(CGRect(x: 0, y: 0, width: 400, height: 800))
+        vm.gameState = .menu
+
+        vm.startGame()
+
+        #expect(vm.gameState == .playing,
+                "ContentView 初期化で screenBounds がセット済みなら、Menu からの startGame で .playing に遷移する")
+        #expect(!vm.bubbles.isEmpty)
+    }
+
     // MARK: - 1.2 時間表示
 
     @Test("gameTime=120 で startGame すると timeRemaining も 120")
