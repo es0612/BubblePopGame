@@ -46,7 +46,7 @@ class EffectServiceImpl: EffectService {
     func createPopEffect(at position: CGPoint, color: Color) {
         // パーティクルエフェクトを作成
         particleEffectViewModel?.addEffect(at: position, color: color)
-        print("🎆 Pop effect created at: \(position)")
+        debugLog("🎆 Pop effect created at: \(position)")
     }
     
     func triggerHapticFeedback(intensity: UIImpactFeedbackGenerator.FeedbackStyle) {

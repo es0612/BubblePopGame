@@ -24,7 +24,7 @@ class SettingsViewModel {
             do {
                 self.gameSettings = try repository.fetchSettings() ?? GameSettings()
             } catch {
-                print("Failed to load settings: \(error)")
+                debugLog("Failed to load settings: \(error)")
                 self.gameSettings = GameSettings()
             }
         } else {
@@ -37,15 +37,15 @@ class SettingsViewModel {
     
     func saveSettings() {
         guard let repository = settingsRepository else {
-            print("SettingsRepository not available")
+            debugLog("SettingsRepository not available")
             return
         }
         
         do {
             try repository.saveSettings(gameSettings)
-            print("Settings saved successfully")
+            debugLog("Settings saved successfully")
         } catch {
-            print("Failed to save settings: \(error)")
+            debugLog("Failed to save settings: \(error)")
         }
     }
     
