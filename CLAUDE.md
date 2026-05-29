@@ -93,6 +93,12 @@ app/BubblePopGame/
 - そのため View 層修正は**手動 walk-through が必須**。PR description に「マージ前手動確認チェックリスト」を明記する
 - `simctl` には `tap` がないため、設定変更や tutorial スキップを伴う自動検証は不可。`xcrun simctl io ... screenshot` で起動確認＋クラッシュなしの確認までが自動化の上限
 - 永続化された GameSettings は SwiftData なので `UserDefaults trick`（`xcrun simctl spawn ... defaults write`）が効かない点に注意
+- 永続化フラグ（`isFirstLaunch` 等）で初期化フローが分岐する場合、手動 walk-through は「初回起動」「2回目以降」の両経路を必ず検証する。Tutorial を経由するかどうかで `updateScreenBounds` のような重要な副作用がスキップされ、本番バグの温床になる
+- `guard` で前提条件を弾く修正を入れるときは、その前提条件を供給するコード（例: `screenBounds` をセットする `onAppear`）が、ガードを通過する全ての到達経路で確実に走るかを必ず洗い出す。コメントに「X で供給される」と書くだけでは、X が一部経路でしか実行されないと永続デッドロックになる
+
+### UI テスト設計
+
+- XCUITest の predicate（例: `CONTAINS '0' OR CONTAINS '1'`）は、意図しない他の UI 要素（時間表示の「60 秒」等）にも偽陽性マッチして検証が空転する。スコア／タイマー等の同種数値要素が画面に共存するときは accessibilityIdentifier で厳密に特定する
 
 ### Git運用
 
