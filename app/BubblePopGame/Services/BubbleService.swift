@@ -18,41 +18,54 @@ protocol BubbleService {
     func generateNumberedBubbles(count: Int, screenBounds: CGRect, numberedCount: Int) -> [Bubble]
     func generateNumberedBubblesWithCustomSet(count: Int, screenBounds: CGRect, numberSet: [Int]) -> [Bubble]
     func updateScreenBounds(_ bounds: CGRect)
+    func updateBubbleConfig(minRadius: Double, maxRadius: Double, animationSpeed: Double)
 }
 
 class BubbleServiceImpl: BubbleService {
     private var screenBounds: CGRect
     private var bubblePool: [Bubble] = []
-    
+
+    // GameSettings から反映されるバブル生成パラメータ（Issue #17）。
+    // デフォルトは GameSettings のデフォルト値（30/60/1.0）に揃える。
+    private var minRadius: CGFloat = 30.0
+    private var maxRadius: CGFloat = 60.0
+    private var animationSpeed: CGFloat = 1.0
+
     init(screenBounds: CGRect) {
         self.screenBounds = screenBounds
     }
-    
+
     func updateScreenBounds(_ bounds: CGRect) {
         screenBounds = bounds
     }
+
+    func updateBubbleConfig(minRadius: Double, maxRadius: Double, animationSpeed: Double) {
+        self.minRadius = CGFloat(minRadius)
+        self.maxRadius = CGFloat(maxRadius)
+        self.animationSpeed = CGFloat(animationSpeed)
+    }
     
     func createBubble(at position: CGPoint, type: BubbleType) -> Bubble {
-        // 数字タイプは少し大きめに、通常タイプは少し小さめに
-        let radius: CGFloat = type == .numbered ? 
-            CGFloat.random(in: 40...70) : 
-            CGFloat.random(in: 25...50)
-        
+        // 半径は設定値（minRadius/maxRadius）を反映。数字タイプは目立たせるため maxRadius 固定。
+        let radius: CGFloat = type == .numbered ?
+            maxRadius :
+            CGFloat.random(in: minRadius...maxRadius)
+
         // 数字タイプは赤や黄色で目立つように
-        let color: Color = type == .numbered ? 
+        let color: Color = type == .numbered ?
             [.red, .yellow, .orange].randomElement() ?? .red :
             Color.random()
-        
-        // 初期速度もタイプによって少し変える
-        let velocityRange: Range<Double> = type == .numbered ? 
-            -30.0..<30.0 : 
+
+        // 初期速度もタイプによって少し変える（animationSpeed でスケール）
+        let velocityRange: Range<Double> = type == .numbered ?
+            -30.0..<30.0 :
             -50.0..<50.0
-        
+
         return Bubble(
             position: position,
             velocity: CGVector(
-                dx: Double.random(in: velocityRange), 
-                dy: Double.random(in: velocityRange)
+                dx: Double.random(in: velocityRange) * Double(animationSpeed),
+                dy: Double.random(in: velocityRange) * Double(animationSpeed)
             ),
             radius: radius,
             type: type,
@@ -64,14 +77,14 @@ class BubbleServiceImpl: BubbleService {
     }
     
     func createNumberedBubble(at position: CGPoint, number: Int) -> Bubble {
-        let radius: CGFloat = 50.0 // 数字バブルは固定サイズ
+        let radius: CGFloat = maxRadius // 数字バブルは目立たせるため maxRadius で固定
         let color: Color = .yellow // 数字バブルは黄色で統一
-        
+
         return Bubble(
             position: position,
             velocity: CGVector(
-                dx: Double.random(in: -20.0..<20.0), 
-                dy: Double.random(in: -20.0..<20.0)
+                dx: Double.random(in: -20.0..<20.0) * Double(animationSpeed),
+                dy: Double.random(in: -20.0..<20.0) * Double(animationSpeed)
             ),
             radius: radius,
             type: .numbered,
