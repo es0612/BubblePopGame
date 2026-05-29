@@ -106,7 +106,7 @@ struct HighScoreView: View {
                 selectedTimeLimit = availableTimeLimits.first ?? 60.0
             }
         } catch {
-            print("Failed to load available time limits: \(error)")
+            debugLog("Failed to load available time limits: \(error)")
             availableTimeLimits = [60.0]
         }
     }
@@ -115,7 +115,7 @@ struct HighScoreView: View {
         do {
             highScores = try gameViewModel.scoreRepository.fetchScoresByModeAndTime(mode, gameTime: timeLimit)
         } catch {
-            print("Failed to load high scores: \(error)")
+            debugLog("Failed to load high scores: \(error)")
             highScores = []
         }
     }

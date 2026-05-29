@@ -28,7 +28,7 @@ struct BubblePopGameApp: App {
             return try ModelContainer(for: schema, configurations: [configuration])
         } catch {
             // フォールバック: インメモリでの実行
-            print("Failed to create ModelContainer with persistent storage: \(error)")
+            debugLog("Failed to create ModelContainer with persistent storage: \(error)")
             do {
                 let schema = Schema([
                     GameSettings.self,

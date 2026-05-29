@@ -346,7 +346,7 @@ struct SettingsView: View {
     
     private func showTutorial() {
         guard let gameViewModel = gameViewModel else {
-            print("⚠️ GameViewModel is not available for tutorial display")
+            debugLog("⚠️ GameViewModel is not available for tutorial display")
             return
         }
         
