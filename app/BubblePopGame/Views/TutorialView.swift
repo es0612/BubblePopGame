@@ -11,6 +11,9 @@ struct TutorialView: View {
     let gameViewModel: GameViewModel
     @State private var currentStep: Int = 0
     @State private var tutorialBubbles: [Bubble] = []
+    // TutorialView 自身の描画サイズ。練習バブル配置に使用（共有 screenBounds は
+    // 起動遷移中に .zero になりうるため #24）。
+    @State private var canvasSize: CGSize = .zero
     @State private var showTapHint = false
     @State private var hasCompletedTap = false
     @State private var tutorialScore = 0
@@ -124,15 +127,20 @@ struct TutorialView: View {
                     }
             )
             .onAppear {
+                canvasSize = geometry.size
                 gameViewModel.updateScreenBounds(geometry.frame(in: .local))
                 if currentStep == 2 {
                     setupTutorialBubbles()
                 }
-                
+
                 // チュートリアル開始時にBGMを再生
                 if gameViewModel.gameSettings.bgmEnabled && gameViewModel.gameSettings.bgmTrack != "off" {
                     gameViewModel.audioService.playBGMTrack(gameViewModel.gameSettings.bgmTrack, loop: true)
                 }
+            }
+            .onChange(of: geometry.size) { _, newSize in
+                // レイアウト確定/回転で描画サイズを更新（#24: 練習バブルを正しい位置に）
+                canvasSize = newSize
             }
         }
     }
@@ -357,15 +365,18 @@ struct TutorialView: View {
         hasCompletedTap = false
         showTapHint = false
         tutorialScore = 0
-        
-        // 画面の下部4分の1の領域に配置（文字と重複しないよう）
-        let screenHeight = gameViewModel.screenBounds.height
-        let screenWidth = gameViewModel.screenBounds.width
-        let bubbleY = screenHeight * 0.75 // 画面の下部4分の1
-        let bubbleX = screenWidth * 0.5   // 画面の中央
-        
+
+        // TutorialView 自身の描画サイズを使用（#24）。共有 gameViewModel.screenBounds は
+        // 起動遷移中に .zero になりうり、その場合バブルが (0,0) に置かれて練習エリアに
+        // 表示されなくなる。canvasSize が未確定なら screenBounds をフォールバックに使う。
+        var size = canvasSize
+        if size.width <= 0 || size.height <= 0 {
+            size = gameViewModel.screenBounds.size
+        }
+        let position = Self.tutorialBubblePosition(in: size)
+
         let centerBubble = Bubble(
-            position: CGPoint(x: bubbleX, y: bubbleY),
+            position: position,
             velocity: CGVector.zero,
             radius: 50,
             type: .normal,
@@ -375,6 +386,12 @@ struct TutorialView: View {
             animationPhase: 0.0
         )
         tutorialBubbles.append(centerBubble)
+    }
+
+    /// 練習バブルの配置位置（画面下部中央・文字と重複しない下部4分の1）。
+    /// テスト容易性のため純粋関数として切り出し（#24）。
+    static func tutorialBubblePosition(in size: CGSize) -> CGPoint {
+        CGPoint(x: size.width * 0.5, y: size.height * 0.75)
     }
     
     private func handleTutorialTap(at location: CGPoint) {
