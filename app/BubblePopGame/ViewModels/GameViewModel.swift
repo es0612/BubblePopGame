@@ -117,26 +117,37 @@ class GameViewModel {
         bubbleService.updateScreenBounds(bounds)
     }
     
-    // パフォーマンス最適化メソッド
+    // パフォーマンス最適化メソッド。
+    // 負荷に応じてバブル数を目標値へ「削減」「補充」の双方向に調整する（Issue #8）。
+    // 数字モードはバブル集合が 1..N のルール依存のため対象外（補充で .normal を足すと
+    // 数字シーケンスが壊れるため）。
     func optimizePerformance() {
+        guard effectiveGameMode != "numbered" else { return }
+
         let adjustment = performanceService.getPerformanceAdjustment()
         let optimalBubbleCount = Int(Double(gameSettings.bubbleCount) * adjustment)
         let deviceOptimalCount = deviceService.adaptBubbleCount(for: gameSettings)
-        
-        // より制限の厳しい方を採用
+
+        // より制限の厳しい方を採用（finalBubbleCount <= gameSettings.bubbleCount）
         let finalBubbleCount = min(optimalBubbleCount, deviceOptimalCount)
-        
-        // バブル数が現在より少ない場合は調整
+
         if bubbles.count > finalBubbleCount {
+            // 負荷が高い → 余剰を削除
             let excess = bubbles.count - finalBubbleCount
             bubbles.removeLast(excess)
+        } else if bubbles.count < finalBubbleCount {
+            // 負荷が回復 → 目標数まで補充（Issue #8: 回復ロジック）
+            let deficit = finalBubbleCount - bubbles.count
+            for _ in 0..<deficit {
+                addRandomBubble()
+            }
         }
+        // bubbles.count == finalBubbleCount: 定常状態は no-op（毎秒のちらつき防止）
     }
     
     func setupParticleEffectViewModel(_ viewModel: ParticleEffectViewModel) {
-        if let effectServiceImpl = effectService as? EffectServiceImpl {
-            effectServiceImpl.particleEffectViewModel = viewModel
-        }
+        // 具象型へのダウンキャストを避け、protocol 経由で注入（Issue #20 / DI 改善）。
+        effectService.setParticleEffectViewModel(viewModel)
     }
     
     func startGame() {
@@ -604,11 +615,10 @@ class GameViewModel {
         // 画面境界を越えたシャボン玉を削除
         removeBubblesOutOfBounds()
         
-        // パフォーマンス監視とバブル数の動的調整（60フレームごと＝約1秒）
+        // パフォーマンス監視とバブル数の動的調整（約1秒ごと）。
+        // ungated で呼ぶことで、負荷上昇時の削減だけでなく回復時の補充も行われる（Issue #8）。
         if displayLink?.timestamp.truncatingRemainder(dividingBy: 1.0) ?? 0 < 0.02 {
-            if performanceService.shouldReduceBubbles() {
-                optimizePerformance()
-            }
+            optimizePerformance()
         }
     }
     
