@@ -141,13 +141,19 @@ struct ContentView: View {
         viewModel.updateScreenBounds(CGRect(origin: .zero, size: screenSize))
 
         // 初回起動時はチュートリアル、そうでなければメニュー。
-        // gameSettings は SwiftData で autosave されるため、デバッグの skip 判定で
-        // isFirstLaunch を書き換えると通常起動にも永続化されてしまう。永続モデルは
-        // 変更せず、初期遷移先の判定のみをローカルに決定する。
+        // gameSettings は SwiftData で autosave されるため、デバッグ override で
+        // モデルを書き換えると通常起動にも永続化されてしまう。永続モデルは変更せず、
+        // 初期遷移先の判定と GameViewModel の実効値 override のみをローカルに決定する。
         #if DEBUG
-        // デバッグ起動引数 --skip-tutorial でチュートリアルを bypass する（Issue #8）
-        let shouldShowTutorial = gameSettings.isFirstLaunch
-            && !DebugLaunchOptions(arguments: CommandLine.arguments).skipTutorial
+        let debugOptions = DebugLaunchOptions(arguments: CommandLine.arguments)
+        // --skip-tutorial: チュートリアルを bypass する（Issue #8）
+        let shouldShowTutorial = gameSettings.isFirstLaunch && !debugOptions.skipTutorial
+        // --game-time / --game-mode: GameViewModel の実効値を override（Issue #13）。
+        // gameSettings は書き換えないので永続化されない。
+        viewModel.debugGameTimeOverride = debugOptions.gameTime
+        if let mode = debugOptions.gameMode, GameMode(rawValue: mode) != nil {
+            viewModel.debugGameModeOverride = mode
+        }
         #else
         let shouldShowTutorial = gameSettings.isFirstLaunch
         #endif
