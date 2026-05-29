@@ -41,7 +41,7 @@ struct HighScoreView: View {
                             .font(.headline)
                             .foregroundColor(.primary)
                         
-                        Picker("制限時間", selection: $selectedTimeLimit) {
+                        Picker(NSLocalizedString("settings_time_limit", comment: "Time limit picker label"), selection: $selectedTimeLimit) {
                             ForEach(availableTimeLimits, id: \.self) { timeLimit in
                                 Text(String(format: NSLocalizedString("seconds_format", comment: "Seconds format"), Int(timeLimit))).tag(timeLimit)
                             }
