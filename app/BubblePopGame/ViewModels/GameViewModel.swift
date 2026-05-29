@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 import QuartzCore
+import os
 
 @Observable
 @MainActor
@@ -86,7 +87,15 @@ class GameViewModel {
     private var lastTouchTime: CFTimeInterval = 0
     private var touchResponseTimes: [CFTimeInterval] = []
     private let maxResponseTimeHistory = 10
-    
+
+    // 画面サイズ未供給で startGame() された場合の保留フラグ（Issue #23）。
+    // サイズ到達時に updateScreenBounds から自動開始し、永久デッドロックを防ぐ。
+    private var pendingStart = false
+
+    // 起動診断ログ。Release/TestFlight でも os_log として記録され Console.app で確認できる
+    // （debugLog は #if DEBUG で TestFlight では無効なため、原因切り分けには OSLog を使う）。
+    private let startLogger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "BubblePopGame", category: "GameStart")
+
     init(bubbleService: BubbleService,
          audioService: AudioService,
          effectService: EffectService,
@@ -108,13 +117,20 @@ class GameViewModel {
     }
     
     func updateScreenBounds(_ size: CGSize) {
-        screenBounds = CGRect(origin: .zero, size: size)
-        bubbleService.updateScreenBounds(screenBounds)
+        updateScreenBounds(CGRect(origin: .zero, size: size))
     }
-    
+
     func updateScreenBounds(_ bounds: CGRect) {
+        // 遷移中の geometry 取りこぼし（.zero/不正サイズ）で有効値を上書きしない（Issue #23）。
+        guard bounds.width > 0, bounds.height > 0 else { return }
         screenBounds = bounds
         bubbleService.updateScreenBounds(bounds)
+
+        // サイズ未供給で保留されていた開始要求があれば、ここで自動開始（Issue #23）。
+        if pendingStart {
+            pendingStart = false
+            startGame()
+        }
     }
     
     // パフォーマンス最適化メソッド。
@@ -151,13 +167,19 @@ class GameViewModel {
     }
     
     func startGame() {
-        // screenBounds 未設定（View マウント前）の場合はバブル生成を遅延
-        // GameView.onAppear で updateScreenBounds → startGame の順に呼ばれる
+        startLogger.notice("startGame entry: screenBounds=\(self.screenBounds.debugDescription, privacy: .public), gameState=\(String(describing: self.gameState), privacy: .public)")
+        // screenBounds 未設定（View マウント前/遷移中の取りこぼし）の場合は開始を保留し、
+        // updateScreenBounds でサイズ到達時に自動開始する（Issue #23: 永久デッドロック防止）。
+        // PR #10 のガード意図（.zero でバブル生成しない）は維持。
         guard screenBounds != .zero else {
+            pendingStart = true
+            startLogger.notice("startGame deferred: screenBounds is .zero (pendingStart=true)")
             return
         }
+        pendingStart = false
 
         gameState = .playing
+        startLogger.notice("startGame: gameState -> .playing")
         score = 0
         timeRemaining = effectiveGameTime
         bubblesPopped = 0
