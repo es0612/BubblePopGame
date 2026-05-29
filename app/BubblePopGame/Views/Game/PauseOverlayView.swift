@@ -39,7 +39,7 @@ struct PauseOverlayView: View {
                     .shadow(radius: 3)
                 }
                 .accessibilityLabel(NSLocalizedString("pause_resume", comment: "Resume accessibility"))
-                .accessibilityHint("Resume the game")
+                .accessibilityHint(NSLocalizedString("accessibility_pause_resume_hint", comment: "Resume hint"))
                 .accessibilityAddTraits(.isButton)
                 
                 // 終了ボタン（2.5秒遅延で表示）
@@ -62,7 +62,7 @@ struct PauseOverlayView: View {
                     }
                     .accessibilityIdentifier("pauseEndButton")
                     .accessibilityLabel(NSLocalizedString("pause_quit", comment: "Quit accessibility"))
-                    .accessibilityHint("End the game and return to menu")
+                    .accessibilityHint(NSLocalizedString("accessibility_pause_quit_hint", comment: "Quit hint"))
                     .accessibilityAddTraits(.isButton)
                     .transition(.opacity.combined(with: .scale))
                 }
@@ -83,7 +83,7 @@ struct PauseOverlayView: View {
             showExitButton = false
             showExitConfirmation = false
         }
-        .alert("Confirm Game Exit", isPresented: $showExitConfirmation) {
+        .alert(NSLocalizedString("pause_confirm_exit_title", comment: "Exit confirmation title"), isPresented: $showExitConfirmation) {
             Button(NSLocalizedString("cancel", comment: "Cancel button"), role: .cancel) {
                 showExitConfirmation = false
             }
@@ -91,7 +91,7 @@ struct PauseOverlayView: View {
                 gameViewModel.endGame()
             }
         } message: {
-            Text("Are you sure you want to quit the game?\nThe current game will be ended.")
+            Text(NSLocalizedString("pause_confirm_exit_message", comment: "Exit confirmation message"))
         }
     }
 }

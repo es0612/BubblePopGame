@@ -39,8 +39,10 @@ struct BubbleView: View {
         .animation(.easeOut(duration: 0.3), value: bubble.isPopping)
         .animation(.easeInOut(duration: 3).repeatForever(autoreverses: true), value: bubble.animationPhase)
         .accessibilityElement()
-        .accessibilityLabel(bubble.type == .numbered ? "数字 \(bubble.number ?? 0) のシャボン玉" : "シャボン玉")
-        .accessibilityHint("タップすると破裂します")
+        .accessibilityLabel(bubble.type == .numbered
+            ? String(format: NSLocalizedString("accessibility_bubble_numbered", comment: "Numbered bubble accessibility label"), bubble.number ?? 0)
+            : NSLocalizedString("accessibility_bubble_normal", comment: "Bubble accessibility label"))
+        .accessibilityHint(NSLocalizedString("accessibility_bubble_hint", comment: "Bubble tap hint"))
         .accessibilityAddTraits(.isButton)
     }
 }

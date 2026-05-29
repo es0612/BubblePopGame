@@ -46,7 +46,7 @@ struct TutorialView: View {
                         .background(Color.blue.opacity(0.1))
                         .cornerRadius(8)
                         .accessibilityLabel(NSLocalizedString("skip", comment: "Skip accessibility"))
-                        .accessibilityHint("Skip tutorial and go to menu")
+                        .accessibilityHint(NSLocalizedString("accessibility_tutorial_skip_hint", comment: "Skip tutorial hint"))
                     }
                     .padding(.top, 10)
                     .padding(.horizontal, 20)

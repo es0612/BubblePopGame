@@ -40,14 +40,14 @@ struct ContentView: View {
                                 }
                             }
                         } else {
-                            ProgressView("設定読み込み中...")
+                            ProgressView(NSLocalizedString("loading_settings", comment: "Loading settings"))
                         }
                     case .highScore:
                         HighScoreView(gameViewModel: gameViewModel)
                     }
                 } else {
                     // 初期化中
-                    ProgressView("初期化中...")
+                    ProgressView(NSLocalizedString("loading_initializing", comment: "Initializing"))
                         .onAppear {
                             setupDependencies(screenSize: geometry.size)
                         }

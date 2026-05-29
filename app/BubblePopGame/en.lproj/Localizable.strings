@@ -148,3 +148,16 @@
 "accessibility_bubbles_popped" = "Bubbles popped %d";
 "accessibility_time_remaining" = "Time remaining %d seconds";
 "accessibility_time_warning" = ", time is running low";
+
+// MARK: - Localization fixes (Issue #5)
+"seconds_decimal_format" = "%.1fsec";
+"accessibility_bubble_numbered" = "Bubble with number %d";
+"accessibility_bubble_normal" = "Bubble";
+"accessibility_bubble_hint" = "Tap to pop";
+"accessibility_pause_resume_hint" = "Resume the game";
+"accessibility_pause_quit_hint" = "End the game and return to menu";
+"pause_confirm_exit_title" = "Confirm Game Exit";
+"pause_confirm_exit_message" = "Are you sure you want to quit the game?\nThe current game will be ended.";
+"accessibility_tutorial_skip_hint" = "Skip tutorial and go to menu";
+"loading_settings" = "Loading settings...";
+"loading_initializing" = "Initializing...";
