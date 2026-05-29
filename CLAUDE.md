@@ -105,7 +105,12 @@ app/BubblePopGame/
 - 永続化された GameSettings は SwiftData なので `UserDefaults trick`（`xcrun simctl spawn ... defaults write`）が効かない点に注意
 - 永続化フラグ（`isFirstLaunch` 等）で初期化フローが分岐する場合、手動 walk-through は「初回起動」「2回目以降」の両経路を必ず検証する。Tutorial を経由するかどうかで `updateScreenBounds` のような重要な副作用がスキップされ、本番バグの温床になる
 - `guard` で前提条件を弾く修正を入れるときは、その前提条件を供給するコード（例: `screenBounds` をセットする `onAppear`）が、ガードを通過する全ての到達経路で確実に走るかを必ず洗い出す。コメントに「X で供給される」と書くだけでは、X が一部経路でしか実行されないと永続デッドロックになる
+- ⚠️ **`screenBounds == .zero` は本番化済みの systemic fault**（#23 起動不能 / #24 チュートリアルバブル不可視で実際に TestFlight に出た）。共有 `gameViewModel.screenBounds` は LaunchScreen→ContentView のアニメ遷移中に供給を取りこぼし `.zero` になりうる。対処は「供給を待つ」だけでなく次の3点:
+  1. `updateScreenBounds` は `.zero`/不正サイズを無視し、有効値を上書きしない
+  2. `startGame` は `.zero` で early-return（永久デッドロック）せず保留し、サイズ到達時に自動開始する（deferred-start）
+  3. **View 固有の座標計算は共有 screenBounds でなく、その View 自身の `geometry.size` を使う**（例: TutorialView の練習バブル配置）
 - ⚠️ **検証後の cleanup を忘れない**: `xcrun simctl launch` でアプリを起動して screenshot を撮ったら、検証完了後に必ず `xcrun simctl terminate <SIM> <BUNDLE>`（必要なら `xcrun simctl shutdown <SIM>`）で停止する。本アプリは BGM がデフォルト ON（`bgmEnabled = true`）でメニュー画面で自動再生されるため、起動しっぱなしにすると裏で音楽が鳴り続ける。**音声を持つアプリの検証では terminate を特に徹底する**
+- バグ報告 issue の screenshot は一次証拠。**public repo なら `curl -L <github user-attachments の画像URL> -o /tmp/x.png` でダウンロード → Read で直接解析**できる（`gh issue view --json body` では `![image](...)` の URL は取れても画像本文は得られない）。タイトルだけで原因を推測せず、必ず画像を見ること（#23/#24 は画像で「メニュー停止」「練習バブル不可視」と即断定できた）
 
 ### UI テスト設計
 
@@ -114,6 +119,7 @@ app/BubblePopGame/
 ### Git運用
 
 - `main` には直接コミットしない。`feature/issue-N-pr-X-<topic>` のような名前で feature branch を切る
+- ⚠️ **スタックPR のマージ順の罠**: base が別 feature ブランチのスタックPR（`#B` の base=`feature/A`）は、`#A` を先に main へマージした後で `#B` をマージすると、**main でなく中間ブランチ（feature/A）に入り、コードが main に到達しない**（GitHub 上は "merged" 表示でも）。実際に #26/#27 がこれで #19/#20 を main 未着地にし、re-land 2 PR（#29/#30）の手戻りが発生した。→ **独立に並行する変更は base=main で切る**（同一ファイルを触っても 3-way merge で大抵解決）。どうしてもスタックする場合は下から順にマージし、各PRの base（マージ先）を必ず確認する
 - `build/` と `DerivedData/` は `.gitignore` 済み（`xcodebuild -derivedDataPath build/DerivedData` 利用時の生成物）
 - PR タイトルは `fix:` / `feat:` / `chore:` プレフィックス、本文に Test plan の手動確認チェックリストを含める
 
