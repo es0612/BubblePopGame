@@ -5,39 +5,42 @@
 - **推定作業量**: 3-5日（1人開発者想定）
 - **作成日**: 2025年9月23日
 
-## 🔴 Phase 1: 致命的バグ修正（優先度：最高 / 1日）
+## 🔴 Phase 1: 致命的バグ修正（優先度：最高 / 1日）✅ 完了（2026-05-29）
 **これらはゲームプレイを破壊する重大な問題です**
 
-### 1. 画面サイズ初期化問題
+> **完了メモ**: 致命的バグ4件は PR #6（Issue #5 PR1）で修正、画面サイズ初期化のデッドロックは
+> PR #10 で追加修正済み。詳細は各項目を参照。
+
+### 1. 画面サイズ初期化問題 ✅ 完了（2026-05-29 / PR #6, #10）
 - **問題**: GameViewModel初期化時に固定screenBoundsでバブル生成（画面外配置リスク）
 - **影響**: ゲーム開始時にバブルが見えない可能性
 - **対応**:
-  - [ ] GameViewModel.swift:19,116 - 遅延初期化実装
-  - [ ] GameView.swift:155 - 実デバイスサイズ反映確認
-  - [ ] 初期化順序の見直し
+  - [x] GameView.swift - 実デバイスサイズ反映確認（PR #6）
+  - [x] 初期化順序の見直し（PR #10: `ContentView.setupDependencies` で生成直後に `updateScreenBounds` を呼び、`startGame()` ガードの `.zero` early-return デッドロックを解消）
+  - 補足: 計画当初の「GameViewModel 遅延初期化」案ではなく、ContentView 初期化時の screenBounds 供給で解決した
 
-### 2. 時間表示不整合
+### 2. 時間表示不整合 ✅ 完了（2026-05-29 / PR #6）
 - **問題**: UIと統計が常に60秒基準（設定変更未反映）
 - **影響**: 設定した時間制限が機能しない
 - **対応**:
-  - [ ] GameView.swift:134 - `gameSettings.gameTime`参照に修正
-  - [ ] GameOverView.swift:102-104 - 実際の制限時間を使用
-  - [ ] 時間バー表示ロジック修正
+  - [x] GameView.swift - `gameSettings.gameTime`参照に修正
+  - [x] GameOverView.swift - 実際の制限時間を使用
+  - [x] 時間バー表示ロジック修正
 
-### 3. ParticleEffectView状態更新問題
+### 3. ParticleEffectView状態更新問題 ✅ 完了（2026-05-29 / PR #6）
 - **問題**: 値型のため状態更新が表示層に反映されない
 - **影響**: パーティクル演出が正しく表示されない
 - **対応**:
-  - [ ] GameView.swift:156 - 参照型ラッパークラス実装
-  - [ ] ParticleEffectView.swift:21-27 - バインディング追加
-  - [ ] EffectServiceとの連携修正
+  - [x] GameView.swift - 参照型ラッパークラス実装
+  - [x] ParticleEffectView.swift - バインディング追加
+  - [x] EffectServiceとの連携修正
 
-### 4. アクセシビリティ無効化
+### 4. アクセシビリティ無効化 ✅ 完了（2026-05-29 / PR #6）
 - **問題**: isHighContrastEnabled常にfalse返却
 - **影響**: 視覚支援機能が動作しない
 - **対応**:
-  - [ ] AccessibilityUtils.swift:131 - UIAccessibility実データ返却
-  - [ ] 高コントラストモードのテスト追加
+  - [x] AccessibilityUtils.swift - UIAccessibility実データ返却
+  - [x] 高コントラストモードのテスト追加
 
 ## 🟠 Phase 2: 機能バグ修正（優先度：高 / 1日）
 **設定やローカライズが正しく動作しない問題**
