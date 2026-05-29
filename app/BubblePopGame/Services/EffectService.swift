@@ -9,6 +9,7 @@ import Foundation
 import SwiftUI
 import UIKit
 
+@MainActor
 protocol EffectService {
     func createPopEffect(at position: CGPoint, color: Color)
     func triggerHapticFeedback(intensity: UIImpactFeedbackGenerator.FeedbackStyle)
