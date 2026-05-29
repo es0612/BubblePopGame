@@ -55,7 +55,33 @@ class GameViewModel {
     private nonisolated(unsafe) var displayLink: CADisplayLink?
     private nonisolated(unsafe) var gameTimer: Timer?
     var gameSettings: GameSettings
-    
+
+    #if DEBUG
+    /// デバッグ起動引数による override（Issue #13）。nil なら gameSettings の値を使う。
+    /// 永続化された gameSettings を書き換えず（autosave で残ってしまうため）、実効値だけを差し替える。
+    var debugGameTimeOverride: Double?
+    var debugGameModeOverride: String?
+    #endif
+
+    /// 実効ゲーム制限時間。DEBUG override があればそれを優先（テスト容易性のため internal）。
+    /// Release では gameSettings.gameTime に collapse する。
+    var effectiveGameTime: Double {
+        #if DEBUG
+        return debugGameTimeOverride ?? gameSettings.gameTime
+        #else
+        return gameSettings.gameTime
+        #endif
+    }
+
+    /// 実効ゲームモード。DEBUG override があればそれを優先（テスト容易性のため internal）。
+    var effectiveGameMode: String {
+        #if DEBUG
+        return debugGameModeOverride ?? gameSettings.gameMode
+        #else
+        return gameSettings.gameMode
+        #endif
+    }
+
     // タッチ応答性監視
     private var lastTouchTime: CFTimeInterval = 0
     private var touchResponseTimes: [CFTimeInterval] = []
@@ -122,7 +148,7 @@ class GameViewModel {
 
         gameState = .playing
         score = 0
-        timeRemaining = gameSettings.gameTime
+        timeRemaining = effectiveGameTime
         bubblesPopped = 0
         currentStreak = 0
         bestStreak = 0
@@ -132,7 +158,7 @@ class GameViewModel {
         successfulTaps = 0
         
         // 数字順ゲームモード初期化
-        if gameSettings.gameMode == "numbered" {
+        if effectiveGameMode == "numbered" {
             // 動的難易度システム初期化
             currentLevel = 1
             levelStartTime = 0.0
@@ -217,7 +243,7 @@ class GameViewModel {
             successfulTaps += 1
             
             // 数字順ゲームモードでの順序チェック
-            if gameSettings.gameMode == "numbered" && hitBubble.type == .numbered {
+            if effectiveGameMode == "numbered" && hitBubble.type == .numbered {
                 if let bubbleNumber = hitBubble.number {
                     if bubbleNumber == nextExpectedNumber {
                         // 正しい順序
@@ -353,7 +379,7 @@ class GameViewModel {
     }
     
     private func generateBubbles() {
-        if gameSettings.gameMode == "numbered" {
+        if effectiveGameMode == "numbered" {
             // 動的システム：カスタム数字セットを使用
             bubbles = bubbleService.generateNumberedBubblesWithCustomSet(
                 count: gameSettings.bubbleCount,
@@ -414,7 +440,7 @@ class GameViewModel {
         // プログレッシブ難易度が無効の場合は常にレベル1
         guard gameSettings.numberedModeProgressive else { return 1 }
         
-        let elapsedTime = gameSettings.gameTime - timeRemaining
+        let elapsedTime = effectiveGameTime - timeRemaining
         let levelInterval = gameSettings.numberedModeLevelInterval
         let maxLevel = gameSettings.numberedModeMaxLevel
         
@@ -489,7 +515,7 @@ class GameViewModel {
         if newLevel != currentLevel {
             // レベルアップ処理
             currentLevel = newLevel
-            levelStartTime = gameSettings.gameTime - timeRemaining
+            levelStartTime = effectiveGameTime - timeRemaining
             currentNumberSet = generateRandomNumberSet(for: currentLevel)
             currentNumberIndex = 0
             nextExpectedNumber = currentNumberSet[0]
@@ -606,10 +632,10 @@ class GameViewModel {
             score: score,
             bubblesPopped: bubblesPopped,
             accuracy: calculateAccuracy(),
-            gameMode: gameSettings.gameMode,
+            gameMode: effectiveGameMode,
             playDate: Date(),
-            gameDuration: gameSettings.gameTime - timeRemaining,
-            gameTimeLimit: gameSettings.gameTime
+            gameDuration: effectiveGameTime - timeRemaining,
+            gameTimeLimit: effectiveGameTime
         )
         
         do {
