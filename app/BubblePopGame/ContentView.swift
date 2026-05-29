@@ -11,13 +11,8 @@ import SwiftData
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var gameViewModel: GameViewModel?
-    @State private var menuViewModel: MenuViewModel
     @State private var settingsViewModel: SettingsViewModel?
-    
-    init() {
-        self._menuViewModel = State(initialValue: MenuViewModel())
-    }
-    
+
     var body: some View {
         GeometryReader { geometry in
             NavigationStack {
@@ -26,7 +21,7 @@ struct ContentView: View {
                     case .tutorial:
                         TutorialView(gameViewModel: gameViewModel)
                     case .menu:
-                        MenuView(viewModel: menuViewModel, gameViewModel: gameViewModel)
+                        MenuView(gameViewModel: gameViewModel)
                     case .playing, .paused:
                         GameView(viewModel: gameViewModel)
                     case .gameOver:
@@ -75,7 +70,7 @@ struct ContentView: View {
                     do {
                         try gameViewModel.reloadGameSettings()
                     } catch {
-                        print("Failed to reload settings: \(error)")
+                        debugLog("Failed to reload settings: \(error)")
                     }
                 }
             }
@@ -113,7 +108,7 @@ struct ContentView: View {
                 gameSettings = newSettings
             }
         } catch {
-            print("Failed to load settings: \(error)")
+            debugLog("Failed to load settings: \(error)")
             // エラー時も初回起動として扱う
             let newSettings = GameSettings()
             gameSettings = newSettings
@@ -173,13 +168,13 @@ struct ContentView: View {
            !audioService.isPlaying && 
            !audioService.isPaused {
             
-            print("🎵 メニュー復帰時にBGMを自動再開: \(settings.bgmTrack)")
+            debugLog("🎵 メニュー復帰時にBGMを自動再開: \(settings.bgmTrack)")
             audioService.playBGMTrack(settings.bgmTrack, loop: true)
         } else if settings.bgmEnabled && 
                   settings.bgmTrack != "off" && 
                   audioService.isPaused {
             
-            print("🎵 メニュー復帰時にBGMを再開（ポーズ解除）")
+            debugLog("🎵 メニュー復帰時にBGMを再開（ポーズ解除）")
             audioService.resumeBGM()
         }
     }
