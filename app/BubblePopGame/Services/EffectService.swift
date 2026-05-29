@@ -16,6 +16,9 @@ protocol EffectService {
     func triggerSuccessFeedback()
     func triggerWarningFeedback()
     func triggerErrorFeedback()
+    /// パーティクル演出用 ViewModel を注入する。
+    /// 具象型へのダウンキャストを避けるため protocol に定義（Issue #20 / DI 改善）。
+    func setParticleEffectViewModel(_ viewModel: ParticleEffectViewModel?)
 }
 
 @MainActor
@@ -27,7 +30,11 @@ class EffectServiceImpl: EffectService {
     private let notificationFeedback: UINotificationFeedbackGenerator
     
     var particleEffectViewModel: ParticleEffectViewModel?
-    
+
+    func setParticleEffectViewModel(_ viewModel: ParticleEffectViewModel?) {
+        particleEffectViewModel = viewModel
+    }
+
     init() {
         self.lightFeedback = UIImpactFeedbackGenerator(style: .light)
         self.mediumFeedback = UIImpactFeedbackGenerator(style: .medium)
