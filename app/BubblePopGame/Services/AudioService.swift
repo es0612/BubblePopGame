@@ -91,7 +91,7 @@ class AudioServiceImpl: AudioService {
         do {
             try audioEngine.start()
         } catch {
-            print("Audio engine start failed: \(error)")
+            debugLog("Audio engine start failed: \(error)")
         }
     }
     
@@ -123,7 +123,7 @@ class AudioServiceImpl: AudioService {
             fileName = "3.mp3"
             resourceName = "3"
         default:
-            print("Unknown BGM track: \(track)")
+            debugLog("Unknown BGM track: \(track)")
             return
         }
         
@@ -133,29 +133,29 @@ class AudioServiceImpl: AudioService {
         // 方法1: メインバンドルから直接検索（最も可能性が高い）
         if let bundlePath = Bundle.main.path(forResource: resourceName, ofType: "mp3") {
             url = URL(fileURLWithPath: bundlePath)
-            print("🔍 Found BGM file in main bundle: \(bundlePath)")
+            debugLog("🔍 Found BGM file in main bundle: \(bundlePath)")
         }
         // 方法2: Bgmディレクトリ内からファイルを検索
         else if let bundlePath = Bundle.main.path(forResource: resourceName, ofType: "mp3", inDirectory: "Bgm") {
             url = URL(fileURLWithPath: bundlePath)
-            print("🔍 Found BGM file in Bgm directory: \(bundlePath)")
+            debugLog("🔍 Found BGM file in Bgm directory: \(bundlePath)")
         }
         // 方法3: Bgmディレクトリでファイルタイプにextensionを含めて検索
         else if let bundlePath = Bundle.main.path(forResource: fileName, ofType: nil, inDirectory: "Bgm") {
             url = URL(fileURLWithPath: bundlePath)
-            print("🔍 Found BGM file with full name: \(bundlePath)")
+            debugLog("🔍 Found BGM file with full name: \(bundlePath)")
         }
         
         guard let audioURL = url else {
-            print("❌ BGM file not found: \(fileName)")
-            print("📁 Bundle contents debug:")
+            debugLog("❌ BGM file not found: \(fileName)")
+            debugLog("📁 Bundle contents debug:")
             let bundlePath = Bundle.main.bundlePath
-            print("   Bundle path: \(bundlePath)")
+            debugLog("   Bundle path: \(bundlePath)")
             if let resourcePath = Bundle.main.resourcePath {
-                print("   Resource path: \(resourcePath)")
+                debugLog("   Resource path: \(resourcePath)")
                 // Bgmディレクトリの存在確認
                 let bgmPath = "\(resourcePath)/Bgm"
-                print("   Bgm directory exists: \(FileManager.default.fileExists(atPath: bgmPath))")
+                debugLog("   Bgm directory exists: \(FileManager.default.fileExists(atPath: bgmPath))")
             }
             // フォールバック: システム音で代用
             generateSynthesizedBGM()
@@ -171,13 +171,13 @@ class AudioServiceImpl: AudioService {
             let success = bgmAudioPlayer?.play() ?? false
             if success {
                 _currentBGMTrack = track
-                print("🎵 Playing BGM track: \(track) (\(fileName))")
+                debugLog("🎵 Playing BGM track: \(track) (\(fileName))")
             } else {
-                print("❌ Failed to play BGM track: \(track)")
+                debugLog("❌ Failed to play BGM track: \(track)")
                 generateSynthesizedBGM() // フォールバック
             }
         } catch {
-            print("❌ Error loading BGM file \(fileName): \(error)")
+            debugLog("❌ Error loading BGM file \(fileName): \(error)")
             generateSynthesizedBGM() // フォールバック
         }
     }
@@ -207,7 +207,7 @@ class AudioServiceImpl: AudioService {
         case "level_up":
             generateLevelUpSound()
         default:
-            print("Playing SFX: \(name)")
+            debugLog("Playing SFX: \(name)")
         }
     }
     
@@ -305,7 +305,7 @@ class AudioServiceImpl: AudioService {
     
     private func generateSynthesizedBGM() {
         // 実際のプロジェクトでは音声ファイルを使用
-        print("🎵 BGM playing (synthesized)")
+        debugLog("🎵 BGM playing (synthesized)")
     }
     
     private func generatePopSound() {
@@ -313,7 +313,7 @@ class AudioServiceImpl: AudioService {
         if !isMuted && sfxVolume > 0 {
             AudioServicesPlaySystemSound(1306) // Pop sound
         }
-        print("🎵 Pop sound (volume: \(sfxVolume))")  
+        debugLog("🎵 Pop sound (volume: \(sfxVolume))")  
     }
     
     private func generateButtonSound() {
@@ -321,7 +321,7 @@ class AudioServiceImpl: AudioService {
         if !isMuted && sfxVolume > 0 {
             AudioServicesPlaySystemSound(1104) // Click sound
         }
-        print("🎵 Button sound (volume: \(sfxVolume))")
+        debugLog("🎵 Button sound (volume: \(sfxVolume))")
     }
     
     private func generateGameOverSound() {
@@ -329,7 +329,7 @@ class AudioServiceImpl: AudioService {
         if !isMuted && sfxVolume > 0 {
             AudioServicesPlaySystemSound(1322) // Anticipate sound
         }
-        print("🎵 Game over sound (volume: \(sfxVolume))")
+        debugLog("🎵 Game over sound (volume: \(sfxVolume))")
     }
     
     private func generateErrorSound() {
@@ -337,7 +337,7 @@ class AudioServiceImpl: AudioService {
         if !isMuted && sfxVolume > 0 {
             AudioServicesPlaySystemSound(1521) // Error sound
         }
-        print("🎵 Error sound (volume: \(sfxVolume))")
+        debugLog("🎵 Error sound (volume: \(sfxVolume))")
     }
     
     private func generateLevelUpSound() {
@@ -345,6 +345,6 @@ class AudioServiceImpl: AudioService {
         if !isMuted && sfxVolume > 0 {
             AudioServicesPlaySystemSound(1315) // Success sound
         }
-        print("🎵 Level up sound (volume: \(sfxVolume))")
+        debugLog("🎵 Level up sound (volume: \(sfxVolume))")
     }
 }

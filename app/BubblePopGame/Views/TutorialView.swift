@@ -417,7 +417,7 @@ struct TutorialView: View {
         do {
             try gameViewModel.saveGameSettings()
         } catch {
-            print("Failed to save tutorial skip: \(error)")
+            debugLog("Failed to save tutorial skip: \(error)")
         }
         
         // メニュー画面に遷移
@@ -432,7 +432,7 @@ struct TutorialView: View {
         do {
             try gameViewModel.saveGameSettings()
         } catch {
-            print("Failed to save tutorial completion: \(error)")
+            debugLog("Failed to save tutorial completion: \(error)")
         }
         
         // メニュー画面に遷移

@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct MenuView: View {
-    let viewModel: MenuViewModel
     let gameViewModel: GameViewModel
     @Environment(\.colorScheme) private var colorScheme
     

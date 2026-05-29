@@ -652,7 +652,7 @@ class GameViewModel {
             // 統計情報を自動更新
             try statisticsRepository.updateStatistics(with: gameScore)
         } catch {
-            print("Failed to save score or update statistics: \(error)")
+            debugLog("Failed to save score or update statistics: \(error)")
         }
     }
     
@@ -685,7 +685,7 @@ class GameViewModel {
         
         // 100ms以上の場合は警告ログ
         if responseTime > 0.1 {
-            print("⚠️ Touch response time exceeded 100ms: \(responseTime * 1000)ms")
+            debugLog("⚠️ Touch response time exceeded 100ms: \(responseTime * 1000)ms")
         }
     }
     
