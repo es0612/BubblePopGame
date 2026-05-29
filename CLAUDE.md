@@ -80,12 +80,20 @@ app/BubblePopGame/
 - パフォーマンス監視（60FPS維持）を重視
 - オブジェクトプールパターンでメモリ効率化
 - アクセシビリティ対応を忘れずに実装
+- 新規 `.swift` ファイルはフォルダに置くだけでターゲットに自動参加する（本プロジェクトは Xcode 16 の file-system synchronized groups を採用 = `PBXFileSystemSynchronizedRootGroup`）。`project.pbxproj` の手編集は不要。テストファイルも `BubblePopGameTests/` に置けば自動で UnitTest ターゲットに含まれる
 
 ### MainActor 隔離
 
 - `@Observable class` で UI から呼ばれるサービスを書く場合は `@MainActor` 付与（特に `effects` などのSwiftUI状態を変更するメソッド）
 - 実装側だけ `@MainActor` を付けるとプロトコル適合で Swift 6 警告（`conformance ... crosses into main actor-isolated code`）が出るため、プロトコル側にも合わせて付与するのが本筋
 - 既存プロトコルを変えにくい場合は `Task { @MainActor in ... }` でラップする選択肢もあるが、`createPopEffect` のような UI 連動メソッドはレイテンシ的に同期呼び出しが望ましい
+- ⚠️ **「見えない警告」の検証**: 本プロジェクトは `SWIFT_VERSION = 5.0` かつ `SWIFT_STRICT_CONCURRENCY` 未設定（= minimal）のため、上記 conformance 警告は**通常ビルドでは surface しない**。`@MainActor` 化のような Swift 6 対応を修正・検証するときは、`xcodebuild build ... SWIFT_STRICT_CONCURRENCY=complete` で before（警告が出る）/ after（消える）を実測すること。通常 config のままだと「修正したつもり」でも検証不能（View レイヤのリテラル revert がテストをすり抜けるのと同じ盲点）
+
+### SwiftData の取り扱い
+
+- ⚠️ **autosave footgun**: SwiftUI の `.modelContainer(_:)` は `mainContext.autosaveEnabled = true` がデフォルト。`fetchSettings()` 等で取得した context 追跡下の `@Model` インスタンス（例: `GameSettings`）を `obj.prop = ...` と書き換えると、明示的に save しなくても autosave で**永続化される**
+- そのため、テスト/デバッグ用の一時的な override（例: `--skip-tutorial` で `isFirstLaunch` を無視する）では、**永続モデルを書き換えず**にローカル変数で判定だけ分岐させること。モデルを mutate すると次回の通常起動にも値が残ってバグになる
+- どうしても override 値をモデル経由で渡したい場合は、context 非挿入の detached な `GameSettings()` を作る方式を検討（ただし全フィールド複製の保守コストと、後段で保存経路に乗ると重複 row を作るリスクに注意）
 
 ### View レイヤ修正の検証戦略
 
@@ -93,6 +101,13 @@ app/BubblePopGame/
 - そのため View 層修正は**手動 walk-through が必須**。PR description に「マージ前手動確認チェックリスト」を明記する
 - `simctl` には `tap` がないため、設定変更や tutorial スキップを伴う自動検証は不可。`xcrun simctl io ... screenshot` で起動確認＋クラッシュなしの確認までが自動化の上限
 - 永続化された GameSettings は SwiftData なので `UserDefaults trick`（`xcrun simctl spawn ... defaults write`）が効かない点に注意
+- 永続化フラグ（`isFirstLaunch` 等）で初期化フローが分岐する場合、手動 walk-through は「初回起動」「2回目以降」の両経路を必ず検証する。Tutorial を経由するかどうかで `updateScreenBounds` のような重要な副作用がスキップされ、本番バグの温床になる
+- `guard` で前提条件を弾く修正を入れるときは、その前提条件を供給するコード（例: `screenBounds` をセットする `onAppear`）が、ガードを通過する全ての到達経路で確実に走るかを必ず洗い出す。コメントに「X で供給される」と書くだけでは、X が一部経路でしか実行されないと永続デッドロックになる
+- ⚠️ **検証後の cleanup を忘れない**: `xcrun simctl launch` でアプリを起動して screenshot を撮ったら、検証完了後に必ず `xcrun simctl terminate <SIM> <BUNDLE>`（必要なら `xcrun simctl shutdown <SIM>`）で停止する。本アプリは BGM がデフォルト ON（`bgmEnabled = true`）でメニュー画面で自動再生されるため、起動しっぱなしにすると裏で音楽が鳴り続ける。**音声を持つアプリの検証では terminate を特に徹底する**
+
+### UI テスト設計
+
+- XCUITest の predicate（例: `CONTAINS '0' OR CONTAINS '1'`）は、意図しない他の UI 要素（時間表示の「60 秒」等）にも偽陽性マッチして検証が空転する。スコア／タイマー等の同種数値要素が画面に共存するときは accessibilityIdentifier で厳密に特定する
 
 ### Git運用
 
