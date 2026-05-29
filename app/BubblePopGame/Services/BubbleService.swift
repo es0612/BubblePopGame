@@ -40,8 +40,12 @@ class BubbleServiceImpl: BubbleService {
     }
 
     func updateBubbleConfig(minRadius: Double, maxRadius: Double, animationSpeed: Double) {
-        self.minRadius = CGFloat(minRadius)
-        self.maxRadius = CGFloat(maxRadius)
+        // min/max が逆転していても CGFloat.random(in:) が trap しないよう正規化する。
+        // （将来 UI でスライダー追加や永続値破損があっても安全に倒す保険）
+        let lo = Swift.min(minRadius, maxRadius)
+        let hi = Swift.max(minRadius, maxRadius)
+        self.minRadius = CGFloat(lo)
+        self.maxRadius = CGFloat(hi)
         self.animationSpeed = CGFloat(animationSpeed)
     }
     

@@ -279,6 +279,23 @@ struct BubbleServiceTests {
         #expect(bubble.radius == 15.0)
     }
 
+    @Test("min/max が逆転していてもクラッシュせず範囲内に収まる")
+    func testInvertedRadiusConfigDoesNotCrash() {
+        let service = createTestService()
+        // 逆転した値を渡しても random(in:) が trap しないこと（正規化される）
+        service.updateBubbleConfig(minRadius: 60.0, maxRadius: 30.0, animationSpeed: 1.0)
+
+        for _ in 0..<50 {
+            let bubble = service.createBubble(at: CGPoint(x: 100, y: 100), type: .normal)
+            #expect(bubble.radius >= 30.0)
+            #expect(bubble.radius <= 60.0)
+        }
+
+        // 数字バブルは大きい方（60）で固定
+        let numbered = service.createNumberedBubble(at: CGPoint(x: 100, y: 100), number: 1)
+        #expect(numbered.radius == 60.0)
+    }
+
     @Test("animationSpeed が初期速度をスケールする")
     func testAnimationSpeedScalesVelocity() {
         let service = createTestService()
