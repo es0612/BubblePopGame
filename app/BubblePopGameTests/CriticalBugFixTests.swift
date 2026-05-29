@@ -91,6 +91,42 @@ struct CriticalBugFixTests {
         #expect(!vm.bubbles.isEmpty)
     }
 
+    // MARK: - 1.1b Start デッドロック防止 (#23)
+
+    @Test("screenBounds 未設定で Start しても、サイズ到達時に自動でゲーム開始する（#23 デッドロック防止）")
+    func startIsDeferredUntilScreenBoundsAvailable() throws {
+        let vm = try Self.makeViewModel()
+        vm.gameState = .menu
+
+        // screenBounds が .zero のまま Start → 即 playing にはせず保留（PR #10 ガード維持）
+        vm.startGame()
+        #expect(vm.gameState == .menu, "サイズ未供給時は保留（まだ playing にしない）")
+        #expect(vm.bubbles.isEmpty, "PR #10 ガード: .zero でバブル生成しない")
+
+        // 画面サイズが到達 → 保留分が自動でゲーム開始（永久デッドロックを防ぐ）
+        vm.updateScreenBounds(CGRect(x: 0, y: 0, width: 400, height: 800))
+        #expect(vm.gameState == .playing, "サイズ到達で保留分が自動開始する")
+        #expect(!vm.bubbles.isEmpty)
+
+        vm.pauseGame() // タイマー/ループ停止
+    }
+
+    @Test("有効な screenBounds は .zero で上書きされない（#23 クロバー防止）")
+    func validScreenBoundsNotClobberedByZero() throws {
+        let vm = try Self.makeViewModel()
+        vm.updateScreenBounds(CGRect(x: 0, y: 0, width: 400, height: 800))
+
+        // 遷移中の geometry 取りこぼし（.zero）が有効値を壊さないこと
+        vm.updateScreenBounds(CGRect.zero)
+        vm.gameState = .menu
+        vm.startGame()
+
+        #expect(vm.gameState == .playing, ".zero で上書きされず Start が機能する")
+        #expect(!vm.bubbles.isEmpty)
+
+        vm.pauseGame()
+    }
+
     // MARK: - 1.2 時間表示
 
     @Test("gameTime=120 で startGame すると timeRemaining も 120")
