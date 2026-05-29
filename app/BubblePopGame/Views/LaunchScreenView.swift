@@ -65,15 +65,21 @@ struct LaunchScreenView: View {
                     
                     // アプリ名
                     VStack(spacing: 8) {
-                        Text("シャボン玉消しゲーム")
+                        Text(NSLocalizedString("game_title", comment: "Game title"))
                             .font(.largeTitle)
                             .fontWeight(.bold)
                             .foregroundColor(.white)
                             .multilineTextAlignment(.center)
-                        
-                        Text("Bubble Pop Game")
-                            .font(.title3)
-                            .foregroundColor(.white.opacity(0.8))
+
+                        // ブランド英語名のサブタイトル。日本語ロケールでは日本語タイトルの
+                        // 下に英語名を添える演出。英語ロケールでは game_title と重複するため
+                        // launch_subtitle を空にして非表示にする。
+                        let launchSubtitle = NSLocalizedString("launch_subtitle", comment: "Launch screen subtitle (English brand name); empty in English locale")
+                        if !launchSubtitle.isEmpty {
+                            Text(launchSubtitle)
+                                .font(.title3)
+                                .foregroundColor(.white.opacity(0.8))
+                        }
                     }
                     .opacity(isAnimating ? 1.0 : 0.0)
                     .offset(y: isAnimating ? 0 : 20)

@@ -14,6 +14,7 @@
 
 // MARK: - Menu Screen
 "game_title" = "Bubble Pop Game";
+"launch_subtitle" = "";
 "menu_start_game" = "Start Game";
 "menu_settings" = "Settings";
 "menu_high_score" = "High Score";

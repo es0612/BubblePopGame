@@ -14,6 +14,7 @@
 
 // MARK: - Menu Screen
 "game_title" = "シャボン玉消しゲーム";
+"launch_subtitle" = "Bubble Pop Game";
 "menu_start_game" = "ゲーム開始";
 "menu_settings" = "設定";
 "menu_high_score" = "ハイスコア";
