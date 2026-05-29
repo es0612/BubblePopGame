@@ -134,9 +134,8 @@ class GameViewModel {
     }
     
     func setupParticleEffectViewModel(_ viewModel: ParticleEffectViewModel) {
-        if let effectServiceImpl = effectService as? EffectServiceImpl {
-            effectServiceImpl.particleEffectViewModel = viewModel
-        }
+        // 具象型へのダウンキャストを避け、protocol 経由で注入（Issue #20 / DI 改善）。
+        effectService.setParticleEffectViewModel(viewModel)
     }
     
     func startGame() {
