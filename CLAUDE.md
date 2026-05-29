@@ -42,6 +42,8 @@ xcodebuild test ... 2>&1 | grep -iE "Suite.*(started|passed|failed)|Test case .*
 ```
 `** TEST SUCCEEDED **` だけ見るとどのテストが走ったか分からないので、テストの実体確認には上記パターン推奨。
 
+⚠️ **単一テスト指定の「0件 SUCCEEDED」罠**: `-only-testing:BubblePopGameTests/SuiteName/testMethod()` のように**メソッド単位**まで絞ると、ビルドキャッシュ等の都合で**1件も実行されないまま `** TEST SUCCEEDED **`**（vacuous）になることがある。これを RED 確認に使うと「落ちるはずのテストが通った」と誤認する。テストを確実に走らせて RED/GREEN を判定したいときは **suite 単位**（`-only-testing:BubblePopGameTests/SuiteName`）で実行し、上の grep で `Test case '...' (passed|failed)` 行が実際に出力されることを確認すること。
+
 ## アーキテクチャ
 
 ### ディレクトリ構造
