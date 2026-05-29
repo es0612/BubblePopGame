@@ -379,6 +379,15 @@ class GameViewModel {
     }
     
     private func generateBubbles() {
+        // 設定値（バブルサイズ・速度）をサービスへ反映（Issue #17）。
+        // ここで毎ゲーム開始時に push することで、設定変更が次ゲームに確実に反映され、
+        // プレイ中の addRandomBubble(createBubble) にも効く。
+        bubbleService.updateBubbleConfig(
+            minRadius: gameSettings.bubbleMinRadius,
+            maxRadius: gameSettings.bubbleMaxRadius,
+            animationSpeed: gameSettings.animationSpeed
+        )
+
         if effectiveGameMode == "numbered" {
             // 動的システム：カスタム数字セットを使用
             bubbles = bubbleService.generateNumberedBubblesWithCustomSet(

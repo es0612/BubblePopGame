@@ -28,18 +28,19 @@ struct BubbleServiceTests {
         #expect(normalBubble.position.y == position.y)
         #expect(normalBubble.type == .normal)
         #expect(normalBubble.number == nil)
-        #expect(normalBubble.radius >= 25.0)
-        #expect(normalBubble.radius <= 50.0)
+        // 設定未指定時はデフォルト（GameSettings 既定の min=30/max=60）を反映
+        #expect(normalBubble.radius >= 30.0)
+        #expect(normalBubble.radius <= 60.0)
         #expect(normalBubble.alpha == 0.8)
         #expect(normalBubble.isPopping == false)
-        
-        // 数字付きバブル作成
+
+        // 数字付きバブル作成（デフォルト maxRadius=60 で固定）
         let numberedBubble = service.createNumberedBubble(at: position, number: 5)
         #expect(numberedBubble.position.x == position.x)
         #expect(numberedBubble.position.y == position.y)
         #expect(numberedBubble.type == .numbered)
         #expect(numberedBubble.number == 5)
-        #expect(numberedBubble.radius == 50.0)
+        #expect(numberedBubble.radius == 60.0)
     }
     
     @Test("衝突判定の正確性テスト")
@@ -255,6 +256,61 @@ struct BubbleServiceTests {
         #expect(colors.count >= 1)
     }
     
+    @Test("バブル半径が設定の min/max を反映する")
+    func testBubbleRadiusReflectsSettings() {
+        let service = createTestService()
+        service.updateBubbleConfig(minRadius: 10.0, maxRadius: 15.0, animationSpeed: 1.0)
+
+        // 設定した半径範囲内で生成されることを確認（ランダムなので複数回）
+        for _ in 0..<50 {
+            let bubble = service.createBubble(at: CGPoint(x: 100, y: 100), type: .normal)
+            #expect(bubble.radius >= 10.0)
+            #expect(bubble.radius <= 15.0)
+        }
+    }
+
+    @Test("数字バブル半径が設定の maxRadius を反映する")
+    func testNumberedBubbleRadiusReflectsSettings() {
+        let service = createTestService()
+        service.updateBubbleConfig(minRadius: 10.0, maxRadius: 15.0, animationSpeed: 1.0)
+
+        // 数字バブルは目立たせるため maxRadius で固定生成
+        let bubble = service.createNumberedBubble(at: CGPoint(x: 100, y: 100), number: 3)
+        #expect(bubble.radius == 15.0)
+    }
+
+    @Test("min/max が逆転していてもクラッシュせず範囲内に収まる")
+    func testInvertedRadiusConfigDoesNotCrash() {
+        let service = createTestService()
+        // 逆転した値を渡しても random(in:) が trap しないこと（正規化される）
+        service.updateBubbleConfig(minRadius: 60.0, maxRadius: 30.0, animationSpeed: 1.0)
+
+        for _ in 0..<50 {
+            let bubble = service.createBubble(at: CGPoint(x: 100, y: 100), type: .normal)
+            #expect(bubble.radius >= 30.0)
+            #expect(bubble.radius <= 60.0)
+        }
+
+        // 数字バブルは大きい方（60）で固定
+        let numbered = service.createNumberedBubble(at: CGPoint(x: 100, y: 100), number: 1)
+        #expect(numbered.radius == 60.0)
+    }
+
+    @Test("animationSpeed が初期速度をスケールする")
+    func testAnimationSpeedScalesVelocity() {
+        let service = createTestService()
+        // animationSpeed=0 なら初速も0になる（決定的に検証可能）
+        service.updateBubbleConfig(minRadius: 30.0, maxRadius: 60.0, animationSpeed: 0.0)
+
+        let normalBubble = service.createBubble(at: CGPoint(x: 100, y: 100), type: .normal)
+        #expect(normalBubble.velocity.dx == 0.0)
+        #expect(normalBubble.velocity.dy == 0.0)
+
+        let numberedBubble = service.createNumberedBubble(at: CGPoint(x: 100, y: 100), number: 1)
+        #expect(numberedBubble.velocity.dx == 0.0)
+        #expect(numberedBubble.velocity.dy == 0.0)
+    }
+
     @Test("境界跳ね返り処理テスト")
     func testBoundaryBounceLogic() {
         let service = createTestService()
