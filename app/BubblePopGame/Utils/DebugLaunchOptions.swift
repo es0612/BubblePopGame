@@ -26,16 +26,20 @@ struct DebugLaunchOptions {
     let gameTime: Double?
     /// `--game-mode=<モード>`: ゲームモードの override（GameMode の rawValue 文字列）
     let gameMode: String?
+    /// `--screenshot=<画面>`: App Store スクショ撮影用に起動直後の表示画面へ直行
+    /// （`menu`/`game`/`game-numbered`/`result`/`settings`/`highscore`）。DEBUG 専用。
+    let screenshot: String?
 
     /// いずれかの override が指定されているか
     var hasOverrides: Bool {
-        skipTutorial || gameTime != nil || gameMode != nil
+        skipTutorial || gameTime != nil || gameMode != nil || screenshot != nil
     }
 
     init(arguments: [String]) {
         self.skipTutorial = arguments.contains("--skip-tutorial")
         self.gameTime = Self.value(for: "--game-time=", in: arguments).flatMap(Double.init)
         self.gameMode = Self.value(for: "--game-mode=", in: arguments)
+        self.screenshot = Self.value(for: "--screenshot=", in: arguments)
     }
 
     /// `--key=value` 形式の引数から value 部分を取り出す（空文字列は nil 扱い）
