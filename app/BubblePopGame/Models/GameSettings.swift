@@ -44,7 +44,7 @@ class GameSettings {
     init() {
         self.id = UUID()
         self.bubbleCount = 20
-        self.gameTime = 60.0
+        self.gameTime = 30.0
         self.bubbleMinRadius = 30.0
         self.bubbleMaxRadius = 60.0
         self.animationSpeed = 1.0

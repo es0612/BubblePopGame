@@ -42,7 +42,7 @@ struct SimpleSwiftDataTests {
         
         // デフォルト値の確認
         #expect(settings.bubbleCount == 20)
-        #expect(settings.gameTime == 60.0)
+        #expect(settings.gameTime == 30.0)
         #expect(settings.soundEnabled == true)
         #expect(settings.vibrationEnabled == true)
         #expect(settings.gameMode == "normal")

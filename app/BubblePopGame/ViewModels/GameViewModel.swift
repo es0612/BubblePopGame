@@ -15,7 +15,7 @@ import os
 class GameViewModel {
     var gameState: GameState = .menu
     var score: Int = 0
-    var timeRemaining: Double = 60.0
+    var timeRemaining: Double = 30.0
     var bubbles: [Bubble] = []
     var screenBounds: CGRect = .zero
     var bubblesPopped: Int = 0
