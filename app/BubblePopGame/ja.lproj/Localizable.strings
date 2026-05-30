@@ -32,7 +32,7 @@
 "game_pieces_unit" = "個";
 
 // MARK: - Game Over Screen  
-"gameover_title" = "ゲーム終了";
+"gameover_title" = "おしまい！";
 "gameover_congratulations" = "お疲れ様でした！";
 "gameover_final_score" = "最終スコア";
 "gameover_bubbles_count" = "破裂数";
@@ -41,8 +41,6 @@
 "gameover_play_again" = "もう一度プレイ";
 "gameover_detailed_stats" = "詳細統計";
 "gameover_play_time" = "プレイ時間";
-"gameover_avg_reaction" = "平均反応速度";
-"gameover_bubble_density" = "シャボン玉密度";
 "gameover_stats_title" = "ゲーム統計";
 
 // MARK: - High Score Screen
