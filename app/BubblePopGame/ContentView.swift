@@ -141,6 +141,12 @@ struct ContentView: View {
         // 初期遷移先の判定と GameViewModel の実効値 override のみをローカルに決定する。
         #if DEBUG
         let debugOptions = DebugLaunchOptions(arguments: CommandLine.arguments)
+        // --screenshot=<画面>: App Store スクショ撮影用に起動直後の画面へ直行（DEBUG専用・リリース未影響）
+        if let shot = debugOptions.screenshot {
+            configureForScreenshot(shot, viewModel: viewModel)
+            self.gameViewModel = viewModel
+            return
+        }
         // --skip-tutorial: チュートリアルを bypass する（Issue #8）
         let shouldShowTutorial = gameSettings.isFirstLaunch && !debugOptions.skipTutorial
         // --game-time / --game-mode: GameViewModel の実効値を override（Issue #13）。
@@ -157,6 +163,35 @@ struct ContentView: View {
 
         self.gameViewModel = viewModel
     }
+
+    #if DEBUG
+    /// App Store スクショ撮影用: 起動直後に指定画面を表示し、必要ならサンプルデータを注入する。
+    /// `--screenshot=<画面>` 起動引数からのみ呼ばれる。リリースビルドには含まれない。
+    private func configureForScreenshot(_ screen: String, viewModel: GameViewModel) {
+        switch screen {
+        case "game", "game-normal":
+            viewModel.startGame()
+        case "game-numbered":
+            viewModel.debugGameModeOverride = "numbered"
+            viewModel.startGame()
+        case "result":
+            // 見栄えのするサンプル結果を注入（正確率 = successfulTaps/totalTaps = 96/104 ≈ 92%）
+            viewModel.score = 1280
+            viewModel.bubblesPopped = 96
+            viewModel.bestStreak = 18
+            viewModel.totalTaps = 104
+            viewModel.successfulTaps = 96
+            viewModel.timeRemaining = 0
+            viewModel.gameState = .gameOver
+        case "settings":
+            viewModel.gameState = .settings
+        case "highscore":
+            viewModel.gameState = .highScore
+        default: // "menu" 含む
+            viewModel.gameState = .menu
+        }
+    }
+    #endif
     
     private func resumeBGMOnMenuReturn(gameViewModel: GameViewModel) {
         // BGMが有効でトラックが設定されているが現在再生されていない場合に再開

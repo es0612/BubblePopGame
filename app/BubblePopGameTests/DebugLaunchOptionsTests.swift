@@ -18,6 +18,7 @@ struct DebugLaunchOptionsTests {
         #expect(options.skipTutorial == false)
         #expect(options.gameTime == nil)
         #expect(options.gameMode == nil)
+        #expect(options.screenshot == nil)
         #expect(options.hasOverrides == false)
     }
 
@@ -51,6 +52,13 @@ struct DebugLaunchOptionsTests {
     func gameModeParsing() {
         let options = DebugLaunchOptions(arguments: ["app", "--game-mode=numbered"])
         #expect(options.gameMode == "numbered")
+        #expect(options.hasOverrides == true)
+    }
+
+    @Test("--screenshot=result を文字列として解釈する")
+    func screenshotParsing() {
+        let options = DebugLaunchOptions(arguments: ["app", "--screenshot=result"])
+        #expect(options.screenshot == "result")
         #expect(options.hasOverrides == true)
     }
 
