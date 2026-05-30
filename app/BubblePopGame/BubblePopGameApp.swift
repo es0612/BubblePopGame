@@ -53,6 +53,11 @@ struct BubblePopGameApp: App {
         WindowGroup {
             LaunchScreenView()
                 .modelContainer(modelContainer)
+                .task {
+                    GameTimeDefaultMigration.runIfNeeded(
+                        repository: SettingsRepositoryImpl(modelContainer: modelContainer)
+                    )
+                }
         }
     }
 }
