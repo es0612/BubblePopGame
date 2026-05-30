@@ -55,6 +55,7 @@ struct GameTimeMigrationTests {
         GameTimeDefaultMigration.runIfNeeded(repository: repo, defaults: defaults)
 
         #expect(try repo.fetchSettings()?.gameTime == 90.0)
+        #expect(defaults.bool(forKey: GameTimeDefaultMigration.sentinelKey) == true)
     }
 
     @Test("センチネル済みなら何もしない")

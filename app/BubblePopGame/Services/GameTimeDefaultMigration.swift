@@ -23,7 +23,12 @@ enum GameTimeDefaultMigration {
         guard let settings = try? repository.fetchSettings() else { return }
         if settings.gameTime == oldDefault {
             settings.gameTime = newDefault
-            try? repository.saveSettings(settings)
+            do {
+                try repository.saveSettings(settings)
+            } catch {
+                // sentinel は defer で立つため retry されない点に留意（クラッシュは避ける）
+                debugLog("GameTimeDefaultMigration: 移行の永続化に失敗 — \(error)")
+            }
         }
     }
 }
