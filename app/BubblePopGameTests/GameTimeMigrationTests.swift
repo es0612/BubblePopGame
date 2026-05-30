@@ -82,4 +82,50 @@ struct GameTimeMigrationTests {
         #expect(try repo.fetchSettings() == nil)
         #expect(defaults.bool(forKey: GameTimeDefaultMigration.sentinelKey) == true)
     }
+
+    // MARK: - 失敗時に sentinel を立てない（次回再試行）
+
+    @MainActor
+    final class ThrowingSettingsRepository: SettingsRepository {
+        enum FailMode { case fetch, save }
+        let failMode: FailMode
+        var stored: GameSettings?
+        struct StubError: Error {}
+
+        init(failMode: FailMode, stored: GameSettings? = nil) {
+            self.failMode = failMode
+            self.stored = stored
+        }
+        func saveSettings(_ settings: GameSettings) throws {
+            if failMode == .save { throw StubError() }
+            stored = settings
+        }
+        func fetchSettings() throws -> GameSettings? {
+            if failMode == .fetch { throw StubError() }
+            return stored
+        }
+        func resetToDefaults() throws {}
+    }
+
+    @Test("fetch 失敗時は sentinel を立てない（次回再試行できる）")
+    func fetchFailureDoesNotBurnSentinel() throws {
+        let repo = ThrowingSettingsRepository(failMode: .fetch)
+        let defaults = Self.makeDefaults("test.migrate.fetchfail")
+
+        GameTimeDefaultMigration.runIfNeeded(repository: repo, defaults: defaults)
+
+        #expect(defaults.bool(forKey: GameTimeDefaultMigration.sentinelKey) == false)
+    }
+
+    @Test("save 失敗時は sentinel を立てない（次回再試行できる）")
+    func saveFailureDoesNotBurnSentinel() throws {
+        let sixty = GameSettings()
+        sixty.gameTime = 60.0
+        let repo = ThrowingSettingsRepository(failMode: .save, stored: sixty)
+        let defaults = Self.makeDefaults("test.migrate.savefail")
+
+        GameTimeDefaultMigration.runIfNeeded(repository: repo, defaults: defaults)
+
+        #expect(defaults.bool(forKey: GameTimeDefaultMigration.sentinelKey) == false)
+    }
 }
