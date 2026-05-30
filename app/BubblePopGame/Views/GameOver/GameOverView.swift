@@ -10,6 +10,10 @@ import SwiftUI
 struct GameOverView: View {
     let viewModel: GameViewModel
     @State private var showingStats = false
+    @State private var buttonsEnabled = false   // #36: GO直後の流れ弾タップ防止
+
+    /// ゲームオーバー表示直後、この秒数だけボタンを無効化する
+    private let buttonActivationDelay: TimeInterval = 0.7
     
     var body: some View {
         VStack(spacing: 30) {
@@ -18,7 +22,7 @@ struct GameOverView: View {
                 Text(NSLocalizedString("gameover_title", comment: "Game over title"))
                     .font(.largeTitle)
                     .fontWeight(.bold)
-                    .foregroundColor(.red.accessible())
+                    .foregroundColor(.orange.accessible())
                 
                 Text(NSLocalizedString("gameover_congratulations", comment: "Congratulations message"))
                     .font(.headline)
@@ -91,7 +95,10 @@ struct GameOverView: View {
                 }
             }
             .padding(.horizontal, 30)
-            
+            .disabled(!buttonsEnabled)
+            .opacity(buttonsEnabled ? 1.0 : 0.35)
+            .animation(.easeIn(duration: 0.3), value: buttonsEnabled)
+
             if showingStats {
                 VStack(spacing: 10) {
                     Text(NSLocalizedString("gameover_stats_title", comment: "Game statistics title"))
@@ -99,9 +106,7 @@ struct GameOverView: View {
                         .foregroundColor(.primary)
                     
                     VStack(spacing: 8) {
-                        StatRow(label: NSLocalizedString("gameover_play_time", comment: "Play time label"), value: String(format: NSLocalizedString("seconds_format", comment: "Seconds format with decimal"), viewModel.gameSettings.gameTime - viewModel.timeRemaining))
-                        StatRow(label: NSLocalizedString("gameover_avg_reaction", comment: "Average reaction time label"), value: viewModel.bubblesPopped > 0 ? String(format: "%.2f" + NSLocalizedString("game_seconds_unit", comment: "Seconds unit") + "/" + NSLocalizedString("game_pieces_unit", comment: "Pieces unit"), (viewModel.gameSettings.gameTime - viewModel.timeRemaining) / Double(viewModel.bubblesPopped)) : "N/A")
-                        StatRow(label: NSLocalizedString("gameover_bubble_density", comment: "Bubble density label"), value: String(format: "%.1f" + NSLocalizedString("game_pieces_unit", comment: "Pieces unit") + "/" + NSLocalizedString("game_seconds_unit", comment: "Seconds unit"), Double(viewModel.bubblesPopped) / max(1, viewModel.gameSettings.gameTime - viewModel.timeRemaining)))
+                        StatRow(label: NSLocalizedString("gameover_play_time", comment: "Play time label"), value: String(format: NSLocalizedString("seconds_format", comment: "Seconds format"), viewModel.elapsedPlaySeconds))
                     }
                 }
                 .padding()
@@ -114,8 +119,14 @@ struct GameOverView: View {
         }
         .padding()
         .background(
-            LinearGradient(colors: [.red.accessible().opacity(0.3), .orange.accessible().opacity(0.1)], 
+            LinearGradient(colors: [.blue.accessible().opacity(0.22), .green.accessible().opacity(0.10)],
                           startPoint: .top, endPoint: .bottom)
         )
+        .onAppear {
+            buttonsEnabled = false
+            DispatchQueue.main.asyncAfter(deadline: .now() + buttonActivationDelay) {
+                buttonsEnabled = true
+            }
+        }
     }
 }

@@ -74,6 +74,13 @@ class GameViewModel {
         #endif
     }
 
+    /// リザルト表示用の経過プレイ秒数（整数秒）。
+    /// timeRemaining は effectiveGameTime から減算されるので、その差が実プレイ秒数。
+    /// seconds_format = "%d秒" に Double を渡すと 0 になるバグ(#37)を、Int で返して防ぐ。
+    var elapsedPlaySeconds: Int {
+        max(0, Int((effectiveGameTime - timeRemaining).rounded()))
+    }
+
     /// 実効ゲームモード。DEBUG override があればそれを優先（テスト容易性のため internal）。
     var effectiveGameMode: String {
         #if DEBUG

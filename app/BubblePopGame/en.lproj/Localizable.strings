@@ -32,7 +32,7 @@
 "game_pieces_unit" = "";
 
 // MARK: - Game Over Screen  
-"gameover_title" = "Game Over";
+"gameover_title" = "All Done!";
 "gameover_congratulations" = "Great job!";
 "gameover_final_score" = "Final Score";
 "gameover_bubbles_count" = "Bubbles Popped";
@@ -41,8 +41,6 @@
 "gameover_play_again" = "Play Again";
 "gameover_detailed_stats" = "Detailed Stats";
 "gameover_play_time" = "Play Time";
-"gameover_avg_reaction" = "Avg Reaction Time";
-"gameover_bubble_density" = "Bubble Density";
 "gameover_stats_title" = "Game Statistics";
 
 // MARK: - High Score Screen
