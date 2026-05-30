@@ -36,7 +36,7 @@
 ### App Store Connect 側（手動・要対応）
 - [ ] スクリーンショット: 6.5"（必須）/ 5.5"（必須）。iPad 対応なら iPad 用も
 - [ ] アプリアイコン 1024×1024 の最終確認（assets には設定済み。ASC 側にも反映）
-- [ ] プライバシーポリシー URL を Web 公開し ASC に登録
+- [x] プライバシーポリシーを GitHub Pages で公開: **https://es0612.github.io/BubblePopGame/**（`gh-pages` ブランチに `index.html` のみ・日英・「データ収集なし」明記）→ 残作業は ASC の「プライバシーポリシーURL」欄にこの URL を入力するだけ
 - [ ] App Privacy（Nutrition Label）= 「データを収集していません」を申告
 - [ ] 年齢制限指定（広告 SDK なしのため「広告」は「いいえ」のままで可）
 - [ ] 説明文 / キーワード / カテゴリ / サポートURL を入力
