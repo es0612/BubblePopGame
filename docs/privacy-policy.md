@@ -2,6 +2,9 @@
 
 **最終更新日 / Last Updated**: 2025年8月20日 / August 20, 2025
 
+> 📢 **公開版（App Store Connect に登録する URL）**: https://es0612.github.io/BubblePopGame/
+> （`gh-pages` ブランチの `index.html` で配信。この md は repo 内ソース。内容を変えたら HTML も更新すること。両者とも「データ収集なし／ローカル保存のみ」で整合済み）
+
 ---
 
 ## 日本語版
