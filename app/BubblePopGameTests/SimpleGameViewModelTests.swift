@@ -18,7 +18,7 @@ struct SimpleGameViewModelTests {
         let settings = GameSettings()
         
         #expect(settings.bubbleCount == 20)
-        #expect(settings.gameTime == 60.0)
+        #expect(settings.gameTime == 30.0)
         #expect(settings.soundEnabled == true)
         #expect(settings.vibrationEnabled == true)
         #expect(settings.gameMode == "normal")

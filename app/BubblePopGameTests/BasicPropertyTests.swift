@@ -17,7 +17,7 @@ struct GameSettingsTests {
         
         // 基本プロパティのデフォルト値テスト
         #expect(settings.bubbleCount == 20)
-        #expect(settings.gameTime == 60.0)
+        #expect(settings.gameTime == 30.0)
         #expect(settings.bubbleMinRadius == 30.0)
         #expect(settings.bubbleMaxRadius == 60.0)
         #expect(settings.animationSpeed == 1.0)
