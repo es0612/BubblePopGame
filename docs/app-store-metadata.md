@@ -33,16 +33,16 @@
 ### 日本語版説明文 (4000文字制限)
 
 ```
-🫧 美しいシャボン玉を指先で楽しもう！
+美しいシャボン玉を指先で楽しもう！
 
 画面に舞い踊る虹色のシャボン玉をタップして消す、心癒されるカジュアルゲームです。美しいアニメーションと心地よい音楽で、日常の疲れを忘れてリラックスできます。
 
-✨ 主な機能
+主な機能
 
 【ゲームモード】
 • 通常モード: 自由にシャボン玉を消してスコアを競う
 • 数字順モード: 1から順番に数字のシャボン玉を消すチャレンジ
-• 制限時間: 15秒〜180秒まで自由に設定可能
+• 制限時間: 30秒〜180秒（初期値30秒）まで自由に設定可能
 • シャボン玉数: 10個〜50個まで調整可能
 
 【カスタマイズ設定】
@@ -55,7 +55,7 @@
 • ハイスコア自動保存
 • ゲームモード別ランキング
 • 制限時間別記録管理
-• 詳細統計情報（正確率、平均反応速度など）
+• 詳細統計情報（正確率、プレイ時間など）
 
 【充実のサポート機能】
 • 分かりやすいチュートリアル（4ステップガイド）
@@ -63,93 +63,92 @@
 • Dynamic Type対応（文字サイズ調整）
 • 色覚異常者配慮のカラーシステム
 
-🎵 音響・体験の特徴
+音響・体験の特徴
 • 3曲のオリジナルBGM搭載
 • リアルなシャボン玉破裂音
 • 美しいパーティクル効果
 • 滑らかな60FPSアニメーション
 • 直感的なタッチ操作
 
-📱 対応デバイス
+対応デバイス
 • iPhone（iOS 17.0以降）
 • iPad（iPadOS 17.0以降）
 • レスポンシブデザインで全画面サイズ対応
 • iPhone 12以降、iPad第9世代以降推奨
 
-🌟 こんな方におすすめ
+こんな方におすすめ
 • 通勤・通学の隙間時間にリラックスしたい
 • 集中力を鍛えたい（数字順モード）
 • 美しい視覚効果を楽しみたい
 • アクセシビリティ機能を必要とする
 • シンプルで分かりやすいゲームをお探しの方
 
-💫 アクセシビリティ
+アクセシビリティ
 このアプリは誰もが楽しめるよう設計されています。VoiceOverによる音声ガイド、高コントラスト表示、文字サイズ調整など、障害をお持ちの方も安心してご利用いただけます。
 
-🔒 プライバシー
+プライバシー
 ユーザーデータは全てデバイス内にローカル保存され、外部サーバーへの送信は一切行いません。安心してお楽しみください。
 
 シンプルながらも奥深い、心温まるシャボン玉の世界をお楽しみください！
 ```
 
-### 英語版説明文 (4000文字制限)
+### 英語版説明文 (4000文字制限) — ⚠️ 絵文字禁止（ASC の en は絵文字を弾く。plain text + ハイフン箇条書き）
 
 ```
-🫧 Pop beautiful soap bubbles with your fingertips!
+Pop beautiful soap bubbles with your fingertips!
 
 A soothing casual game where you tap to pop rainbow-colored soap bubbles dancing on your screen. Beautiful animations and relaxing music help you forget daily stress and unwind.
 
-✨ Key Features
+Key Features
 
-【Game Modes】
-• Normal Mode: Freely pop bubbles and compete for high scores
-• Numbered Mode: Challenge yourself by popping numbered bubbles in order
-• Time Limit: Customizable from 15 to 180 seconds
-• Bubble Count: Adjustable from 10 to 50 bubbles
+Game Modes
+- Normal Mode: Freely pop bubbles and compete for high scores
+- Numbered Mode: Challenge yourself by popping numbered bubbles in order
+- Time Limit: Customizable from 30 to 180 seconds (default 30)
+- Bubble Count: Adjustable from 10 to 50 bubbles
 
-【Customization Settings】
-• BGM Selection: Choose from 3 soothing music tracks
-• Sound Effects: Fine-tune volume levels
-• Vibration: Toggle touch feedback ON/OFF
-• Progressive Difficulty: Gradually increasing challenge in numbered mode
+Customization Settings
+- BGM Selection: Choose from 3 soothing music tracks
+- Sound Effects: Fine-tune volume levels
+- Vibration: Toggle touch feedback ON/OFF
+- Progressive Difficulty: Gradually increasing challenge in numbered mode
 
-【Score & Record System】
-• Automatic high score saving
-• Rankings by game mode
-• Records management by time limit
-• Detailed statistics (accuracy rate, average reaction time, etc.)
+Score and Record System
+- Automatic high score saving
+- Rankings by game mode
+- Records management by time limit
+- Detailed statistics
 
-【Comprehensive Support Features】
-• Easy-to-understand tutorial (4-step guide)
-• Full VoiceOver support (visual impairment accessibility)
-• Dynamic Type support (text size adjustment)
-• Color vision deficiency considerate color system
+Comprehensive Support Features
+- Easy-to-understand tutorial
+- Full VoiceOver support (visual impairment accessibility)
+- Dynamic Type support (text size adjustment)
+- Color vision deficiency considerate color system
 
-🎵 Audio & Experience Features
-• 3 original BGM tracks included
-• Realistic bubble popping sounds
-• Beautiful particle effects
-• Smooth 60FPS animations
-• Intuitive touch controls
+Audio and Experience
+- 3 original BGM tracks included
+- Realistic bubble popping sounds
+- Beautiful particle effects
+- Smooth 60FPS animations
+- Intuitive touch controls
 
-📱 Device Compatibility
-• iPhone (iOS 17.0 or later)
-• iPad (iPadOS 17.0 or later)
-• Responsive design for all screen sizes
-• Recommended: iPhone 12 or later, iPad 9th generation or later
+Device Compatibility
+- iPhone (iOS 17.0 or later)
+- iPad (iPadOS 17.0 or later)
+- Responsive design for all screen sizes
 
-🌟 Perfect For
-• Relaxing during commute or study breaks
-• Training concentration skills (numbered mode)
-• Enjoying beautiful visual effects
-• Users requiring accessibility features
-• Anyone seeking simple, intuitive games
+Perfect For
+- Relaxing during commute or study breaks
+- Training concentration skills (numbered mode)
+- Enjoying beautiful visual effects
+- Users requiring accessibility features
+- Anyone seeking simple, intuitive games
 
-💫 Accessibility
+Accessibility
 This app is designed for everyone to enjoy. With VoiceOver audio guidance, high contrast display, text size adjustment, and more, users with disabilities can use it with confidence.
 
-🔒 Privacy
-All user data is stored locally on your device, with no transmission to external servers. Enjoy with peace of mind.
+Privacy
+All data is stored locally on your device, with no transmission to external servers. Enjoy with peace of mind.
 
 Experience the simple yet profound, heartwarming world of soap bubbles!
 ```
@@ -259,12 +258,12 @@ bubble,pop,soap bubbles,casual game,relaxing,family,kids,adults,numbers,sequence
 
 ### 日本語 (170文字制限)
 ```
-🫧 心癒されるシャボン玉ゲーム！美しいアニメーションと癒しの音楽で日常のストレスを忘れましょう。通常モードでリラックス、数字順モードでチャレンジ。VoiceOver対応で誰でも楽しめます。今すぐ無料でダウンロード！
+心癒されるシャボン玉ゲーム！美しいアニメーションと癒しの音楽で日常のストレスを忘れましょう。通常モードでリラックス、数字順モードでチャレンジ。VoiceOver対応で誰でも楽しめます。今すぐ無料でダウンロード！
 ```
 
-### 英語 (170文字制限)
+### 英語 (170文字制限) — ⚠️ 絵文字禁止（ASC の en フィールドは絵文字を弾く）
 ```
-🫧 Soothing bubble popping game! Beautiful animations and healing music help you forget daily stress. Relax in normal mode, challenge in numbered mode. VoiceOver support for everyone. Free download now!
+Soothing bubble popping game! Beautiful animations and healing music help you forget daily stress. Relax in normal mode, challenge in numbered mode. VoiceOver support for everyone. Free download now!
 ```
 
 ---
@@ -336,4 +335,5 @@ bubble,pop,soap bubbles,casual game,relaxing,family,kids,adults,numbers,sequence
 
 ---
 
-*このメタデータは2025年8月20日時点の情報に基づいて作成されています。App Store Connect提出時は最新のガイドラインと合わせて確認してください。*
+*最終更新: 2026-05-30（v1.0 提出に向けて最新化）。反映済みの実装: 制限時間 30〜180秒（初期値30）/ iPhone・iPad 両対応 / リザルト画面はお祝いトーン（タイトル「おしまい！/All Done!」）/ 詳細統計はプレイ時間中心（平均反応速度・密度は廃止）/ 広告・解析・ネットワークなし＝データ収集なし。*
+*⚠️ en（英語ロケール）の Description / Promotional / What's New は **絵文字禁止**（ASC が弾く）。ja は絵文字OK。提出直前に App Store Connect の最新ガイドラインと再確認すること。*
