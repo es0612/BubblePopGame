@@ -96,6 +96,8 @@ app/BubblePopGame/
 - ⚠️ **autosave footgun**: SwiftUI の `.modelContainer(_:)` は `mainContext.autosaveEnabled = true` がデフォルト。`fetchSettings()` 等で取得した context 追跡下の `@Model` インスタンス（例: `GameSettings`）を `obj.prop = ...` と書き換えると、明示的に save しなくても autosave で**永続化される**
 - そのため、テスト/デバッグ用の一時的な override（例: `--skip-tutorial` で `isFirstLaunch` を無視する）では、**永続モデルを書き換えず**にローカル変数で判定だけ分岐させること。モデルを mutate すると次回の通常起動にも値が残ってバグになる
 - どうしても override 値をモデル経由で渡したい場合は、context 非挿入の detached な `GameSettings()` を作る方式を検討（ただし全フィールド複製の保守コストと、後段で保存経路に乗ると重複 row を作るリスクに注意）
+- ✅ **read サイトが多数ある `@Model` 値の一時 override は computed-property override が本命**（上記「局所変数 / detached copy」に続く第3の選択肢）。`gameTime` のように参照箇所が多い（タイマー初期化・ProgressView・スコア記録・難易度計算・リザルト表示など 9 箇所超）値を override するとき、各 read サイトを書き換えるのは保守不能。ViewModel に `effectiveX = overrideX ?? gameSettings.X` の computed property を1つ置き、全 read サイトをそれ経由にする。**本プロジェクトは既に `GameViewModel.effectiveGameTime`（DEBUG の `--game-time=` 起動引数を優先）でこのパターンを採用済み**。テスト可能・副作用ゼロ（永続モデルを mutate しない）・Release ビルドで collapse し、detached copy の全フィールド複製コストも保存経路での重複 row リスクも回避できる
+- ⚠️ **`@Model` のデフォルト値を変えたら既存ユーザー移行を別途用意する**。デフォルト値の変更（例 `gameTime 60→30`、#35）は `init()` 経由なので**新規インストールにしか効かない**（既存ユーザーは永続 row の旧値を保持）。既存ユーザーも動かすには 1 回限りの migration を、**全ユーザーが起動時に必ず通る単一チョークポイント**で実行する（ルート View の `.task` 等。設定画面に紐付けると設定を開かない人に発火しない）。二重実行は `UserDefaults` センチネルで防ぎ、**値ベース判定**（旧デフォルト値の row だけ移行）で手動変更したユーザーを尊重する。⚠️ センチネル/完了フラグは **no-op・成功時のみ立て、fetch/save が失敗したら立てずに（`debugLog` して）次回起動で再試行**させる。`defer { setFlag }` を fetch ガードより前に置くと失敗も握り潰し「やった印」だけ立って**永久に未移行**になる（#35 の最終レビューで実際に捕捉した）。`GameTimeDefaultMigration` が実装例（in-memory ModelContainer + 一意 UserDefaults suite でユニットテスト可能）
 
 ### View レイヤ修正の検証戦略
 
@@ -115,6 +117,11 @@ app/BubblePopGame/
 ### UI テスト設計
 
 - XCUITest の predicate（例: `CONTAINS '0' OR CONTAINS '1'`）は、意図しない他の UI 要素（時間表示の「60 秒」等）にも偽陽性マッチして検証が空転する。スコア／タイマー等の同種数値要素が画面に共存するときは accessibilityIdentifier で厳密に特定する
+
+### ローカライズの検証戦略
+
+- accessibility ラベル等、**スクショ/目視に映らないローカライズ文字列**を追加したら、「全新規キーが ja/en/Base の全ファイルに存在する」＋「3 ファイルのキー集合が一致する」ことを assert するユニットテストで守る。キー欠落・ロケール漏れは `simctl` の no-tap 検証や目視をすり抜けるため、テストで大声で検出させる（関連スキル: `xcstrings-bulk-update` / `xcstrings-plural-variations`）。**本プロジェクトには既に `LocalizationKeysTests`（必須キー存在＋ ja/en/Base パリティ）がある**ので、キー追加/削除時はこれが守る（1 ロケールだけ消し忘れるとパリティテストが落ちる）
+- ⚠️ **`String(format:)` の書式指定子と引数型の不一致は実行時に黙って壊れる**。`seconds_format = "%d秒"`（整数書式）に **Double** を渡すと 0／不正値になる（#37「Play Time 0 sec」の実際の原因。`SettingsView` は `Int(...)` キャスト済みだが `GameOverView` は Double を渡していた）。同じ format キーを複数箇所で使うと、片方が `Int(...)`・片方が Double で挙動が割れて目視をすり抜ける。format 系は型を揃え、計算は **testable な computed property（`Int` 返し等）に切り出してユニットテストで守る**（例: `GameViewModel.elapsedPlaySeconds`）
 
 ### Git運用
 
