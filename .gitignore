@@ -71,3 +71,7 @@ fastlane/test_output
 # serena mcp
 .serena/cache
 app-store-assets/
+
+# macOS
+.DS_Store
+**/.DS_Store
