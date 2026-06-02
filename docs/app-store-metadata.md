@@ -4,13 +4,15 @@
 
 ### アプリ名
 - **日本語**: シャボン玉消しゲーム
-- **英語**: Bubble Pop Game
-- **文字数**: 日本語 9文字、英語 15文字（30文字制限内）
+- **英語**: Bubble Pop: Relax & Focus
+- **文字数**: 日本語 10文字、英語 25文字（30文字制限内）
+> ※ 当初の「Bubble Pop Game」「BubblePopGame」はどちらも他アプリが使用中で ASC に登録不可だったため、一意な「Bubble Pop: Relax & Focus」を採用（2026-05-31 ASC 登録時に確定）。App Store のアプリ名は全世界で一意。
 
 ### サブタイトル
 - **日本語**: 美しいシャボン玉で楽しむリラックスゲーム
-- **英語**: Relaxing game with beautiful soap bubbles
-- **文字数**: 日本語 19文字、英語 37文字（30文字制限内）
+- **英語**: Relaxing soap bubble game
+- **文字数**: 日本語 20文字、英語 25文字（30文字制限内）
+> ※ 旧英語サブタイトル「Relaxing game with beautiful soap bubbles」は 37 文字で 30 字制限超過だったため短縮（25 文字）。
 
 ### カテゴリ
 - **プライマリ**: ゲーム
@@ -29,6 +31,8 @@
 ---
 
 ## 📝 説明文
+
+> ⚠️ **ASC の文字制限（2026-05-31 実機検証）**: 説明文・プロモーションテキスト欄は**絵文字を「無効な文字」として拒否**する（🫧 だけでなく ✨🎵📱🌟💫🔒 等も全滅）。ウェーブダッシュ `〜`(U+301C) も避け、全角チルダ `～`(U+FF5E) を使う。箇条書き `•`(U+2022)・CJK 隅付き括弧 `【】` は OK。本ファイルの説明文・プロモは絵文字除去済み（#42）。
 
 ### 日本語版説明文 (4000文字制限)
 
@@ -159,13 +163,15 @@ Experience the simple yet profound, heartwarming world of soap bubbles!
 
 ### 日本語キーワード (100文字制限)
 ```
-シャボン玉,バブル,ゲーム,リラックス,カジュアル,癒し,アクション,パズル,家族,子供,大人,数字,順番,タイミング,反射神経,集中力,無料,シンプル,美しい,アニメーション,音楽,BGM,効果音,アクセシビリティ,VoiceOver
+バブル,癒し,カジュアル,アクション,パズル,数字,順番,タイミング,反射神経,集中力,無料,シンプル,アニメーション,BGM,効果音,アクセシビリティ,VoiceOver,家族,子供,大人
 ```
+> ※ アプリ名/サブタイトルに含まれる `シャボン玉` `ゲーム` `リラックス` は別枠でインデックスされるためキーワード欄から除外（約95文字）
 
 ### 英語キーワード (100文字制限)
 ```
-bubble,pop,soap bubbles,casual game,relaxing,family,kids,adults,numbers,sequence,timing,reflexes,concentration,free,simple,beautiful,animation,music,accessibility,VoiceOver,puzzle,action
+casual,family,kids,numbers,sequence,timing,reflexes,free,simple,animation,accessibility,voiceover
 ```
+> ※ アプリ名/サブタイトルに含まれる `bubble` `pop` `game` `relaxing` `soap` は除外。枠の都合で `music` `puzzle` `action` 等もカット（約97文字）
 
 ---
 
@@ -263,8 +269,9 @@ bubble,pop,soap bubbles,casual game,relaxing,family,kids,adults,numbers,sequence
 
 ### 英語 (170文字制限) — ⚠️ 絵文字禁止（ASC の en フィールドは絵文字を弾く）
 ```
-Soothing bubble popping game! Beautiful animations and healing music help you forget daily stress. Relax in normal mode, challenge in numbered mode. VoiceOver support for everyone. Free download now!
+Soothing bubble popping game! Beautiful animations and music melt away daily stress. Relax in normal mode or challenge numbered mode. VoiceOver supported. Free now!
 ```
+> ※ 旧版は約200字で170字制限超過のため短縮（約160字・絵文字なし）
 
 ---
 

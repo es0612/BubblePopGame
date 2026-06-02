@@ -123,6 +123,12 @@ app/BubblePopGame/
 - accessibility ラベル等、**スクショ/目視に映らないローカライズ文字列**を追加したら、「全新規キーが ja/en/Base の全ファイルに存在する」＋「3 ファイルのキー集合が一致する」ことを assert するユニットテストで守る。キー欠落・ロケール漏れは `simctl` の no-tap 検証や目視をすり抜けるため、テストで大声で検出させる（関連スキル: `xcstrings-bulk-update` / `xcstrings-plural-variations`）。**本プロジェクトには既に `LocalizationKeysTests`（必須キー存在＋ ja/en/Base パリティ）がある**ので、キー追加/削除時はこれが守る（1 ロケールだけ消し忘れるとパリティテストが落ちる）
 - ⚠️ **`String(format:)` の書式指定子と引数型の不一致は実行時に黙って壊れる**。`seconds_format = "%d秒"`（整数書式）に **Double** を渡すと 0／不正値になる（#37「Play Time 0 sec」の実際の原因。`SettingsView` は `Int(...)` キャスト済みだが `GameOverView` は Double を渡していた）。同じ format キーを複数箇所で使うと、片方が `Int(...)`・片方が Double で挙動が割れて目視をすり抜ける。format 系は型を揃え、計算は **testable な computed property（`Int` 返し等）に切り出してユニットテストで守る**（例: `GameViewModel.elapsedPlaySeconds`）
 
+### App Store 提出・スクショ検証
+
+- ✅ **simctl 自動スクショの上限は「起動画面のみ」ではない**。`#if DEBUG` 限定の起動引数で目的の `gameState` へ直行＋サンプルデータ注入すれば、ゲーム中／リザルト／設定など **tap 遷移が要る "売り" の画面も tap なしで全自動キャプチャ**できる。本プロジェクトは `--screenshot=<画面>` を実装済み（#43）。App Store スクショはこの DEBUG ナビ＋ Pillow 合成（`scripts/screenshots/compose_screenshots.py`、Hiragino フォント）で全自動生成できる。`simctl` に `tap` が無い制約は、DEBUG 起動引数で「画面遷移そのものを引数化」すれば回避できる（[[ios-simulator-app-verification]] の no-tap 検証の発展形）
+- ⚠️ **App Store スクショは `TARGETED_DEVICE_FAMILY` の全デバイスファミリ分が提出必須**。本プロジェクトは `"1,2"`（iPhone+iPad）なので、iPhone 6.9" だけでなく **iPad 13" のスクショも必須**（iPhone 分だけ用意すると審査で不足扱い）。撮影機シミュレータの実寸は必須解像度と一致不要で、合成時にデバイス枠内へスケール配置すればよい
+- ✅ **ASC 提出フィールド（説明文・キーワード・サブタイトル等）の単一ソースは `docs/app-store-metadata.md`**。コードと乖離した旧マーケ／分析 docs（旧リリース計画等）は削除済みなので、提出情報はこのファイルだけを最新化・参照する
+
 ### Git運用
 
 - `main` には直接コミットしない。`feature/issue-N-pr-X-<topic>` のような名前で feature branch を切る
