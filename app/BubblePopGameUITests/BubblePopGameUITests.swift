@@ -45,25 +45,21 @@ final class BubblePopGameUITests: XCTestCase {
     func testGameStart() throws {
         // アプリ起動
         app.launch()
-        
-        // 起動を待機
-        sleep(2)
-        
+
         // チュートリアルスキップ（存在する場合）
         let tutorialSkipButton = app.buttons.containing(NSPredicate(format: "label CONTAINS 'スキップ' OR label CONTAINS 'Skip'")).firstMatch
         if tutorialSkipButton.waitForExistence(timeout: 5.0) {
             tutorialSkipButton.tap()
-            sleep(1)
         }
-        
+
         // メニュー画面が表示されるまで待機
         let gameStartButton = app.buttons["mainMenuGameStart"]
         XCTAssertTrue(gameStartButton.waitForExistence(timeout: 10.0), "ゲーム開始ボタンが表示されない")
         gameStartButton.tap()
-        
-        // ゲーム画面への遷移を待機
-        sleep(3)
-        
+
+        // ゲーム画面への遷移を待機（メニューのスタートボタンが消えることで判定）
+        _ = gameStartButton.waitForNonExistence(timeout: 5.0)
+
         // ゲーム開始が成功したことを確認（基本テスト）
         XCTAssertTrue(true, "ゲーム開始テスト完了")
     }
@@ -71,34 +67,26 @@ final class BubblePopGameUITests: XCTestCase {
     func testGamePauseAndResume() throws {
         // アプリ起動
         app.launch()
-        
-        // 起動を待機
-        sleep(2)
-        
+
         // チュートリアルスキップ（存在する場合）
         let tutorialSkipButton = app.buttons.containing(NSPredicate(format: "label CONTAINS 'スキップ' OR label CONTAINS 'Skip'")).firstMatch
         if tutorialSkipButton.waitForExistence(timeout: 5.0) {
             tutorialSkipButton.tap()
-            sleep(1)
         }
-        
+
         // ゲーム開始
         let gameStartButton = app.buttons["mainMenuGameStart"]
         XCTAssertTrue(gameStartButton.waitForExistence(timeout: 10.0))
         gameStartButton.tap()
-        
-        // ゲームが完全に読み込まれるまで待機
-        sleep(3)
-        
+
         // ポーズボタンをタップ（より柔軟な検索）
         let pauseButton = app.buttons.matching(NSPredicate(format: "label CONTAINS 'ポーズ' OR identifier CONTAINS 'pause'")).firstMatch
         if pauseButton.waitForExistence(timeout: 5.0) {
             pauseButton.tap()
-            
-            // ポーズ画面の表示を確認（短いタイムアウトで簡単にチェック）
-            sleep(1)
-            let pauseExists = app.staticTexts.containing(NSPredicate(format: "label CONTAINS 'ポーズ' OR label CONTAINS 'Pause' OR label CONTAINS '一時停止'")).firstMatch.exists
-            
+
+            // ポーズ画面の表示を確認
+            let pauseExists = app.staticTexts.containing(NSPredicate(format: "label CONTAINS 'ポーズ' OR label CONTAINS 'Pause' OR label CONTAINS '一時停止'")).firstMatch.waitForExistence(timeout: 3.0)
+
             if pauseExists {
                 // 再開ボタンをタップ
                 let resumeButton = app.buttons.containing(NSPredicate(format: "label CONTAINS '再開' OR label CONTAINS 'Resume'")).firstMatch
@@ -107,7 +95,7 @@ final class BubblePopGameUITests: XCTestCase {
                 }
             }
         }
-        
+
         // テスト完了（ポーズ・再開が実行できれば成功とする）
         XCTAssertTrue(true, "ポーズ・再開テスト完了")
     }
@@ -184,20 +172,17 @@ final class BubblePopGameUITests: XCTestCase {
         let gameStartButton = app.buttons["mainMenuGameStart"]
         XCTAssertTrue(gameStartButton.waitForExistence(timeout: 5.0))
         gameStartButton.tap()
-        
-        // ゲーム画面が表示されるまで待機
-        sleep(2)
-        
+
+        // ゲーム画面が表示されるまで待機（メニューを抜けたことで判定）
+        _ = gameStartButton.waitForNonExistence(timeout: 5.0)
+
         // 画面上をタップしてみる（バブルがあるかもしれない場所）
         let gameArea = app.otherElements.firstMatch
         if gameArea.exists {
             gameArea.tap()
-            
-            // 少し待つ
-            sleep(1)
-            
-            // スコアが変更されたかチェック（必ずしもヒットするとは限らないため、エラーにはしない）
-            let scoreExists = app.staticTexts.matching(NSPredicate(format: "label CONTAINS '0' OR label CONTAINS '1' OR label CONTAINS '2'")).firstMatch.exists
+
+            // 少し待つ（スコア表示の出現を待機）
+            let scoreExists = app.staticTexts.matching(NSPredicate(format: "label CONTAINS '0' OR label CONTAINS '1' OR label CONTAINS '2'")).firstMatch.waitForExistence(timeout: 2.0)
             XCTAssertTrue(scoreExists, "スコア表示が見つからない")
         }
     }
@@ -207,15 +192,11 @@ final class BubblePopGameUITests: XCTestCase {
     func testAccessibilityLabels() throws {
         // アプリ起動
         app.launch()
-        
-        // 起動を待機
-        sleep(2)
-        
+
         // チュートリアルスキップ（存在する場合）
         let tutorialSkipButton = app.buttons.containing(NSPredicate(format: "label CONTAINS 'スキップ' OR label CONTAINS 'Skip'")).firstMatch
         if tutorialSkipButton.waitForExistence(timeout: 5.0) {
             tutorialSkipButton.tap()
-            sleep(1)
         }
         
         // メニュー画面の基本的な要素の存在を確認（アクセシビリティ要素として）
