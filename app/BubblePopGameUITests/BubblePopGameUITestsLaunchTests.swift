@@ -59,8 +59,8 @@ final class BubblePopGameUITestsLaunchTests: XCTestCase {
         // 実際のメモリ測定はXCTMemoryMetricを使用するが、ここでは基本的な動作確認
 
         // アプリがまだ応答することを確認
-        XCTAssertTrue(app.buttons["mainMenuGameStart"].exists, "アプリが応答しない")
-        XCTAssertTrue(app.buttons["mainMenuSettings"].exists, "アプリが応答しない")
+        XCTAssertTrue(app.buttons["mainMenuGameStart"].waitForExistence(timeout: 3.0), "アプリが応答しない")
+        XCTAssertTrue(app.buttons["mainMenuSettings"].waitForExistence(timeout: 3.0), "アプリが応答しない")
     }
     
     func testOrientationHandling() throws {
@@ -81,8 +81,8 @@ final class BubblePopGameUITestsLaunchTests: XCTestCase {
         // ランドスケープモードへの回転をテスト
         XCUIDevice.shared.orientation = .landscapeLeft
 
-        // 回転後もアプリが正常に動作することを確認
-        XCTAssertTrue(menuTitle.exists || menuTitle.waitForExistence(timeout: 3.0), "ランドスケープモードでアプリが正常に表示されない")
+        // 回転後もアプリが正常に動作することを確認（waitForExistence で回転アニメ完了を待つ）
+        XCTAssertTrue(menuTitle.waitForExistence(timeout: 3.0), "ランドスケープモードでアプリが正常に表示されない")
         
         // 元の向きに戻す
         XCUIDevice.shared.orientation = .portrait
