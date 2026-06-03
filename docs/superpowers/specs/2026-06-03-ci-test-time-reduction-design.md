@@ -76,6 +76,20 @@ Xcode Cloud の CI/CD 所要時間が長い。コード読みの推測ではな�
   - `xcodebuild test ... -testPlan Full` → Unit + UITest 実行
 - **before / after の実測時間を記録**し、PR 本文に残す（CLAUDE.md の grep でテスト実体を確認）。
 
+### 実測結果（テストプラン導入後）
+
+計測日時: 2026-06-03、環境: iPhone 17 Pro シミュレータ（`test-without-building`、ビルドキャッシュ使用）
+
+| テストプラン | 実行ターゲット | 経過時間 | UITest 実行数 |
+| --- | --- | --- | --- |
+| **CI（デフォルト）** | BubblePopGameTests のみ | **62s** | **0**（確認済み） |
+| **Full** | BubblePopGameTests + BubblePopGameUITests | ~600s 超 | **39 件**（全 passed） |
+
+- CI プランでは UITest が一切走らないことを確認（`grep -cE "BubblePopGameUITests" /tmp/t3-ci.log` = 0）
+- Full プランでは UITest 39 件がすべて passed（フレーキー失敗なし）
+- `xcodebuild -showTestPlans` で CI (default) / Full の 2 プランが列挙されることを確認
+- ベースラインの UnitTest 単体 85s に対して CI プランは **62s**（clean build 後の `build-for-testing` キャッシュ使用のため実際の差分）
+
 ## 6. スコープ外 / マージ後フォローアップ
 
 - ⚠️ **Xcode Cloud ワークフロー設定は ASC 側にあり、リポからは変更できない。** 現在のワークフローが明示的にテストターゲットを列挙している場合、ASC 側で「CI テストプランを使う / UITest ターゲットを外す」設定の確認・更新が**1 回だけ**必要。マージ後タスクとして PR に明記する（#46 の ASC 作業と同じ構図）。
