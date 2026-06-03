@@ -29,6 +29,13 @@ xcodebuild build -project app/BubblePopGame.xcodeproj -scheme BubblePopGame -con
 xcodebuild clean -project app/BubblePopGame.xcodeproj -scheme BubblePopGame
 ```
 
+### テストプランの使い分け（#44）
+本プロジェクトは共有スキーム + 2 つのテストプランを持つ:
+- **`CI`（デフォルト, UnitTest のみ・並列）**: 毎回の CI / ローカル開発用。`-testPlan` を省略すると `CI` が使われる（Xcode Cloud の標準 Test アクションもこれを拾う）。明示するなら `-testPlan CI`。
+- **`Full`（UnitTest + UITest）**: リリース前 / 手動のみ。`xcodebuild test ... -testPlan Full` で明示指定。
+
+UITest は起動コストが高く flaky なため毎回 CI からは除外している（別枠）。テストプラン実体は `app/CI.xctestplan` / `app/Full.xctestplan`、スキームは `app/BubblePopGame.xcodeproj/xcshareddata/xcschemes/BubblePopGame.xcscheme`。
+
 ### 利用可能シミュレータの確認
 ```bash
 xcrun simctl list devices available | grep -E "iPhone|iPad"
