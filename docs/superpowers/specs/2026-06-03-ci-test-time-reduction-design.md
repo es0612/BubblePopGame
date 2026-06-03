@@ -83,12 +83,13 @@ Xcode Cloud の CI/CD 所要時間が長い。コード読みの推測ではな�
 | テストプラン | 実行ターゲット | 経過時間 | UITest 実行数 |
 | --- | --- | --- | --- |
 | **CI（デフォルト）** | BubblePopGameTests のみ | **62s** | **0**（確認済み） |
-| **Full** | BubblePopGameTests + BubblePopGameUITests | ~600s 超 | **39 件**（全 passed） |
+| **Full** | BubblePopGameTests + BubblePopGameUITests | 未計測（推定 600s 超） | **39 件**（全 passed） |
 
 - CI プランでは UITest が一切走らないことを確認（`grep -cE "BubblePopGameUITests" /tmp/t3-ci.log` = 0）
 - Full プランでは UITest 39 件がすべて passed（フレーキー失敗なし）
 - `xcodebuild -showTestPlans` で CI (default) / Full の 2 プランが列挙されることを確認
 - ベースラインの UnitTest 単体 85s に対して CI プランは **62s**（clean build 後の `build-for-testing` キャッシュ使用のため実際の差分）
+- 注: ベースライン記載「116 funcs」は `func test*` と `@Test` デコレータの重複カウント。実際は全テストが Swift Testing (`import Testing`) で `@Test` = 84 関数が正確な数値（CI プランで 84 件全件 passed、skipped=0 を確認）
 
 ## 6. スコープ外 / マージ後フォローアップ
 
