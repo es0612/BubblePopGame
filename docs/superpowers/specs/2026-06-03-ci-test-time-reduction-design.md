@@ -11,8 +11,8 @@ Xcode Cloud の CI/CD 所要時間が長い。コード読みの推測ではな�
 | 工程 | 時間 | 割合 |
 | --- | --- | --- |
 | クリーンビルド（app + Unit + UI 全ターゲット, `build-for-testing`） | 16s | ~2% |
-| UnitTest 実行（116 funcs, `BubblePopGameTests`） | 85s | ~12% |
-| **UITest 実行（11 funcs, `BubblePopGameUITests`）** | **617s（約10分）** | **~86%** |
+| UnitTest 実行（84 `@Test` funcs, `BubblePopGameTests`） | 85s | ~12% |
+| **UITest 実行（11 funcs / per-config 反復で 39 ケース実行, `BubblePopGameUITests`）** | **617s（約10分）** | **~86%** |
 
 計測方法: `xcodebuild build-for-testing`（クリーン）→ `test-without-building -only-testing:<target>` で工程を分離して `SECONDS` 計測。
 
@@ -47,7 +47,7 @@ Xcode Cloud の CI/CD 所要時間が長い。コード読みの推測ではな�
 
 ### ② テストプラン 2 枚
 
-配置: `app/TestPlans/`（新規ディレクトリ）
+配置: `app/`（`.xcodeproj` と同階層。`container:` の `../` 解決を避けるため。当初案の `app/TestPlans/` から変更）
 
 参考: ターゲット GUID（`project.pbxproj` より）
 - app `BubblePopGame`: `D5DF7FBE2E28B0A4002424F1`
@@ -76,20 +76,29 @@ Xcode Cloud の CI/CD 所要時間が長い。コード読みの推測ではな�
   - `xcodebuild test ... -testPlan Full` → Unit + UITest 実行
 - **before / after の実測時間を記録**し、PR 本文に残す（CLAUDE.md の grep でテスト実体を確認）。
 
-### 実測結果（テストプラン導入後）
+### 実測結果（最終 HEAD での before/after）
 
-計測日時: 2026-06-03、環境: iPhone 17 Pro シミュレータ（`test-without-building`、ビルドキャッシュ使用）
+計測環境: iPhone 17 Pro シミュレータ、ローカル、`SECONDS` 計測。本表は per-config 反復無効化（#44 Task 4）+ ハード sleep 置換（Task 5）まで反映した**最終 HEAD**での値。
 
-| テストプラン | 実行ターゲット | 経過時間 | UITest 実行数 |
+**毎回 CI（push/PR ごと）の総時間**（クリーン後の bare `xcodebuild test`、`-testPlan` 未指定 = デフォルト CI プラン）:
+
+| | 総時間（build + test） | 実行内容 |
+| --- | --- | --- |
+| before（テストプラン導入前・全テスト） | 約 718s | Unit + UITest（UITest は per-config 反復で 39 ケース） |
+| **after（デフォルト CI プラン）** | **105s** | Unit のみ・**UITest 0 件**（bare 実行で `Test case 'BubblePopGameUITests` = 0 を確認） |
+
+→ 毎回 CI を **約 85% 削減**。`-testPlan` 省略の bare `xcodebuild test` で UITest 0 件 = デフォルトの CI プランが拾われることを実証。
+
+**テスト実行のみ**の時間（`test-without-building`、ビルドキャッシュ使用、参考値）:
+
+| テストプラン | 実行ターゲット | 経過時間 | UITest 実行ケース |
 | --- | --- | --- | --- |
-| **CI（デフォルト）** | BubblePopGameTests のみ | **62s** | **0**（確認済み） |
-| **Full** | BubblePopGameTests + BubblePopGameUITests | 未計測（推定 600s 超） | **39 件**（全 passed） |
+| CI（デフォルト） | BubblePopGameTests のみ | 62s | 0 |
+| Full（per-config 無効化 + sleep 置換後） | Unit + UITest | 197s | 11（全 passed） |
 
-- CI プランでは UITest が一切走らないことを確認（`grep -cE "BubblePopGameUITests" /tmp/t3-ci.log` = 0）
-- Full プランでは UITest 39 件がすべて passed（フレーキー失敗なし）
-- `xcodebuild -showTestPlans` で CI (default) / Full の 2 プランが列挙されることを確認
-- ベースラインの UnitTest 単体 85s に対して CI プランは **62s**（clean build 後の `build-for-testing` キャッシュ使用のため実際の差分）
-- 注: ベースライン記載「116 funcs」は `func test*` と `@Test` デコレータの重複カウント。実際は全テストが Swift Testing (`import Testing`) で `@Test` = 84 関数が正確な数値（CI プランで 84 件全件 passed、skipped=0 を確認）
+- Full の UITest は per-config 反復無効化で **39 → 11 ケース**に減少、ハード sleep 置換と合わせ test-only 時間は 617s → **197s**。flaky 失敗なし。
+- `xcodebuild -showTestPlans` で CI (default) / Full の 2 プランが列挙されることを確認。
+- 注: §1 ベースライン表の旧「116 funcs」は `func test*` と `@Test` の重複カウント。全テストが Swift Testing (`import Testing`) で `@Test` = **84** が正（CI プランで 84 件全件 passed、skipped=0）。
 
 ## 6. スコープ外 / マージ後フォローアップ
 
