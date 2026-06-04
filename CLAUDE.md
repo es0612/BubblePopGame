@@ -36,6 +36,10 @@ xcodebuild clean -project app/BubblePopGame.xcodeproj -scheme BubblePopGame
 
 UITest は起動コストが高く flaky なため毎回 CI からは除外している（別枠）。テストプラン実体は `app/CI.xctestplan` / `app/Full.xctestplan`、スキームは `app/BubblePopGame.xcodeproj/xcshareddata/xcschemes/BubblePopGame.xcscheme`。
 
+#### 最適化・調査の進め方（#44 で得た知見）
+- ✅ **「遅い／重い」系の最適化 issue は、コード読みの推測で犯人を決め打たず、まず工程別の時間内訳を実測してから方針を固める**。#44 では advisor が「`CI/CD が遅い ≠ テスト実行が遅い`、clean build が犯人かもしれない」と一旦止め、実測で **UITest 86%(617s) / Unit 12% / build 2%** と確定してから着手した（推測は当たっていたが、ビルドが犯人だった可能性も十分あった）。推測ベースで最適化対象を決めると、見当違いの箇所を磨いて時間を溶かす。
+- ⚠️ **ローカル `xcodebuild` は Xcode Cloud の proxy にすぎない**。CI wall-clock の実効果は**マージ後の実ビルドでしか確定しない**ので、CI 短縮系 PR は `Closes` でなく `Toward` にし、post-merge 検証チェックリストを PR 本文と issue 本体に残す（View 層リテラルがユニットテストをすり抜けるのと同じ「検証の届かない層」テーマの CI 版）。#48 が実例で、実 Xcode Cloud での「UITest 不実行・wall-clock 短縮」確認が #44 のクローズ条件。
+
 ### 利用可能シミュレータの確認
 ```bash
 xcrun simctl list devices available | grep -E "iPhone|iPad"
@@ -124,6 +128,7 @@ app/BubblePopGame/
 ### UI テスト設計
 
 - XCUITest の predicate（例: `CONTAINS '0' OR CONTAINS '1'`）は、意図しない他の UI 要素（時間表示の「60 秒」等）にも偽陽性マッチして検証が空転する。スコア／タイマー等の同種数値要素が画面に共存するときは accessibilityIdentifier で厳密に特定する
+- ⚠️ **`runsForEachTargetApplicationUIConfiguration = true` は UITest を対象 UI 構成数だけ黙って乗算する**。#44 では 11→39 ケースに膨張し数百秒級の無駄が出ていた。実行ログのケース数が定義数より明らかに多い／UITest 数が想定より多いときはこれを疑う。テストプランの設定で false にすると per-config 反復が止まる
 
 ### ローカライズの検証戦略
 
