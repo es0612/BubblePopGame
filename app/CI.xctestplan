@@ -1,0 +1,25 @@
+{
+  "configurations" : [
+    {
+      "id" : "C1000000-0000-4000-8000-000000000001",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:BubblePopGame.xcodeproj",
+        "identifier" : "D5DF7FCD2E28B0A6002424F1",
+        "name" : "BubblePopGameTests"
+      }
+    }
+  ],
+  "version" : 1
+}

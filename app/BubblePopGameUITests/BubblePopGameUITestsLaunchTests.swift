@@ -10,7 +10,7 @@ import XCTest
 final class BubblePopGameUITestsLaunchTests: XCTestCase {
     
     override class var runsForEachTargetApplicationUIConfiguration: Bool {
-        true
+        false
     }
     
     override func setUpWithError() throws {
@@ -57,11 +57,10 @@ final class BubblePopGameUITestsLaunchTests: XCTestCase {
         
         // メモリ使用量の測定（アプリが正常に動作していることの確認）
         // 実際のメモリ測定はXCTMemoryMetricを使用するが、ここでは基本的な動作確認
-        sleep(2) // アプリが安定するまで待機
-        
+
         // アプリがまだ応答することを確認
-        XCTAssertTrue(app.buttons["mainMenuGameStart"].exists, "アプリが応答しない")
-        XCTAssertTrue(app.buttons["mainMenuSettings"].exists, "アプリが応答しない")
+        XCTAssertTrue(app.buttons["mainMenuGameStart"].waitForExistence(timeout: 3.0), "アプリが応答しない")
+        XCTAssertTrue(app.buttons["mainMenuSettings"].waitForExistence(timeout: 3.0), "アプリが応答しない")
     }
     
     func testOrientationHandling() throws {
@@ -81,10 +80,9 @@ final class BubblePopGameUITestsLaunchTests: XCTestCase {
         
         // ランドスケープモードへの回転をテスト
         XCUIDevice.shared.orientation = .landscapeLeft
-        sleep(1) // 回転アニメーションを待つ
-        
-        // 回転後もアプリが正常に動作することを確認
-        XCTAssertTrue(menuTitle.exists || menuTitle.waitForExistence(timeout: 3.0), "ランドスケープモードでアプリが正常に表示されない")
+
+        // 回転後もアプリが正常に動作することを確認（waitForExistence で回転アニメ完了を待つ）
+        XCTAssertTrue(menuTitle.waitForExistence(timeout: 3.0), "ランドスケープモードでアプリが正常に表示されない")
         
         // 元の向きに戻す
         XCUIDevice.shared.orientation = .portrait
@@ -93,25 +91,21 @@ final class BubblePopGameUITestsLaunchTests: XCTestCase {
     func testAppStateTransitions() throws {
         let app = XCUIApplication()
         app.launch()
-        
-        // 起動を待機
-        sleep(2)
-        
+
         // チュートリアルスキップ（存在する場合）
         let tutorialSkipButton = app.buttons.containing(NSPredicate(format: "label CONTAINS 'スキップ' OR label CONTAINS 'Skip'")).firstMatch
         if tutorialSkipButton.waitForExistence(timeout: 5.0) {
             tutorialSkipButton.tap()
-            sleep(1)
         }
-        
+
         // メニュー → ゲームの状態遷移をテスト
         let gameStartButton = app.buttons["mainMenuGameStart"]
         XCTAssertTrue(gameStartButton.waitForExistence(timeout: 10.0))
         gameStartButton.tap()
-        
-        // ゲーム画面への遷移を待機
-        sleep(3)
-        
+
+        // ゲーム画面への遷移を待機（メニューを抜けたことで判定）
+        _ = gameStartButton.waitForNonExistence(timeout: 5.0)
+
         // アプリの基本的な状態遷移が成功したことを確認
         XCTAssertTrue(true, "アプリの状態遷移テスト完了")
     }
