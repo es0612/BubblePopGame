@@ -1,0 +1,37 @@
+# fastlane Fastfile — ASC メタデータ投入（バイナリは Xcode Cloud 所有）
+#
+# 設計方針（skill: asc-metadata-delivery）:
+# - バイナリは Xcode Cloud が ASC に upload・処理する。ここでは触らない（skip_binary_upload: true）。
+# - このファイルは「メタデータ（What's New / marketing URL / 説明文 等）だけ」を ASC に stage する。
+# - 審査提出（不可逆）は ASC UI で人間が行う（submit_for_review: false がデフォルト）。
+# - 順序は必ず download → edit → upload → precheck → 人間 submit。
+#   download を先にやらないと live の説明文/キーワードを空で上書きする（fastlane/SETUP.md 参照）。
+#
+# 認証は fastlane 標準の APP_STORE_CONNECT_API_KEY_PATH（API Key JSON のパス）に統一している。
+# fastlane は起動時に fastlane/.env（gitignore 済み）を自動ロードするので、この 1 変数で
+# 「deliver download_metadata（CLI）/ upload_to_app_store（lane）/ precheck」すべてが認証される。
+
+default_platform(:ios)
+
+platform :ios do
+  desc "メタデータを ASC の editable に stage（binary は Xcode Cloud 所有）→ staged コピーを precheck で検証"
+  lane :upload_metadata do
+    # env 未設定なら早期に大声で落とす（暗黙の認証フォールバックで事故らないように）。
+    key_path = ENV.fetch("APP_STORE_CONNECT_API_KEY_PATH")
+
+    # force は付けない: 本番 ASC へ書き込む前に deliver の HTML プレビューを人間が確認する gate を残す。
+    upload_to_app_store(
+      api_key_path: key_path,
+      skip_binary_upload: true,   # バイナリは Xcode Cloud 所有（衝突させない）
+      skip_screenshots: true,     # スクショは v1.0 分を ASC 側で流用（ここでは触らない）
+      submit_for_review: false,   # ステージのみ。提出は ASC UI で人間が意図的に行う
+      precheck_include_in_app_purchases: false,
+      run_precheck_before_submit: false # stage-only では発火しないので、下で明示的に precheck する
+    )
+
+    # precheck は ASC 側の editable（= いま stage したコピー）を検証する。
+    # ローカルファイルは見ない（metadata_path オプションは無い）ので upload の "後" に呼ぶ。
+    # emoji / version bump は precheck の対象外 → upload 前に release-version-bump-check skill で潰す。
+    precheck(api_key_path: key_path)
+  end
+end
