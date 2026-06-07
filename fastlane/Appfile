@@ -1,0 +1,12 @@
+# fastlane Appfile — アプリ固有の識別子（公開リポなので秘密情報は置かない）
+#
+# 認証は ASC API Key（推奨）を fastlane/.env から読む（Fastfile 参照）。
+# API Key 方式では apple_id / team_id / itc_team_id は通常不要なので未設定でよい。
+# Apple-ID + App用パスワード方式に切り替える場合のみ下のコメントを有効化する。
+
+app_identifier("com.asapapalab.BubblePopGame")
+
+# --- Apple-ID 方式を使う場合のみ（API Key 方式では不要・公開リポに個人情報を置かない） ---
+# apple_id(ENV["FASTLANE_USER"])      # .env で渡す（ハードコードしない）
+# team_id("XXXXXXXXXX")               # Developer Portal Team ID
+# itc_team_id("XXXXXXXXXX")           # App Store Connect Team ID

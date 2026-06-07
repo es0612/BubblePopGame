@@ -68,6 +68,12 @@ fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
 
+# fastlane secrets（公開リポなので絶対にコミットしない。.env.example はテンプレなので追跡する）
+fastlane/.env
+fastlane/*.p8
+fastlane/*.json
+fastlane/metadata/review_information/
+
 # serena mcp
 .serena/cache
 app-store-assets/
