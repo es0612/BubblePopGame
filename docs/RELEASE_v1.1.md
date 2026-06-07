@@ -38,8 +38,11 @@ v1.0 が 2026-06-02 に App Store 公開（approved）された後、build 39 �
 
 ## What's New 下書き
 
-> ja（絵文字OK）:
+> ja（絵文字あり版を第一候補）:
 > 軽微な内部改善とビルドの安定性向上を行いました。引き続きごゆっくりお楽しみください🫧
+
+> ⚠️ **ja 絵文字フォールバック**: BubblePopGame は v1.0 提出時に ja の説明文・プロモ文の絵文字を ASC 拒否で全除去した実績がある（memory: `asc-bubblepop-state`）。What's New でも 🫧 が弾かれる場合は、絵文字なしの下記を使う:
+> 軽微な内部改善とビルドの安定性向上を行いました。引き続きごゆっくりお楽しみください。
 
 > en（**絵文字禁止** — ASC が en の絵文字を「無効な文字」として弾く。plain text）:
 > This update includes minor internal improvements and build stability fixes. Thank you for playing!
@@ -55,7 +58,13 @@ v1.0 が 2026-06-02 に App Store 公開（approved）された後、build 39 �
 - [ ] ASC で **v1.1 のバージョンを新規作成**し、What's New を入力（ja は絵文字可 / **en は絵文字 NG**）
 - [ ] スクリーンショット: 既存 v1.0 提出分を流用可（UI 変更なし）。iPhone 6.9" + iPad 13"（`TARGETED_DEVICE_FAMILY = "1,2"` のため両方必須）
 - [ ] App Privacy / 年齢制限 / 説明文・キーワード等は v1.0 から変更なし（`docs/app-store-metadata.md` が単一ソース）
-- [ ] **Xcode で Archive → Distribute**。Archive 直前に build が **≥ 40** であることを `release-version-bump-check` で再確認
+  - 年齢制限の「広告」(Advertising) は **No 据え置きで正**（広告 SDK なしを確認済み。Package.resolved 不在・コード grep でも 0 ヒット）
+- [ ] **marketing URL を修正**: v1.0 提出時に別アプリ用 `weightscale-7cdf1.web.app` のまま出た可能性（memory: `asc-bubblepop-state`）→ サポートURL `https://note.com/es0612swift` に**付け替える**。ASC → 該当バージョン → 「マーケティングURL」フィールド（任意フィールドだが他アプリへの誤リンクは是正する）
+- [ ] **Xcode Cloud 経由で配信ビルドを実行**。配信前に build が **≥ 40** であることを `release-version-bump-check` で再確認（pbxproj は `-showBuildSettings` で `1.1 / 40` 伝播確認済み）
+- [ ] 🔗 **配信ビルドの Test アクションのログで #44 を同時検証**（本プロジェクトは Xcode Cloud 配信のため、提出ビルドが #44 のクローズ条件も満たせる）:
+  - [ ] UITest が走っていない（Unit のみ・`CI` テストプラン）ことを確認
+  - [ ] もし UITest がまだ走るなら、ASC のワークフロー Test アクションを「`CI` テストプラン使用」に**1回だけ**設定変更（リポからは変更不可）
+  - [ ] wall-clock が before（約 718s）より実際に短縮されたことを確認
 
 ### マージ後
 - [ ] `git tag -a v1.1 -m "v1.1 (build 40) ITMS リジェクト回避の再提出" && git push origin v1.1`
