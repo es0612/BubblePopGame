@@ -139,7 +139,7 @@ Chrome 経路の申請準備 skill（`~/.claude/skills/asc-submission-prep`）�
 | 提出ビルドの番号は Xcode Cloud が決める／TestFlight のビルドは 90 日で失効する | `release-version-bump-check` skill に追記 | ✅ 2026-09-28 |
 | バージョンを上げてから提出まで 3.5 か月止まった | 記録のみ。原因（403・fastlane）は CLAUDE.md に、対策は `asc-submission-prep` にある。**物差し: 次のリリースで「バージョンを上げた日 → 提出日」の日数を記録して比べる** | ✅ 記録 |
 | 説明文の正本（doc と live のずれ） | #54。2026-09-28 に「live を正本として doc に取り込む」と決定 | 🔲 #54 |
-| `asc-submission-prep` の宿題 5 件 | #53 | 🔲 2026-09-28 に着手 |
+| `asc-submission-prep` の宿題 5 件 | 1 件（#54 のリンク）は本 PR で対応。残り 4 件は #57。#53 は 4 アプリで実走済みのためクローズ（手直し回数は未記録） | 🔲 #57 |
 | memory `asc-bubblepop-state` が「審査待ち」のまま | memory を更新 | ✅ 2026-09-28 |
 
 > 前回（v1.0）の Action items のうち、タグ（`v1.0`）と #5 のクローズは消化済み。v1.0 のときは ASC の入力ノウハウを memory に残した。今回はそれが skill（`asc-submission-prep`）になり、仕組みで守れるようになった。
