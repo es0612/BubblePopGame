@@ -54,28 +54,45 @@ v1.0 が 2026-06-02 に App Store 公開（approved）された後、build 39 �
 - [x] Debug ビルド成功（pbxproj 非破損）/ UnitTest 緑（CI テストプラン）
 - [x] 広告/解析/クラッシュ/ネットワーク SDK なし（= App Privacy「データを収集していません」据え置き）
 
-### App Store Connect 側（手動・要対応）
-- [ ] ASC で **v1.1 のバージョンを新規作成**し、What's New を入力（ja は絵文字可 / **en は絵文字 NG**）
-- [ ] スクリーンショット: 既存 v1.0 提出分を流用可（UI 変更なし）。iPhone 6.9" + iPad 13"（`TARGETED_DEVICE_FAMILY = "1,2"` のため両方必須）
-- [ ] App Privacy / 年齢制限 / 説明文・キーワード等は v1.0 から変更なし（`docs/app-store-metadata.md` が単一ソース）
-  - 年齢制限の「広告」(Advertising) は **No 据え置きで正**（広告 SDK なしを確認済み。Package.resolved 不在・コード grep でも 0 ヒット）
-- [ ] **marketing URL を修正**: v1.0 提出時に別アプリ用 `weightscale-7cdf1.web.app` のまま出た可能性（memory: `asc-bubblepop-state`）→ サポートURL `https://note.com/es0612swift` に**付け替える**。ASC → 該当バージョン → 「マーケティングURL」フィールド（任意フィールドだが他アプリへの誤リンクは是正する）
-- [ ] **Xcode Cloud 経由で配信ビルドを実行**。配信前に build が **≥ 40** であることを `release-version-bump-check` で再確認（pbxproj は `-showBuildSettings` で `1.1 / 40` 伝播確認済み）
-- [ ] 🔗 **配信ビルドの Test アクションのログで #44 を同時検証**（本プロジェクトは Xcode Cloud 配信のため、提出ビルドが #44 のクローズ条件も満たせる）:
-  - [ ] UITest が走っていない（Unit のみ・`CI` テストプラン）ことを確認
-  - [ ] もし UITest がまだ走るなら、ASC のワークフロー Test アクションを「`CI` テストプラン使用」に**1回だけ**設定変更（リポからは変更不可）
-  - [ ] wall-clock が before（約 718s）より実際に短縮されたことを確認
+### App Store Connect 側（2026-09-27 時点）
+- [x] ASC で v1.1 のバージョンを作成（2026-06-08）・What's New を入力（2026-08-28 API 投入。ja は 🫧 が `INVALID_CHARACTERS` で拒否されたため絵文字なし文）
+- [x] スクリーンショット: v1.0 分を流用（iPhone 6.5" 5 枚 / iPad 13" 5 枚を 2026-09-27 に確認）
+- [x] 年齢制限の「広告」(Advertising) は No のまま（広告 SDK なし）
+- [x] marketing URL を `https://note.com/es0612swift` に付け替え（2026-08-28 API 投入、2026-09-27 に ja/en を確認）
+- [x] プロモーション用テキスト（ja/en）を入力（2026-09-27。v1.1 では空になっていた → `docs/app-store-metadata.md` の値を入力）
+- [x] 説明文（ja/en）の制限時間を「15〜180 秒」→「30〜180 秒（初期値 30 秒）」に修正（2026-09-27。コード `SettingsView` の `30...180` に合わせた 1 行修正。リポ doc と live の体裁の違いは別 Issue）
+- [x] Xcode Cloud 配信ビルド: **build 46**（2026-09-27 09:51 手動ビルド、commit `03e7ca3`）。build 41〜45 は TestFlight の 90 日期限で失効
+- [x] build 46 を v1.1 に紐付け（2026-09-27、再読み込みして確認済み）
+- [x] #44 を同時に検証: Test アクション 84/84 合格、実行は UnitTest 14 スイートのみで UITest は 0 件（ASC 側の設定変更は不要）。変更前の Xcode Cloud 実行記録がないため時間の前後比較はできず、ビルド全体 14 分を今後の基準値として記録 → #44 クローズ
+- [ ] 👤 App Review の連絡先（氏名・電話・メール）が空欄 → 提出前に人が入力または確認する
+- [ ] 👤 内容を確認 →「審査用に追加」→ 提出（人が実行）
 
-### マージ後
-- [ ] `git tag -a v1.1 -m "v1.1 (build 40) ITMS リジェクト回避の再提出" && git push origin v1.1`
-  - ⚠️ **タグは実提出する commit に打つ**。提出前に追加 commit が入るとタグ位置がずれるため、ASC へ Archive/Distribute する commit が確定してから打つこと（v1.0 のときと同じ運用）
-- [ ] 提出が承認されたら本ファイルに「Retrospective」節を追記（`RELEASE_v1.0.md` の慣習に倣う）
+### 提出後
+- [ ] `git tag -a v1.1 03e7ca3 -m "v1.1 (build 46) ITMS リジェクト回避の再提出" && git push origin v1.1`
+  - ⚠️ **タグは build 46 のビルド元 `03e7ca3` に打つ**（main の先頭ではない。この PR がマージされると先頭はずれる）
+- [ ] 承認されたら本ファイルに「Retrospective」節を追加（`RELEASE_v1.0.md` の書き方に合わせる）
 
 ---
 
 ## クローズ条件（#46）
 
-- [ ] ASC で v1.1 / build 40 が **正常に受理**される（ITMS-90186 / ITMS-90062 が再発しない）
+- [ ] ASC で v1.1 / build 46 が **正常に受理**される（ITMS-90186 / ITMS-90062 が再発しない）
 - [ ] 審査通過後に `git tag v1.1` を push
 
 > #46 は ASC 提出という**外部依存**のため、コード側 bump（PR #47）マージだけではクローズできない。実提出の受理を確認して初めてクローズする。
+
+---
+
+## asc-submission-prep 初回実走（2026-09-27, #53）
+
+Chrome 経路の申請準備 skill（`~/.claude/skills/asc-submission-prep`）を v1.1 で初めて実走した記録。
+
+| 物差し | 結果 |
+|---|---|
+| 人が判断した回数 | 1 回（判断①：差分表のうち説明文の扱いを選んだ）。判断②（ビルド起動）は build 46 があったので不要 |
+| 人が手で直した回数 | 0 回（書き込み 5 件はすべて再読み込み後の読み戻しで一致） |
+| dry-run で見つかった想定外 | プロモ ja/en が空欄／説明文 ja/en の制限時間が古い（15 秒）／App Review 連絡先が空欄 |
+| 実走で得た手順の修正 | フォーム値は `javascript_tool` で name 属性を読む／ビルド選択ダイアログは期限切れのビルドも選べる／ロケールのメニューは座標クリックで開く（SKILL.md に反映済み） |
+| まだ検証していない手順 | スクショ差し替え、Xcode Cloud のビルド起動 |
+
+所要時間は、会話の往復と skill 自体の修正が混ざっているため、今回は正確に測れていない。2 アプリ目で dry-run の開始から停止レポートまでを計測して、比較の基準にする。
