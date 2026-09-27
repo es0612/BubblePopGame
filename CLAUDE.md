@@ -143,6 +143,9 @@ app/BubblePopGame/
 - ✅ **メタデータだけを ASC に投入する fastlane 経路が整備済み（#46/#51, skill: `asc-metadata-delivery`）**。バイナリは Xcode Cloud 所有のまま `skip_binary_upload:true` で What's New / marketing URL 等だけを editable バージョンに stage する（提出は ASC UI で人間が実行=`submit_for_review:false`）。認証は **fastlane 標準の `APP_STORE_CONNECT_API_KEY_PATH`（API Key JSON のパス）1 変数に統一する**。カスタム env を作ると Fastfile の helper でしか読まれず、bare CLI（`fastlane deliver download_metadata`）や precheck が読まないため download/upload/precheck で認証が割れる。`fastlane/.env` は起動時に自動ロードされるので 1 変数で全コマンドが認証される。⚠️ **必ず download → edit → upload → precheck → 人間 submit の順**。download を飛ばして upload すると live の説明文/キーワードを空で**上書き破壊**する。手順の単一ソースは `fastlane/SETUP.md`
 - ⚠️ **fastlane/CLI のフラグは推測で書かず必ず `--help` で実在検証してから使う**。`--api_key_id` / `--api_issuer` は deliver CLI に**存在しない**（CLI の API Key 認証は `--api_key_path`(JSON) か `--api_key`(hash) のみ）。推測でフラグを SETUP 手順に書いて download コマンドを壊しかけた実績あり。`fastlane lanes` で lane が認識される＝**parse-verified ≠ run-verified**（lane が見える≠実行が通る）
 - ⚠️ **ASC 提出の「宿題」＝外部依存タスク（marketing URL の付け替え等）は memory だけでなく、提出時に必ず開くリリース doc のチェックリストにも転記する**。memory にしか無いと提出フローのドキュメント（`docs/RELEASE_v1.1.md` 等）から見えず抜け落ちる（実際に marketing URL 修正項目が RELEASE doc のチェックリストに載っておらず穴になっていた／advisor が捕捉）
+- ⚠️ **ASC API の `403 FORBIDDEN.REQUIRED_AGREEMENTS_MISSING_OR_EXPIRED` は実装バグではなく Apple 規約の再同意待ち**。fastlane・直接 API を問わず**全エンドポイントが同時に**塞がる。ユーザーに ASC の Business ページで同意を依頼する。同意後も反映まで数分かかり、**エンドポイントごとに反映タイミングがズレる**ため、単発チェックでなく数分間バックグラウンドでリトライすること（2026-08-28 実例）
+- ⚠️ **`fastlane deliver download_metadata` が HTTP を 1 本も発行せず silent exit 0 する環境故障が起きうる**（brew upgrade / `--verbose` / sandbox 無効化でも再現。同じ認証の `precheck` は正常＝`deliver` 固有）。この症状なら深追いせず、変更フィールドが少なければ **ASC API（`appStoreVersionLocalizations` 等）への直接 PATCH にフォールバック**する方が安全（送らないフィールドに触れない）
+- ⚠️ **API Key 認証の `fastlane precheck` は IAP チェック非対応**。IAP を持たないアプリでも `--include_in_app_purchases false` を付けないとエラーになるので、API Key 運用時は常時付与する
 
 ### Git運用
 
