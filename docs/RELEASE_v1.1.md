@@ -1,6 +1,6 @@
 # RELEASE v1.1 — ITMS リジェクト回避の再提出
 
-- 対象: BubblePopGame v1.1（build 40）の App Store 再提出
+- 対象: BubblePopGame v1.1 の App Store 再提出（pbxproj は build 40 に bump、実際の提出ビルドは Xcode Cloud が採番した build 46）
 - 作成: 2026-06-05
 - 関連: #46（ASC リジェクト）/ PR #47（バージョン bump）/ #44・PR #48（CI テスト時間短縮）
 
