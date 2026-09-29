@@ -149,6 +149,7 @@ app/BubblePopGame/
 - ⚠️ **プロモーション用テキストはバージョン単位の値で、新しいバージョンでは空になっていることがある**（v1.1 で ja/en とも空だった）。前のバージョンから引き継がれている前提にせず、申請前に毎回読む
 - ⚠️ **説明文の doc と live の差を「体裁の違い」で片付けない**。v1.1 では体裁の差（`【】`・`•`）に紛れて「制限時間 15 秒〜」という事実の誤り（コードは `30...180`）が live に残っていた。中身の差はコードを grep して、どちらが正しいかを確かめる（残っている体裁の差は #54）
 - ⚠️ **リリースタグは提出したビルドのビルド元 commit に打つ**。Xcode Cloud の手動ビルドは、ビルドした時点の main の commit を使う（v1.1 build 46 = `03e7ca3`）。その後の docs PR マージで main の先頭はずれるため、`git tag -a v1.1 03e7ca3` のように commit を明示する
+- ⚠️ **審査を通ってタグを打ったら、同じ日のうちに `MARKETING_VERSION` を次のパッチに上げる PR を出す**。Xcode Cloud の `Default` ワークフローは main の変更でアーカイブ → ASC へアップロードするため、据え置くと docs だけの PR のマージでも承認済みバージョンのビルドが作られ、ITMS-90186 / 90062 の却下メールが届く（#58: v1.1 承認後に PR #56 のマージで build 48 が却下された）。あわせて開始条件の「ファイルとフォルダ」を `app/` 配下に限定する（#58 で人が ASC で設定。設定済みかは ASC で確認する）。手順と他アプリの事例は skill `release-version-bump-check`。物差し: リリースの間に届く ITMS-90186 のメールが 0 通
 - ⚠️ **API Key 認証の `fastlane precheck` は IAP チェック非対応**。IAP を持たないアプリでも `--include_in_app_purchases false` を付けないとエラーになるので、API Key 運用時は常時付与する
 
 ### Git運用
@@ -157,6 +158,8 @@ app/BubblePopGame/
 - ⚠️ **スタックPR のマージ順の罠**: base が別 feature ブランチのスタックPR（`#B` の base=`feature/A`）は、`#A` を先に main へマージした後で `#B` をマージすると、**main でなく中間ブランチ（feature/A）に入り、コードが main に到達しない**（GitHub 上は "merged" 表示でも）。実際に #26/#27 がこれで #19/#20 を main 未着地にし、re-land 2 PR（#29/#30）の手戻りが発生した。→ **独立に並行する変更は base=main で切る**（同一ファイルを触っても 3-way merge で大抵解決）。どうしてもスタックする場合は下から順にマージし、各PRの base（マージ先）を必ず確認する
 - `build/` と `DerivedData/` は `.gitignore` 済み（`xcodebuild -derivedDataPath build/DerivedData` 利用時の生成物）
 - PR タイトルは `fix:` / `feat:` / `chore:` プレフィックス、本文に Test plan の手動確認チェックリストを含める
+- ⚠️ **グローバル skill（`~/.claude/skills/*/SKILL.md`）は複数リポ（BubblePopGame / OtetsudaiCoin / LeafTimer 等）で共有している**。編集前に更新日時と他リポのセッションが動いていないかを確認し、同時に編集している可能性があれば編集を見送って Issue に切り出す（#57: `asc-submission-prep` の SKILL.md が同じ日の朝に別リポのセッションで書き換えられていたため、Issue 化だけにした）
+- ⚠️ **Issue のクローズ条件に、他リポでの実走回数・手直し回数のような数値を入れるときは、その数値がどのリポでも実際に記録されているかを条件を決める時点で確認する**。記録がないとクローズ時に測れない（#53 の「手直し回数」はどのリポにもログがなく、測れないままクローズした）
 
 ## セッション終了時の振り返り運用
 
