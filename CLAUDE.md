@@ -147,7 +147,7 @@ app/BubblePopGame/
 - ⚠️ **`fastlane deliver download_metadata` が HTTP を 1 本も発行せず silent exit 0 する環境故障が起きうる**（brew upgrade / `--verbose` / sandbox 無効化でも再現。同じ認証の `precheck` は正常＝`deliver` 固有）。この症状なら深追いせず、変更フィールドが少なければ **ASC API（`appStoreVersionLocalizations` 等）への直接 PATCH にフォールバック**する方が安全（送らないフィールドに触れない）
 - ✅ **ASC 申請準備の本線は Chrome 経由の skill `asc-submission-prep`（#53）**。Claude が API Key を読む操作は auto mode で拒否されるため、ログイン済みブラウザで読み取り → 差分表 → 一括 OK → 書き込み → 読み戻し、の順で進める。提出ボタンは人が押す
 - ⚠️ **プロモーション用テキストはバージョン単位の値で、新しいバージョンでは空になっていることがある**（v1.1 で ja/en とも空だった）。前のバージョンから引き継がれている前提にせず、申請前に毎回読む
-- ⚠️ **説明文の doc と live の差を「体裁の違い」で片付けない**。v1.1 では体裁の差（`【】`・`•`）に紛れて「制限時間 15 秒〜」という事実の誤り（コードは `30...180`）が live に残っていた。中身の差はコードを grep して、どちらが正しいかを確かめる（残っている体裁の差は #54）
+- ⚠️ **説明文の doc と live の差を「体裁の違い」で片付けない**。v1.1 では体裁の差（`【】`・`•`）に紛れて「制限時間 15 秒〜」という事実の誤り（コードは `30...180`）が live に残っていた。中身の差はコードを grep して、どちらが正しいかを確かめる（体裁の差は #54 で live を正本にして doc に取り込んだ）
 - ⚠️ **リリースタグは提出したビルドのビルド元 commit に打つ**。Xcode Cloud の手動ビルドは、ビルドした時点の main の commit を使う（v1.1 build 46 = `03e7ca3`）。その後の docs PR マージで main の先頭はずれるため、`git tag -a v1.1 03e7ca3` のように commit を明示する
 - ⚠️ **API Key 認証の `fastlane precheck` は IAP チェック非対応**。IAP を持たないアプリでも `--include_in_app_purchases false` を付けないとエラーになるので、API Key 運用時は常時付与する
 
