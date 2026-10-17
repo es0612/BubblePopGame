@@ -46,8 +46,8 @@
 【ゲームモード】
 • 通常モード: 自由にシャボン玉を消してスコアを競う
 • 数字順モード: 1から順番に数字のシャボン玉を消すチャレンジ
-• 制限時間: 30秒〜180秒（初期値30秒）まで自由に設定可能
-• シャボン玉数: 10個〜50個まで調整可能
+• 制限時間: 30秒～180秒（初期値30秒）まで自由に設定可能
+• シャボン玉数: 10個～50個まで調整可能
 
 【カスタマイズ設定】
 • BGMセレクション: 3つの癒し系楽曲から選択
@@ -59,7 +59,7 @@
 • ハイスコア自動保存
 • ゲームモード別ランキング
 • 制限時間別記録管理
-• 詳細統計情報（正確率、プレイ時間など）
+• 詳細統計情報（正確率、平均反応速度など）
 
 【充実のサポート機能】
 • 分かりやすいチュートリアル（4ステップガイド）
@@ -96,7 +96,7 @@
 シンプルながらも奥深い、心温まるシャボン玉の世界をお楽しみください！
 ```
 
-### 英語版説明文 (4000文字制限) — ⚠️ 絵文字禁止（ASC の en は絵文字を弾く。plain text + ハイフン箇条書き）
+### 英語版説明文 (4000文字制限) — ⚠️ 絵文字禁止（ASC の en は絵文字を弾く。見出し `【】`・箇条書き `•` は v1.1 で受理済み）
 
 ```
 Pop beautiful soap bubbles with your fingertips!
@@ -105,54 +105,55 @@ A soothing casual game where you tap to pop rainbow-colored soap bubbles dancing
 
 Key Features
 
-Game Modes
-- Normal Mode: Freely pop bubbles and compete for high scores
-- Numbered Mode: Challenge yourself by popping numbered bubbles in order
-- Time Limit: Customizable from 30 to 180 seconds (default 30)
-- Bubble Count: Adjustable from 10 to 50 bubbles
+【Game Modes】
+• Normal Mode: Freely pop bubbles and compete for high scores
+• Numbered Mode: Challenge yourself by popping numbered bubbles in order
+• Time Limit: Customizable from 30 to 180 seconds (default 30)
+• Bubble Count: Adjustable from 10 to 50 bubbles
 
-Customization Settings
-- BGM Selection: Choose from 3 soothing music tracks
-- Sound Effects: Fine-tune volume levels
-- Vibration: Toggle touch feedback ON/OFF
-- Progressive Difficulty: Gradually increasing challenge in numbered mode
+【Customization Settings】
+• BGM Selection: Choose from 3 soothing music tracks
+• Sound Effects: Fine-tune volume levels
+• Vibration: Toggle touch feedback ON/OFF
+• Progressive Difficulty: Gradually increasing challenge in numbered mode
 
-Score and Record System
-- Automatic high score saving
-- Rankings by game mode
-- Records management by time limit
-- Detailed statistics
+【Score & Record System】
+• Automatic high score saving
+• Rankings by game mode
+• Records management by time limit
+• Detailed statistics (accuracy rate, average reaction time, etc.)
 
-Comprehensive Support Features
-- Easy-to-understand tutorial
-- Full VoiceOver support (visual impairment accessibility)
-- Dynamic Type support (text size adjustment)
-- Color vision deficiency considerate color system
+【Comprehensive Support Features】
+• Easy-to-understand tutorial (4-step guide)
+• Full VoiceOver support (visual impairment accessibility)
+• Dynamic Type support (text size adjustment)
+• Color vision deficiency considerate color system
 
-Audio and Experience
-- 3 original BGM tracks included
-- Realistic bubble popping sounds
-- Beautiful particle effects
-- Smooth 60FPS animations
-- Intuitive touch controls
+Audio & Experience Features
+• 3 original BGM tracks included
+• Realistic bubble popping sounds
+• Beautiful particle effects
+• Smooth 60FPS animations
+• Intuitive touch controls
 
 Device Compatibility
-- iPhone (iOS 17.0 or later)
-- iPad (iPadOS 17.0 or later)
-- Responsive design for all screen sizes
+• iPhone (iOS 17.0 or later)
+• iPad (iPadOS 17.0 or later)
+• Responsive design for all screen sizes
+• Recommended: iPhone 12 or later, iPad 9th generation or later
 
 Perfect For
-- Relaxing during commute or study breaks
-- Training concentration skills (numbered mode)
-- Enjoying beautiful visual effects
-- Users requiring accessibility features
-- Anyone seeking simple, intuitive games
+• Relaxing during commute or study breaks
+• Training concentration skills (numbered mode)
+• Enjoying beautiful visual effects
+• Users requiring accessibility features
+• Anyone seeking simple, intuitive games
 
 Accessibility
 This app is designed for everyone to enjoy. With VoiceOver audio guidance, high contrast display, text size adjustment, and more, users with disabilities can use it with confidence.
 
 Privacy
-All data is stored locally on your device, with no transmission to external servers. Enjoy with peace of mind.
+All user data is stored locally on your device, with no transmission to external servers. Enjoy with peace of mind.
 
 Experience the simple yet profound, heartwarming world of soap bubbles!
 ```
