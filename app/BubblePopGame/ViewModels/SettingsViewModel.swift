@@ -80,15 +80,30 @@ class SettingsViewModel {
         
         // チュートリアル完了状態を復元
         gameSettings.isFirstLaunch = wasFirstLaunch
-        
+
+        // 戻した BGM・効果音・音量を AudioService にも反映する（#66）
+        applyAudioSettings()
         saveSettings()
     }
     
     func toggleSound() {
         gameSettings.soundEnabled.toggle()
+        audioService?.setSFXEnabled(gameSettings.soundEnabled)
         saveSettings()
     }
     
+    /// BGM 音量スライダー用。トラックを再生し直さず、音量だけを AudioService に伝える（#66）
+    func setBGMVolume(_ volume: Double) {
+        gameSettings.bgmVolume = volume
+        audioService?.setBGMVolume(Float(volume))
+    }
+
+    /// 効果音音量スライダー用。音量だけを AudioService に伝える（#66）
+    func setSFXVolume(_ volume: Double) {
+        gameSettings.sfxVolume = volume
+        audioService?.setSFXVolume(Float(volume))
+    }
+
     func toggleVibration() {
         gameSettings.vibrationEnabled.toggle()
         saveSettings()
@@ -111,6 +126,7 @@ class SettingsViewModel {
         
         // BGM設定を適用
         audioService.setBGMEnabled(gameSettings.bgmEnabled)
+        audioService.setSFXEnabled(gameSettings.soundEnabled)
         
         // BGMが有効でトラックが"off"でない場合はBGMを再生
         if gameSettings.bgmEnabled && gameSettings.bgmTrack != "off" {

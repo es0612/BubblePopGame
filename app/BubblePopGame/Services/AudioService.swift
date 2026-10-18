@@ -12,6 +12,7 @@ protocol AudioService {
     func playBGM(name: String, loop: Bool)
     func playBGMTrack(_ track: String, loop: Bool)
     func setBGMEnabled(_ enabled: Bool)
+    func setSFXEnabled(_ enabled: Bool)
     func playSFX(name: String)
     func setVolume(_ volume: Float)
     func setBGMVolume(_ volume: Float)
@@ -24,6 +25,7 @@ protocol AudioService {
     func resumeBGM()
     var isPlaying: Bool { get }
     var isBGMEnabled: Bool { get }
+    var isSFXEnabled: Bool { get }
     var currentBGMTrack: String? { get }
     var isPaused: Bool { get }
 }
@@ -42,6 +44,7 @@ class AudioServiceImpl: AudioService {
     // 実際のBGM再生用のAVAudioPlayer
     private var bgmAudioPlayer: AVAudioPlayer?
     private var _isBGMEnabled: Bool = true
+    private var _isSFXEnabled: Bool = true
     private var _currentBGMTrack: String?
     private var _isPaused: Bool = false
     private var fadingTimer: Timer?
@@ -54,6 +57,20 @@ class AudioServiceImpl: AudioService {
         return _isBGMEnabled
     }
     
+    var isSFXEnabled: Bool {
+        return _isSFXEnabled
+    }
+
+    /// 効果音を鳴らしてよいか。効果音 OFF・ミュート・音量 0 をここ 1 箇所で判定する（#66）
+    var canPlaySFX: Bool {
+        return _isSFXEnabled && !isMuted && sfxVolume > 0
+    }
+
+    /// フェードアウト中か（テスト用）
+    var isFadingOut: Bool {
+        return fadingTimer != nil
+    }
+
     var currentBGMTrack: String? {
         return _currentBGMTrack
     }
@@ -106,6 +123,10 @@ class AudioServiceImpl: AudioService {
             return
         }
         
+        // 前のゲームのフェードアウトが残っていると、最後に stopBGM() でこれから鳴らす BGM を止めてしまう（#66）
+        fadingTimer?.invalidate()
+        fadingTimer = nil
+
         // 現在再生中のBGMを停止
         bgmAudioPlayer?.stop()
         
@@ -193,6 +214,10 @@ class AudioServiceImpl: AudioService {
         }
     }
     
+    func setSFXEnabled(_ enabled: Bool) {
+        _isSFXEnabled = enabled
+    }
+
     func playSFX(name: String) {
         // 効果音の種類に応じてシステム音で代用（音量調整対応）
         switch name {
@@ -310,7 +335,7 @@ class AudioServiceImpl: AudioService {
     
     private func generatePopSound() {
         // シャボン玉破裂音をシミュレート（音量調整対応）
-        if !isMuted && sfxVolume > 0 {
+        if canPlaySFX {
             AudioServicesPlaySystemSound(1306) // Pop sound
         }
         debugLog("🎵 Pop sound (volume: \(sfxVolume))")  
@@ -318,7 +343,7 @@ class AudioServiceImpl: AudioService {
     
     private func generateButtonSound() {
         // ボタンタップ音をシミュレート（音量調整対応）
-        if !isMuted && sfxVolume > 0 {
+        if canPlaySFX {
             AudioServicesPlaySystemSound(1104) // Click sound
         }
         debugLog("🎵 Button sound (volume: \(sfxVolume))")
@@ -326,7 +351,7 @@ class AudioServiceImpl: AudioService {
     
     private func generateGameOverSound() {
         // ゲームオーバー音をシミュレート（音量調整対応）
-        if !isMuted && sfxVolume > 0 {
+        if canPlaySFX {
             AudioServicesPlaySystemSound(1322) // Anticipate sound
         }
         debugLog("🎵 Game over sound (volume: \(sfxVolume))")
@@ -334,7 +359,7 @@ class AudioServiceImpl: AudioService {
     
     private func generateErrorSound() {
         // エラー音をシミュレート（音量調整対応）
-        if !isMuted && sfxVolume > 0 {
+        if canPlaySFX {
             AudioServicesPlaySystemSound(1521) // Error sound
         }
         debugLog("🎵 Error sound (volume: \(sfxVolume))")
@@ -342,7 +367,7 @@ class AudioServiceImpl: AudioService {
     
     private func generateLevelUpSound() {
         // レベルアップ音をシミュレート（音量調整対応）
-        if !isMuted && sfxVolume > 0 {
+        if canPlaySFX {
             AudioServicesPlaySystemSound(1315) // Success sound
         }
         debugLog("🎵 Level up sound (volume: \(sfxVolume))")
