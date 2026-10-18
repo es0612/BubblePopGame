@@ -304,6 +304,11 @@ class GameViewModel {
             // タッチ応答性記録
             recordTouchResponseTime(startTime: touchStartTime)
         } else {
+            // ノーマルモードは空振りでチェーンを切る（#67）。
+            // 数字順モードはチェーンボーナスがスコアに乗るため、ここでは変えない
+            if effectiveGameMode != "numbered" {
+                currentStreak = 0
+            }
             // ミスタップも記録
             recordTouchResponseTime(startTime: touchStartTime)
         }

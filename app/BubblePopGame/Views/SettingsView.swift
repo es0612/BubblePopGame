@@ -113,7 +113,10 @@ struct SettingsView: View {
                                     Text("0")
                                         .font(.caption)
                                         .foregroundColor(.secondary)
-                                    Slider(value: $viewModel.gameSettings.bgmVolume, in: 0...1, step: 0.1)
+                                    Slider(value: Binding(
+                                        get: { viewModel.gameSettings.bgmVolume },
+                                        set: { viewModel.setBGMVolume($0) }
+                                    ), in: 0...1, step: 0.1)
                                     Text("100")
                                         .font(.caption)
                                         .foregroundColor(.secondary)
@@ -134,7 +137,10 @@ struct SettingsView: View {
                                     Text("0")
                                         .font(.caption)
                                         .foregroundColor(.secondary)
-                                    Slider(value: $viewModel.gameSettings.sfxVolume, in: 0...1, step: 0.1)
+                                    Slider(value: Binding(
+                                        get: { viewModel.gameSettings.sfxVolume },
+                                        set: { viewModel.setSFXVolume($0) }
+                                    ), in: 0...1, step: 0.1)
                                     Text("100")
                                         .font(.caption)
                                         .foregroundColor(.secondary)
