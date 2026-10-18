@@ -47,11 +47,11 @@
 • 通常モード: 自由にシャボン玉を消してスコアを競う
 • 数字順モード: 1から順番に数字のシャボン玉を消すチャレンジ
 • 制限時間: 30秒～180秒（初期値30秒）まで自由に設定可能
-• シャボン玉数: 10個～50個まで調整可能
+• シャボン玉数: 10個から調整可能（最大数は端末に合わせて自動調整）
 
 【カスタマイズ設定】
 • BGMセレクション: 3つの癒し系楽曲から選択
-• 効果音調整: 音量レベル細かく設定
+• 効果音: ON/OFF を切り替え
 • バイブレーション: タッチフィードバックのON/OFF
 • プログレッシブ難易度: 数字モードで段階的に難しくなる設定
 
@@ -59,7 +59,7 @@
 • ハイスコア自動保存
 • ゲームモード別ランキング
 • 制限時間別記録管理
-• 詳細統計情報（正確率、平均反応速度など）
+• リザルトで正確率・最大チェーン・プレイ時間を表示
 
 【充実のサポート機能】
 • 分かりやすいチュートリアル（4ステップガイド）
@@ -88,7 +88,7 @@
 • シンプルで分かりやすいゲームをお探しの方
 
 アクセシビリティ
-このアプリは誰もが楽しめるよう設計されています。VoiceOverによる音声ガイド、高コントラスト表示、文字サイズ調整など、障害をお持ちの方も安心してご利用いただけます。
+このアプリは誰もが楽しめるよう設計されています。VoiceOverによる音声ガイド、文字サイズ調整など、障害をお持ちの方も安心してご利用いただけます。
 
 プライバシー
 ユーザーデータは全てデバイス内にローカル保存され、外部サーバーへの送信は一切行いません。安心してお楽しみください。
@@ -109,11 +109,11 @@ Key Features
 • Normal Mode: Freely pop bubbles and compete for high scores
 • Numbered Mode: Challenge yourself by popping numbered bubbles in order
 • Time Limit: Customizable from 30 to 180 seconds (default 30)
-• Bubble Count: Adjustable from 10 to 50 bubbles
+• Bubble Count: Adjustable from 10 (the maximum adapts to your device)
 
 【Customization Settings】
 • BGM Selection: Choose from 3 soothing music tracks
-• Sound Effects: Fine-tune volume levels
+• Sound Effects: Turn on or off
 • Vibration: Toggle touch feedback ON/OFF
 • Progressive Difficulty: Gradually increasing challenge in numbered mode
 
@@ -121,7 +121,7 @@ Key Features
 • Automatic high score saving
 • Rankings by game mode
 • Records management by time limit
-• Detailed statistics (accuracy rate, average reaction time, etc.)
+• Results show accuracy, max chain, and play time
 
 【Comprehensive Support Features】
 • Easy-to-understand tutorial (4-step guide)
@@ -150,7 +150,7 @@ Perfect For
 • Anyone seeking simple, intuitive games
 
 Accessibility
-This app is designed for everyone to enjoy. With VoiceOver audio guidance, high contrast display, text size adjustment, and more, users with disabilities can use it with confidence.
+This app is designed for everyone to enjoy. With VoiceOver audio guidance, text size adjustment, and more, users with disabilities can use it with confidence.
 
 Privacy
 All user data is stored locally on your device, with no transmission to external servers. Enjoy with peace of mind.
