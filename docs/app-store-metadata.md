@@ -11,8 +11,9 @@
 
 ### サブタイトル
 - **日本語**: 広告なし。泡をタップする暇つぶし（1.1.2 から。#78）
-- **英語**: Calm tap game for kids, no ads（1.1.2 から。#78）
-- **文字数**: 日本語 16文字、英語 30文字（30文字制限内）
+- **英語**: Family tap game, no ads（1.1.2 から。#78）
+- **文字数**: 日本語 16文字、英語 23文字（30文字制限内）
+> ※ en は当初「Calm tap game for kids, no ads」だったが、“For Kids” はガイドライン 2.3.8 でキッズカテゴリ専用の語のため差し替えた（2026-11-03 の最終レビューで指摘、原文を確認）
 > ※ 1.1.1 までは ja「美しいシャボン玉で楽しむリラックスゲーム」/ en「Relaxing soap bubble game」
 > ※ 旧英語サブタイトル「Relaxing game with beautiful soap bubbles」は 37 文字で 30 字制限超過だったため短縮（25 文字）。
 
@@ -170,15 +171,15 @@ Experience the simple yet profound, heartwarming world of soap bubbles!
 
 ### 日本語キーワード (100文字制限)
 ```
-子供,子ども,幼児,知育,数字,順番,バブル,プチプチ,リラックス,ストレス解消,ストレス発散,集中力,家族,反射神経,カジュアル,ひまつぶし,BGM
+子供,子ども,幼児,知育,数字,順番,バブル,プチプチ,リラックス,ストレス解消,ストレス発散,集中力,家族,反射神経,カジュアル,BGM
 ```
-> ※ 75 文字。名前・サブタイトルにある `シャボン玉` `ゲーム` `親子` `癒し` `タッチ` `広告なし` `泡` `タップ` `暇つぶし` は除外。1.1.1 までの `無料` `シンプル` `アクセシビリティ` `VoiceOver` などは外した
+> ※ 69 文字。名前・サブタイトルにある `シャボン玉` `ゲーム` `親子` `癒し` `タッチ` `広告なし` `泡` `タップ` `暇つぶし`（`ひまつぶし` も同じ語として扱われうるので）は除外。`子供` `子ども` `幼児` は 2.3.8 の “For Kids” に当たるかグレーだが、言い回しではなく単語なので残す（PO の判断。却下されたら外して再提出）。1.1.1 までの `無料` `シンプル` `アクセシビリティ` `VoiceOver` などは外した
 
 ### 英語キーワード (100文字制限)
 ```
-family,toddler,baby,numbers,count,stress relief,fidget,time killer,casual,soap,chill,quick,popping
+toddler,baby,numbers,count,stress relief,fidget,time killer,casual,soap,chill,quick,popping
 ```
-> ※ 98 文字。名前・サブタイトルにある `bubble` `pop` `relax` `focus` `calm` `tap` `game` `kids` `ads` は除外
+> ※ 91 文字。名前・サブタイトルにある `bubble` `pop` `relax` `focus` `family` `tap` `game` `ads` は除外
 
 ---
 
