@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """App Store 用スクショ合成スクリプト (#5)
 
-simctl で撮った生スクショ（/tmp/bpg-shots/{iphone,ipad}-<screen>.png）を、
-「グラデ背景 + 上部の日本語見出し + デバイス枠に収めたアプリ画面」に合成し、
+simctl で撮った生スクショ（/tmp/bpg-shots/{iphone,ipad}-{ja,en}-<screen>.png）を、
+「グラデ背景 + 上部の見出し（ja/en） + デバイス枠に収めたアプリ画面」に合成し、
 App Store 必須解像度（6.9" / 6.5" / iPad 13"）で出力する。
 
 実行:
@@ -23,14 +23,24 @@ CANVASES = {
     "ipad-13_2064x2752":    (2064, 2752, "ipad"),
 }
 
-# (screen キー, 日本語見出し) ※絵文字なし
-JOBS = [
-    ("menu",          "美しいシャボン玉の世界へ"),
-    ("game",          "指先でシャボン玉をはじこう"),
-    ("game-numbered", "数字を順番に消すチャレンジ"),
-    ("result",        "あなたの記録を更新しよう"),
-    ("settings",      "自分好みに自由カスタマイズ"),
-]
+# ロケールごとの (screen キー, 見出し)。並びは App Store に出る順（#78: 遊び → 安心 → 癒し → 補足）。
+# 絵文字は使わない（ASC が ja/en とも「無効な文字」で拒否する）
+JOBS = {
+    "ja": [
+        ("game",          "タップでぱちん！シャボン玉"),
+        ("game-numbered", "広告なし。親子で安心して遊べる"),
+        ("result",        "30秒で気分転換"),
+        ("menu",          "BGMで癒しのひととき"),
+        ("settings",      "時間も数も好みに調整"),
+    ],
+    "en": [
+        ("game",          "Tap to pop the bubbles!"),
+        ("game-numbered", "No ads. Fun for families"),
+        ("result",        "A 30-second break to refresh"),
+        ("menu",          "Relax with calming music"),
+        ("settings",      "Adjust time and bubbles"),
+    ],
+}
 
 # ブランドのグラデ（上=濃いめの空色 → 下=淡い水色）
 GRAD_TOP = (74, 168, 232)
@@ -125,20 +135,22 @@ def compose(raw_path, caption, out_path, canvas):
 
 
 def main():
-    os.makedirs(OUT_DIR, exist_ok=True)
     made = []
-    for cname, canvas in CANVASES.items():
-        device = canvas[2]
-        for i, (screen, caption) in enumerate(JOBS, start=1):
-            raw = os.path.join(SRC_DIR, f"{device}-{screen}.png")
-            if not os.path.exists(raw):
-                print(f"  SKIP (no raw): {raw}")
-                continue
-            out = os.path.join(OUT_DIR, f"{cname}__{i:02d}_{screen}.png")
-            compose(raw, caption, out, canvas)
-            made.append(out)
-            print(f"  OK: {out}")
-    print(f"\n生成 {len(made)} 枚 -> {OUT_DIR}")
+    for locale, jobs in JOBS.items():
+        out_dir = os.path.join(OUT_DIR, locale)
+        os.makedirs(out_dir, exist_ok=True)
+        for cname, canvas in CANVASES.items():
+            device = canvas[2]
+            for i, (screen, caption) in enumerate(jobs, start=1):
+                raw = os.path.join(SRC_DIR, f"{device}-{locale}-{screen}.png")
+                if not os.path.exists(raw):
+                    print(f"  SKIP (no raw): {raw}")
+                    continue
+                out = os.path.join(out_dir, f"{cname}__{i:02d}_{screen}.png")
+                compose(raw, caption, out, canvas)
+                made.append(out)
+                print(f"  OK: {out}")
+    print(f"\n生成 {len(made)} 枚 -> {OUT_DIR}/{{ja,en}}")
 
 
 if __name__ == "__main__":
