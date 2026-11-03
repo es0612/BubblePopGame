@@ -62,6 +62,9 @@ class GameViewModel {
     /// 永続化された gameSettings を書き換えず（autosave で残ってしまうため）、実効値だけを差し替える。
     var debugGameTimeOverride: Double?
     var debugGameModeOverride: String?
+    /// App Store スクショ撮影用のプレイ途中の状態（Issue #78）。startGame() の最後に適用する。
+    /// 起動直後の startGame() は screenBounds 待ちで保留され、再開時に値をリセットするため、最後に上書きする。
+    var debugScreenshotSnapshot: ScreenshotGameSnapshot?
     #endif
 
     /// 実効ゲーム制限時間。DEBUG override があればそれを優先（テスト容易性のため internal）。
@@ -229,6 +232,18 @@ class GameViewModel {
         
         // パフォーマンス監視開始
         performanceService.startMonitoring()
+
+        #if DEBUG
+        if let snapshot = debugScreenshotSnapshot {
+            score = snapshot.score
+            bubblesPopped = snapshot.bubblesPopped
+            currentStreak = snapshot.currentStreak
+            bestStreak = snapshot.bestStreak
+            totalTaps = snapshot.totalTaps
+            successfulTaps = snapshot.successfulTaps
+            timeRemaining = snapshot.timeRemaining
+        }
+        #endif
     }
     
     func pauseGame() {
