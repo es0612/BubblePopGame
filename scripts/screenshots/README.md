@@ -25,7 +25,7 @@ xcodebuild build -project app/BubblePopGame.xcodeproj -scheme BubblePopGame \
 #          -AppleLanguages '(ja)' -AppleLocale ja_JP
 #    en: xcrun simctl launch <UDID> com.asapapalab.BubblePopGame --screenshot=<画面> \
 #          -AppleLanguages '(en)' -AppleLocale en_US
-#    → 約 5 秒待って xcrun simctl io <UDID> screenshot /tmp/bpg-shots/<device>-<ja|en>-<画面>.png → terminate
+#    → 約 8 秒待って（インストール直後の初回起動は 5 秒だと起動画面のまま写る）xcrun simctl io <UDID> screenshot /tmp/bpg-shots/<device>-<ja|en>-<画面>.png → terminate
 #    （BGM がデフォルト ON なので撮影後は必ず terminate すること）
 #    game / game-numbered はプレイ途中の状態（スコア・残り時間）が注入される。残り時間が 0 になる前に撮る
 
