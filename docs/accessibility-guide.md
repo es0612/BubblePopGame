@@ -33,20 +33,7 @@
 - **タップ時**: 「シャボン玉を消しました。スコア10点追加」などの結果音声
 - **リザルト画面**: 「おしまい！最終スコア120点」の詳細報告（タイトルは勝ち負けのないお祝いトーン）
 
-**1.2 高コントラスト表示対応**
-
-**設定方法**
-1. iOS設定 > アクセシビリティ > 画面表示とテキストサイズ
-2. 「コントラストを上げる」をオン
-3. アプリが自動的に高コントラストカラーに切り替わります
-
-**高コントラスト時の変更点**
-- 背景色: より暗い青色に変更
-- シャボン玉: 境界線を太く、色彩をより鮮明に
-- UI要素: ボタンの枠線を強調
-- 文字: より太いフォントウェイトで表示
-
-**1.3 文字サイズ調整（Dynamic Type）**
+**1.2 文字サイズ調整（Dynamic Type）**
 
 **設定方法**
 1. iOS設定 > アクセシビリティ > 画面表示とテキストサイズ
@@ -127,7 +114,6 @@
 - **VoiceOver詳細度**: 簡潔／標準／詳細の3段階
 - **効果音説明**: 音響効果の詳細音声説明ON/OFF
 - **自動ポーズ**: VoiceOver使用時の自動一時停止機能
-- **コントラスト**: 標準／高コントラストの切り替え
 - **アニメーション**: モーション効果の軽減設定
 
 **5.2 iOS設定との連携**
@@ -188,7 +174,6 @@
 **解決方法**:
 1. iOS設定で「コントラストを上げる」を有効化
 2. 色覚調整機能（色覚多様性）を設定
-3. アプリ内で高コントラストモードを選択
 
 #### 8. フィードバックと改善
 
@@ -245,20 +230,7 @@ The app is fully compatible with iOS standard VoiceOver functionality.
 - **Tap Actions**: Result feedback like "Bubble popped. 10 points added to score"
 - **Game End**: Detailed reporting like "Game over. Final score 120 points"
 
-**1.2 High Contrast Display Support**
-
-**Setup Method**
-1. iOS Settings > Accessibility > Display & Text Size
-2. Turn on "Increase Contrast"
-3. App automatically switches to high contrast colors
-
-**High Contrast Changes**
-- Background: Changes to darker blue
-- Bubbles: Thicker borders with more vivid colors
-- UI Elements: Enhanced button outlines
-- Text: Displays with bolder font weight
-
-**1.3 Text Size Adjustment (Dynamic Type)**
+**1.2 Text Size Adjustment (Dynamic Type)**
 
 **Setup Method**
 1. iOS Settings > Accessibility > Display & Text Size
@@ -339,7 +311,6 @@ Settings Screen > "Accessibility" Section
 - **VoiceOver Verbosity**: Concise/Standard/Detailed (3 levels)
 - **Sound Effect Description**: Detailed audio description of sound effects ON/OFF
 - **Auto Pause**: Automatic pause function when using VoiceOver
-- **Contrast**: Standard/High Contrast toggle
 - **Animation**: Motion effect reduction settings
 
 **5.2 iOS Settings Integration**
@@ -400,7 +371,6 @@ The app automatically recognizes and applies the following iOS standard settings
 **Solution**:
 1. Enable "Increase Contrast" in iOS settings
 2. Configure color vision adjustment (color vision diversity)
-3. Select high contrast mode within the app
 
 #### 8. Feedback and Improvement
 
