@@ -152,12 +152,6 @@
   2. 「さらに大きな文字」をON
   3. 文字サイズを調整
 
-### 高コントラスト表示
-- **対応範囲**: UI要素の色彩とコントラスト
-- **使用方法**:
-  1. iOS設定 → アクセシビリティ → 表示とテキストサイズ
-  2. 「コントラストを上げる」をON
-
 ### 色覚異常への配慮
 - **対応**: 色以外でも要素を区別可能
 - **特徴**: 形状、位置、テキストによる識別
@@ -426,12 +420,6 @@ This guide provides detailed instructions from basic usage to problem resolution
   1. iOS Settings → Accessibility → Display & Text Size
   2. Turn ON "Larger Text"
   3. Adjust text size
-
-### High Contrast Display
-- **Coverage**: UI element colors and contrast
-- **Usage**:
-  1. iOS Settings → Accessibility → Display & Text Size
-  2. Turn ON "Increase Contrast"
 
 ### Color Vision Deficiency Consideration
 - **Support**: Elements distinguishable without color alone

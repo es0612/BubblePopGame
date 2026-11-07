@@ -20,7 +20,6 @@ A soothing casual game where you pop beautiful soap bubbles with your fingertips
 
 ### 🌟 アクセシビリティ / Accessibility
 - **VoiceOver完全対応**: 音声ガイドでゲームを楽しめる
-- **高コントラスト表示**: 視認性を向上
 - **Dynamic Type対応**: 文字サイズを自由に調整
 - **色覚配慮**: 色覚多様性に対応したカラーシステム
 
@@ -225,7 +224,6 @@ xcodebuild test -project app/BubblePopGame.xcodeproj -scheme BubblePopGame -dest
 
 - **VoiceOver**: 完全音声ガイド対応
 - **Dynamic Type**: 文字サイズ調整
-- **高コントラスト**: 視認性向上
 - **色覚配慮**: 色覚多様性対応
 - **操作支援**: AssistiveTouch対応
 

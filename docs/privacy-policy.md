@@ -64,7 +64,6 @@
 
 - VoiceOver（画面読み上げ機能）
 - Dynamic Type（文字サイズ調整）
-- 高コントラスト表示
 
 これらの機能使用時も、個人情報の収集や外部送信は一切行いません。
 
@@ -174,7 +173,6 @@ The App uses the following iOS standard features to improve accessibility:
 
 - VoiceOver (screen reading function)
 - Dynamic Type (text size adjustment)
-- High contrast display
 
 Even when using these features, no personal information is collected or transmitted externally.
 
