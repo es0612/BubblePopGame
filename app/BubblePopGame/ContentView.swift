@@ -170,9 +170,12 @@ struct ContentView: View {
     private func configureForScreenshot(_ screen: String, viewModel: GameViewModel) {
         switch screen {
         case "game", "game-normal":
+            // 開始直後（スコア 0）ではなく、遊んでいる途中の状態で撮る（#78）
+            viewModel.debugScreenshotSnapshot = .normal
             viewModel.startGame()
         case "game-numbered":
             viewModel.debugGameModeOverride = "numbered"
+            viewModel.debugScreenshotSnapshot = .numbered
             viewModel.startGame()
         case "result":
             // 見栄えのするサンプル結果を注入（正確率 = successfulTaps/totalTaps = 96/104 ≈ 92%）
