@@ -59,7 +59,7 @@
 
 ### 提出後（審査を通ったら）
 - [ ] 提出したビルドのビルド元 commit にタグを打つ（main の先頭ではない。`git tag -a v1.1.2 bf2887b`）
-- [ ] 同じ日のうちに `MARKETING_VERSION` を 1.1.3 に上げる PR を出す（`release-version-bump-check`）
+- [x] 同じ日のうちに `MARKETING_VERSION` を 1.1.3 に上げる PR を出す（`release-version-bump-check`）→ 2026-11-15 に `feature/release-v1.1.3-bump` で対応（配信は 2026-11-08 で、7 日遅れ。週次調査で気づいた）
 
 ## 手動確認（TestFlight の実機で。View 層はユニットテストで守れないため）
 
