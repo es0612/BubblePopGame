@@ -179,14 +179,10 @@ class BubbleServiceImpl: BubbleService {
     func generateRandomBubbles(count: Int, screenBounds: CGRect) -> [Bubble] {
         var bubbles: [Bubble] = []
         
-        // HUD領域（上部150px）とマージン（60px）を除外した生成領域
-        let hudHeight: CGFloat = 150
-        let margin: CGFloat = 60
+        // HUD領域（上部150px）とマージン（60px）を除外した生成領域（BubbleSpawnArea、#85）
         
         for _ in 0..<count {
-            let x = CGFloat.random(in: margin...(screenBounds.width - margin))
-            let y = CGFloat.random(in: (hudHeight + margin)...(screenBounds.height - margin))
-            let position = CGPoint(x: x, y: y)
+            let position = BubbleSpawnArea.randomPosition(in: screenBounds)
             
             // 通常モードでは通常タイプのみ生成
             let bubble = createBubble(at: position, type: .normal)
@@ -199,15 +195,11 @@ class BubbleServiceImpl: BubbleService {
     func generateNumberedBubbles(count: Int, screenBounds: CGRect, numberedCount: Int) -> [Bubble] {
         var bubbles: [Bubble] = []
         
-        // HUD領域（上部150px）とマージン（60px）を除外した生成領域
-        let hudHeight: CGFloat = 150
-        let margin: CGFloat = 60
+        // HUD領域（上部150px）とマージン（60px）を除外した生成領域（BubbleSpawnArea、#85）
         
         // 指定された数の数字付きバブルを生成（1からnumberedCountまで）
         for number in 1...numberedCount {
-            let x = CGFloat.random(in: margin...(screenBounds.width - margin))
-            let y = CGFloat.random(in: (hudHeight + margin)...(screenBounds.height - margin))
-            let position = CGPoint(x: x, y: y)
+            let position = BubbleSpawnArea.randomPosition(in: screenBounds)
             
             let bubble = createNumberedBubble(at: position, number: number)
             bubbles.append(bubble)
@@ -215,9 +207,7 @@ class BubbleServiceImpl: BubbleService {
         
         // 残りは通常のバブル
         for _ in numberedCount..<count {
-            let x = CGFloat.random(in: margin...(screenBounds.width - margin))
-            let y = CGFloat.random(in: (hudHeight + margin)...(screenBounds.height - margin))
-            let position = CGPoint(x: x, y: y)
+            let position = BubbleSpawnArea.randomPosition(in: screenBounds)
             
             let bubble = createBubble(at: position, type: .normal)
             bubbles.append(bubble)
@@ -229,15 +219,11 @@ class BubbleServiceImpl: BubbleService {
     func generateNumberedBubblesWithCustomSet(count: Int, screenBounds: CGRect, numberSet: [Int]) -> [Bubble] {
         var bubbles: [Bubble] = []
         
-        // HUD領域（上部150px）とマージン（60px）を除外した生成領域
-        let hudHeight: CGFloat = 150
-        let margin: CGFloat = 60
+        // HUD領域（上部150px）とマージン（60px）を除外した生成領域（BubbleSpawnArea、#85）
         
         // カスタム数字セットから数字付きバブルを生成
         for number in numberSet {
-            let x = CGFloat.random(in: margin...(screenBounds.width - margin))
-            let y = CGFloat.random(in: (hudHeight + margin)...(screenBounds.height - margin))
-            let position = CGPoint(x: x, y: y)
+            let position = BubbleSpawnArea.randomPosition(in: screenBounds)
             
             let bubble = createNumberedBubble(at: position, number: number)
             bubbles.append(bubble)
@@ -246,9 +232,7 @@ class BubbleServiceImpl: BubbleService {
         // 残りは通常のバブル
         let remainingCount = max(0, count - numberSet.count)
         for _ in 0..<remainingCount {
-            let x = CGFloat.random(in: margin...(screenBounds.width - margin))
-            let y = CGFloat.random(in: (hudHeight + margin)...(screenBounds.height - margin))
-            let position = CGPoint(x: x, y: y)
+            let position = BubbleSpawnArea.randomPosition(in: screenBounds)
             
             let bubble = createBubble(at: position, type: .normal)
             bubbles.append(bubble)
