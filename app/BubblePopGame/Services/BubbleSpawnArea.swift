@@ -20,8 +20,11 @@ enum BubbleSpawnArea {
     /// y: (hudHeight + margin)...(height - margin)。
     /// 足りない軸は、その軸の中央付近の 1 点に潰す（落ちないことを優先した暫定の振る舞い）。
     static func ranges(in screenBounds: CGRect) -> (x: ClosedRange<CGFloat>, y: ClosedRange<CGFloat>) {
-        let x = axisRange(lower: margin, upper: screenBounds.width - margin, size: screenBounds.width)
-        let y = axisRange(lower: hudHeight + margin, upper: screenBounds.height - margin, size: screenBounds.height)
+        // `CGRect.width/height` は負のサイズを絶対値に直すので、渡された値そのものの `size` を使う
+        let width = screenBounds.size.width
+        let height = screenBounds.size.height
+        let x = axisRange(lower: margin, upper: width - margin, size: width)
+        let y = axisRange(lower: hudHeight + margin, upper: height - margin, size: height)
         return (x, y)
     }
 
