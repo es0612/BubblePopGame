@@ -472,12 +472,8 @@ class GameViewModel {
     }
     
     private func randomPosition() -> CGPoint {
-        // HUD領域（上部150px）とマージン（60px）を除外した生成領域
-        let hudHeight: CGFloat = 150
-        let margin: CGFloat = 60
-        let x = CGFloat.random(in: margin...(screenBounds.width - margin))
-        let y = CGFloat.random(in: (hudHeight + margin)...(screenBounds.height - margin))
-        return CGPoint(x: x, y: y)
+        // HUD領域（上部150px）とマージン（60px）を除外した生成領域（BubbleSpawnArea、#85）
+        return BubbleSpawnArea.randomPosition(in: screenBounds)
     }
     
     private func calculateScore(for bubble: Bubble) -> Int {
