@@ -24,7 +24,7 @@ struct GameOverResultTests {
         settings.gameTime = gameTime
         return GameViewModel(
             bubbleService: BubbleServiceImpl(screenBounds: .zero),
-            audioService: AudioServiceImpl(),
+            audioService: SpyAudioService(),
             effectService: EffectServiceImpl(),
             deviceService: DeviceServiceImpl(),
             performanceService: PerformanceServiceImpl(),

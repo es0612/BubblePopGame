@@ -76,7 +76,7 @@ struct PerformanceAndDITests {
         settings.bgmEnabled = false
         return GameViewModel(
             bubbleService: BubbleServiceImpl(screenBounds: CGRect(x: 0, y: 0, width: 400, height: 800)),
-            audioService: AudioServiceImpl(),
+            audioService: SpyAudioService(),
             effectService: effect,
             deviceService: DeviceServiceImpl(),
             performanceService: PerformanceServiceImpl(),
@@ -113,7 +113,7 @@ struct PerformanceAndDITests {
         // bubbleCount は既定 20。finalBubbleCount = min(20 * adjustment, deviceOptimal)
         let vm = GameViewModel(
             bubbleService: BubbleServiceImpl(screenBounds: CGRect(x: 0, y: 0, width: 400, height: 800)),
-            audioService: AudioServiceImpl(),
+            audioService: SpyAudioService(),
             effectService: SpyEffectService(),
             deviceService: device,
             performanceService: perf,

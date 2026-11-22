@@ -26,7 +26,7 @@ struct NormalModeChainTests {
         settings.vibrationEnabled = false
         let vm = GameViewModel(
             bubbleService: BubbleServiceImpl(screenBounds: .zero),
-            audioService: AudioServiceImpl(),
+            audioService: SpyAudioService(),
             effectService: EffectServiceImpl(),
             deviceService: DeviceServiceImpl(),
             performanceService: PerformanceServiceImpl(),

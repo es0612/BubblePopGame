@@ -71,6 +71,11 @@ class AudioServiceImpl: AudioService {
         return fadingTimer != nil
     }
 
+    /// AVAudioEngine が動いているか（テスト用。#92）
+    var isEngineRunning: Bool {
+        return audioEngine.isRunning
+    }
+
     var currentBGMTrack: String? {
         return _currentBGMTrack
     }
@@ -104,12 +109,9 @@ class AudioServiceImpl: AudioService {
         
         // 初期音量設定
         updateVolumes()
-        
-        do {
-            try audioEngine.start()
-        } catch {
-            debugLog("Audio engine start failed: \(error)")
-        }
+
+        // AVAudioEngine は起動しない。音を流すノードが無く（BGM は AVAudioPlayer、効果音はシステムサウンド）、
+        // 起動するとユニットテストでもオーディオサーバーに接続して、RPC タイムアウトで abort することがある（#92）
     }
     
     func playBGM(name: String, loop: Bool) {

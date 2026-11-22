@@ -85,7 +85,7 @@ struct SettingsReflectionTests {
         let spy = SpyBubbleService(screenBounds: .zero)
         let vm = GameViewModel(
             bubbleService: spy,
-            audioService: AudioServiceImpl(),
+            audioService: SpyAudioService(),
             effectService: EffectServiceImpl(),
             deviceService: DeviceServiceImpl(),
             performanceService: PerformanceServiceImpl(),
