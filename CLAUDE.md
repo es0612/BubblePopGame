@@ -125,6 +125,10 @@ app/BubblePopGame/
 - ⚠️ **検証後の cleanup を忘れない**: `xcrun simctl launch` でアプリを起動して screenshot を撮ったら、検証完了後に必ず `xcrun simctl terminate <SIM> <BUNDLE>`（必要なら `xcrun simctl shutdown <SIM>`）で停止する。本アプリは BGM がデフォルト ON（`bgmEnabled = true`）でメニュー画面で自動再生されるため、起動しっぱなしにすると裏で音楽が鳴り続ける。**音声を持つアプリの検証では terminate を特に徹底する**
 - バグ報告 issue の screenshot は一次証拠。**public repo なら `curl -L <github user-attachments の画像URL> -o /tmp/x.png` でダウンロード → Read で直接解析**できる（`gh issue view --json body` では `![image](...)` の URL は取れても画像本文は得られない）。タイトルだけで原因を推測せず、必ず画像を見ること（#23/#24 は画像で「メニュー停止」「練習バブル不可視」と即断定できた）
 
+### Swift の幾何計算
+
+- ⚠️ **`CGRect.width` / `height` は、負のサイズを渡すと絶対値に正規化して返す**。サイズ 0 以下の境界ケース（狭い画面で生成範囲が逆転する等）を扱う計算では `rect.width` を使わず、元の `size.width` を直接使う（#85 / PR #90 の `BubbleSpawnArea`）
+
 ### UI テスト設計
 
 - XCUITest の predicate（例: `CONTAINS '0' OR CONTAINS '1'`）は、意図しない他の UI 要素（時間表示の「60 秒」等）にも偽陽性マッチして検証が空転する。スコア／タイマー等の同種数値要素が画面に共存するときは accessibilityIdentifier で厳密に特定する
@@ -163,6 +167,8 @@ app/BubblePopGame/
 - PR タイトルは `fix:` / `feat:` / `chore:` プレフィックス、本文に Test plan の手動確認チェックリストを含める
 - ⚠️ **グローバル skill（`~/.claude/skills/*/SKILL.md`）は複数リポ（BubblePopGame / OtetsudaiCoin / LeafTimer 等）で共有している**。編集前に更新日時と他リポのセッションが動いていないかを確認し、同時に編集している可能性があれば編集を見送って Issue に切り出す（#57: `asc-submission-prep` の SKILL.md が同じ日の朝に別リポのセッションで書き換えられていたため、Issue 化だけにした）
 - ⚠️ **Issue のクローズ条件に、他リポでの実走回数・手直し回数のような数値を入れるときは、その数値がどのリポでも実際に記録されているかを条件を決める時点で確認する**。記録がないとクローズ時に測れない（#53 の「手直し回数」はどのリポにもログがなく、測れないままクローズした）
+- ⚠️ **夜間の自動処理など、人が書いていない PR は、マージ前に手元で関連テストを必ず 1 回走らせる**。#90（夜間の自動処理が作った PR）には、一度も実行されていない、実際に落ちるテストが入っていた（自動処理の環境ではビルド・テストを動かせなかった）
+- ⚠️ **自動処理が `needs-human` を付けた Issue は、PR 本文に `Closes #N` / `Fixes #N` を書かず `Refs #N` にする**。人の判断が残っているので、`Closes` だとマージと同時に Issue が閉じて判断待ちが見えなくなる（#85 / PR #90）
 
 ## セッション終了時の振り返り運用
 
