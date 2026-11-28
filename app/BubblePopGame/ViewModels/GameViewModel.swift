@@ -77,11 +77,16 @@ class GameViewModel {
         #endif
     }
 
+    /// 実際に遊んだ秒数（#101）。難しさのレベル・リザルトのプレイ時間・記録の gameDuration はこれを使う。
+    /// 数字モードのまちがいのペナルティは timeRemaining を減らすが、遊んだ時間ではないので引く。
+    var actualPlaySeconds: Double {
+        max(0, effectiveGameTime - timeRemaining - timePenalty)
+    }
+
     /// リザルト表示用の経過プレイ秒数（整数秒）。
-    /// timeRemaining は effectiveGameTime から減算されるので、その差が実プレイ秒数。
     /// seconds_format = "%d秒" に Double を渡すと 0 になるバグ(#37)を、Int で返して防ぐ。
     var elapsedPlaySeconds: Int {
-        max(0, Int((effectiveGameTime - timeRemaining).rounded()))
+        Int(actualPlaySeconds.rounded())
     }
 
     /// パーフェクトチェーンで数字の泡の得点に掛かる倍率（#69）。
@@ -213,6 +218,8 @@ class GameViewModel {
         // 正確率計算用カウンターをリセット
         totalTaps = 0
         successfulTaps = 0
+        // ペナルティはモードによらず毎回 0 に戻す（数字モードの値をノーマルモードに持ち越さない。#101）
+        timePenalty = 0.0
         
         // 数字順ゲームモード初期化
         if effectiveGameMode == "numbered" {
@@ -222,7 +229,6 @@ class GameViewModel {
             currentNumberSet = generateRandomNumberSet(for: 1)
             currentNumberIndex = 0
             nextExpectedNumber = currentNumberSet[0]
-            timePenalty = 0.0
             
             // 設定に基づいてボーナス初期化
             perfectChain = gameSettings.perfectChainEnabled ? 0 : 0
@@ -543,7 +549,7 @@ class GameViewModel {
         // プログレッシブ難易度が無効の場合は常にレベル1
         guard gameSettings.numberedModeProgressive else { return 1 }
         
-        let elapsedTime = effectiveGameTime - timeRemaining
+        let elapsedTime = actualPlaySeconds
         let levelInterval = gameSettings.numberedModeLevelInterval
         let maxLevel = gameSettings.numberedModeMaxLevel
         
@@ -618,7 +624,7 @@ class GameViewModel {
         if newLevel != currentLevel {
             // レベルアップ処理
             currentLevel = newLevel
-            levelStartTime = effectiveGameTime - timeRemaining
+            levelStartTime = actualPlaySeconds
             currentNumberSet = generateRandomNumberSet(for: currentLevel)
             currentNumberIndex = 0
             nextExpectedNumber = currentNumberSet[0]
@@ -736,7 +742,7 @@ class GameViewModel {
             accuracy: calculateAccuracy(),
             gameMode: effectiveGameMode,
             playDate: Date(),
-            gameDuration: effectiveGameTime - timeRemaining,
+            gameDuration: actualPlaySeconds,
             gameTimeLimit: effectiveGameTime
         )
         
