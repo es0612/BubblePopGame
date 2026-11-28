@@ -53,9 +53,11 @@ xcodebuild test ... 2>&1 | grep -iE "Suite.*(started|passed|failed)|Test case .*
 ```
 `** TEST SUCCEEDED **` だけ見るとどのテストが走ったか分からないので、テストの実体確認には上記パターン推奨。
 
-⚠️ **件数は passed の行数でなく、テスト名で数える**。同じテストの `Test case '...' passed` 行が 2 回出力されることがあり、行数を数えると多くなる（#92: 行数は 105、テスト名で数えると 103。CI の `Summarize results` も 103）。件数を報告するときは次の形で数える:
+⚠️ **件数はログの行でなく、xcresult の集計で数える**（CI の `Summarize results` と同じ数え方）。ログの `Test case '...' passed` 行は、同じテストが 2 回出ることも（#92: 行数 105／実際 103）、並列実行で別の出力に割り込まれて行頭が欠け、grep から漏れることもある（2026-11-28 #103: テスト名で数えると 112／実際 113。`snapshotsAreReachable()` の行が途中から始まっていた）。件数を報告するときは次の形で数える:
 ```bash
-grep -oE "Test case '[^']+' (passed|failed)" test.log | sort -u | wc -l
+XR=$(grep -oE "/[^ ]+\.xcresult" test.log | tail -1)
+xcrun xcresulttool get test-results summary --path "$XR" \
+  | python3 -I -c "import json,sys; s=json.load(sys.stdin); print(s['result'], 'passed', s['passedTests'], 'failed', s['failedTests'], 'skipped', s['skippedTests'])"
 ```
 
 ⚠️ **単一テスト指定の「0件 SUCCEEDED」罠**: `-only-testing:BubblePopGameTests/SuiteName/testMethod()` のように**メソッド単位**まで絞ると、ビルドキャッシュ等の都合で**1件も実行されないまま `** TEST SUCCEEDED **`**（vacuous）になることがある。これを RED 確認に使うと「落ちるはずのテストが通った」と誤認する。テストを確実に走らせて RED/GREEN を判定したいときは **suite 単位**（`-only-testing:BubblePopGameTests/SuiteName`）で実行し、上の grep で `Test case '...' (passed|failed)` 行が実際に出力されることを確認すること。
@@ -121,7 +123,10 @@ app/BubblePopGame/
 
 - View 内のハードコード値（`60.0` リテラル等）や `EnvironmentValues` の挙動は、ViewModel/Color変換の単体テストではカバーできない（リテラルをrevertしてもテストPASSしてしまう盲点）
 - そのため View 層修正は**手動 walk-through が必須**。PR description に「マージ前手動確認チェックリスト」を明記する
-- `simctl` には `tap` がないため、設定変更や tutorial スキップを伴う自動検証は不可。`xcrun simctl io ... screenshot` で起動確認＋クラッシュなしの確認までが自動化の上限
+- `simctl` には `tap` がないが、**表示の確認は使い捨てのテストで Claude ができる**（2026-11-28 #103 で、チュートリアル 2 枚目の秒数と HUD の「×1.15」を人に渡さず確認した）。テストは scratchpad の `git worktree add --detach` に置き、リポには入れない
+  - tap が要る画面（チュートリアルの 2 枚目など）: **アプリを入れていないシミュレータ**を選んで初回起動にし、XCUITest で `accessibilityIdentifier`（例 `tutorialNext`）を tap して `app.screenshot()` と `staticTexts` のラベルを書き出す。UITest は `-testPlan Full` で流す。いつも使うシミュレータの記録を消さないために、アプリの削除はしない
+  - ViewModel の値で決まる表示（HUD の倍率など）: ホスト付きのユニットテストで ViewModel に値を入れ、`ImageRenderer(content: GameView(viewModel:))` で PNG に書き出す
+  - 耳で聞く音・実機でしか出ない差は、これでは確かめられない（TestFlight か `ios-device-check`）
 - 永続化された GameSettings は SwiftData なので `UserDefaults trick`（`xcrun simctl spawn ... defaults write`）が効かない点に注意
 - 起動確認では、**確かめたい機能が動く画面まで届くか**を先に決める。BGM のようにメニュー画面で鳴る機能は、初回起動のチュートリアルで止まった screenshot では確かめたことにならない。DEBUG 起動引数（`--skip-tutorial`、`--screenshot=<画面>`）で目的の画面へ直行させる（#92）
 - 永続化フラグ（`isFirstLaunch` 等）で初期化フローが分岐する場合、手動 walk-through は「初回起動」「2回目以降」の両経路を必ず検証する。Tutorial を経由するかどうかで `updateScreenBounds` のような重要な副作用がスキップされ、本番バグの温床になる
