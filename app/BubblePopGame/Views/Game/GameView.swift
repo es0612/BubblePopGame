@@ -58,7 +58,7 @@ struct GameView: View {
                                         .fontWeight(.bold)
                                         .foregroundColor(.orange)
                                     if viewModel.perfectChain > 0 {
-                                        Text(String(format: NSLocalizedString("multiplier_format", comment: "Multiplier format"), Double(viewModel.perfectChain + 1)))
+                                        Text(String(format: NSLocalizedString("chain_multiplier_format", comment: "Perfect chain multiplier format"), viewModel.perfectChainBonusMultiplier))
                                             .font(.caption2)
                                             .foregroundColor(.green)
                                     }

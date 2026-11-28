@@ -97,7 +97,7 @@
 "tutorial_welcome_description" = "Tap beautiful bubbles to pop them and aim for high scores.\n\nLet's start by learning the basics.";
 
 "tutorial_objective_title" = "Game Objective";
-"tutorial_time_limit" = "Time Limit: 60 seconds";
+"tutorial_time_limit_format" = "Time Limit: %d seconds";
 "tutorial_tap_bubbles" = "Tap bubbles to pop them";
 "tutorial_get_score" = "Get as many points as possible";
 "tutorial_chain_bonus" = "Chain pops for bonus points";
@@ -128,6 +128,7 @@
 "level_format" = "Lv.%d";
 "percentage_format" = "%.1f%%";
 "multiplier_format" = "×%.1f";
+"chain_multiplier_format" = "×%.2f";
 "range_format" = "1-%d";
 
 // MARK: - Accessibility

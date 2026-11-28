@@ -84,6 +84,13 @@ class GameViewModel {
         max(0, Int((effectiveGameTime - timeRemaining).rounded()))
     }
 
+    /// パーフェクトチェーンで数字の泡の得点に掛かる倍率（#69）。
+    /// スコア計算と HUD の「×1.15」表示の両方がこの値を使い、表示と実際の倍率がずれないようにする。
+    var perfectChainBonusMultiplier: Double {
+        guard gameSettings.perfectChainEnabled else { return 1.0 }
+        return 1.0 + Double(perfectChain) * gameSettings.perfectChainMultiplier
+    }
+
     /// 実効ゲームモード。DEBUG override があればそれを優先（テスト容易性のため internal）。
     var effectiveGameMode: String {
         #if DEBUG
@@ -101,6 +108,12 @@ class GameViewModel {
     // 画面サイズ未供給で startGame() された場合の保留フラグ（Issue #23）。
     // サイズ到達時に updateScreenBounds から自動開始し、永久デッドロックを防ぐ。
     private var pendingStart = false
+
+    // 割れた泡の 0.3 秒後の後片付け用（#69）。
+    // ポーズ中に割れた泡の補充は再開まで保留する。
+    private var pendingPopRefills = 0
+    // 泡の集合を作り直した回数。作り直す前に割った泡の補充は、作り直しで不要になるので足さない。
+    private var bubbleSetGeneration = 0
 
     // 起動診断ログ。Release/TestFlight でも os_log として記録され Console.app で確認できる
     // （debugLog は #if DEBUG で TestFlight では無効なため、原因切り分けには OSLog を使う）。
@@ -187,6 +200,7 @@ class GameViewModel {
             return
         }
         pendingStart = false
+        pendingPopRefills = 0
 
         gameState = .playing
         startLogger.notice("startGame: gameState -> .playing")
@@ -256,6 +270,11 @@ class GameViewModel {
     func resumeGame() {
         guard gameState == .paused else { return }
         gameState = .playing
+        // ポーズ中に割れた泡の補充（#69）
+        for _ in 0..<pendingPopRefills {
+            addRandomBubble()
+        }
+        pendingPopRefills = 0
         startGameLoop()
         startGameTimer()
     }
@@ -337,6 +356,8 @@ class GameViewModel {
         hitBubble.isPopping = true
         hitBubble.lastTouchTime = Date()
         bubbles[index] = hitBubble
+        // 次の advanceToNextNumber() で泡を作り直すことがあるので、割った時点の回数を取っておく（#69）
+        let generationAtPop = bubbleSetGeneration
         
         // 統計更新
         bubblesPopped += 1
@@ -364,10 +385,7 @@ class GameViewModel {
         }
         
         // 破裂アニメーション後に削除
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
-            self?.bubbles.removeAll { $0.id == bubble.id }
-            self?.addRandomBubble()
-        }
+        schedulePopCleanup(for: bubble.id, scheduledIn: generationAtPop)
     }
     
     private func handleIncorrectNumberedBubble(_ bubble: Bubble) {
@@ -432,13 +450,36 @@ class GameViewModel {
         }
         
         // 破裂アニメーション後に削除（0.3秒後）
+        schedulePopCleanup(for: bubble.id, scheduledIn: bubbleSetGeneration)
+    }
+    
+    /// 破裂アニメーション（0.3 秒）の後に、割れた泡を消して代わりの泡を足す（#69）。
+    /// `generation` には割った時点の bubbleSetGeneration を渡す。
+    private func schedulePopCleanup(for bubbleID: UUID, scheduledIn generation: Int) {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
-            self?.bubbles.removeAll { $0.id == bubble.id }
-            self?.addRandomBubble()
+            self?.finishPop(of: bubbleID, scheduledIn: generation)
         }
     }
     
+    /// 代わりの泡はプレイ中だけ足す。ポーズ中は再開まで保留し、ゲーム終了後や、
+    /// 泡の集合を作り直した後（数字モードのセット完了・新しいゲーム）は足さない。
+    private func finishPop(of bubbleID: UUID, scheduledIn generation: Int) {
+        bubbles.removeAll { $0.id == bubbleID }
+        guard generation == bubbleSetGeneration else { return }
+        switch gameState {
+        case .playing:
+            addRandomBubble()
+        case .paused:
+            pendingPopRefills += 1
+        default:
+            break
+        }
+    }
+
     private func generateBubbles() {
+        bubbleSetGeneration += 1
+
+
         // 設定値（バブルサイズ・速度）をサービスへ反映（Issue #17）。
         // ここで毎ゲーム開始時に push することで、設定変更が次ゲームに確実に反映され、
         // プレイ中の addRandomBubble(createBubble) にも効く。
@@ -489,11 +530,8 @@ class GameViewModel {
                 bonusMultiplier *= speedBonus
             }
             
-            // パーフェクトチェインボーナス適用（設定で有効な場合のみ）
-            if gameSettings.perfectChainEnabled {
-                let chainMultiplier = gameSettings.perfectChainMultiplier
-                bonusMultiplier *= (1.0 + Double(perfectChain) * chainMultiplier)
-            }
+            // パーフェクトチェインボーナス適用（設定で無効なら 1.0）
+            bonusMultiplier *= perfectChainBonusMultiplier
             
             return Int(Double(baseScore) * bonusMultiplier)
         }

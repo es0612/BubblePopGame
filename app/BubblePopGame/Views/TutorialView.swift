@@ -20,6 +20,12 @@ struct TutorialView: View {
     
     private let totalSteps = 4
     
+    /// チュートリアルの「制限時間: N秒」（#69）。固定の 60 秒ではなく、設定の制限時間を出す。
+    /// `%d` に Double を渡すと 0 になる（#37）ので、引数は Int にしている。
+    static func timeLimitText(seconds: Int) -> String {
+        String(format: NSLocalizedString("tutorial_time_limit_format", comment: "Time limit info"), seconds)
+    }
+
     var body: some View {
         GeometryReader { geometry in
             ZStack {
@@ -199,7 +205,7 @@ struct TutorialView: View {
                 HStack {
                     Image(systemName: "timer")
                         .foregroundColor(.red)
-                    Text(NSLocalizedString("tutorial_time_limit", comment: "Time limit info"))
+                    Text(Self.timeLimitText(seconds: Int(gameViewModel.effectiveGameTime)))
                         .font(.title3)
                 }
                 

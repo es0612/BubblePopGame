@@ -97,7 +97,7 @@
 "tutorial_welcome_description" = "美しいシャボン玉をタップして割り、高スコアを目指すゲームです。\n\nまずは基本的な遊び方を覚えましょう。";
 
 "tutorial_objective_title" = "ゲームの目標";
-"tutorial_time_limit" = "制限時間: 60秒";
+"tutorial_time_limit_format" = "制限時間: %d秒";
 "tutorial_tap_bubbles" = "シャボン玉をタップして割る";
 "tutorial_get_score" = "できるだけ多くのスコアを獲得";
 "tutorial_chain_bonus" = "連続で割るとボーナス";
@@ -128,6 +128,7 @@
 "level_format" = "Lv.%d";
 "percentage_format" = "%.1f%%";
 "multiplier_format" = "×%.1f";
+"chain_multiplier_format" = "×%.2f";
 "range_format" = "1〜%d";
 
 // MARK: - Accessibility
