@@ -60,6 +60,8 @@ grep -oE "Test case '[^']+' (passed|failed)" test.log | sort -u | wc -l
 
 ⚠️ **単一テスト指定の「0件 SUCCEEDED」罠**: `-only-testing:BubblePopGameTests/SuiteName/testMethod()` のように**メソッド単位**まで絞ると、ビルドキャッシュ等の都合で**1件も実行されないまま `** TEST SUCCEEDED **`**（vacuous）になることがある。これを RED 確認に使うと「落ちるはずのテストが通った」と誤認する。テストを確実に走らせて RED/GREEN を判定したいときは **suite 単位**（`-only-testing:BubblePopGameTests/SuiteName`）で実行し、上の grep で `Test case '...' (passed|failed)` 行が実際に出力されることを確認すること。
 
+⚠️ **テストで `AVAudioEngine` を起動する経路を作らない**（#92）。CI ではエンジンの起動がオーディオサーバーの RPC タイムアウトで abort し、同じプロセスで動いていた無関係なテストが 46 件まとめて落ちた（手元では再現しなかった）。#97 で `AudioServiceImpl.init()` はエンジンを起動しなくなり（`isEngineRunning` を見るテストで守っている）、ViewModel を作るテストは `SpyAudioService` を渡す。`AudioServiceImpl()` をテストで生成すること自体は問題ない。音などのハードウェアを使うサービスを足すときは、生成しただけでは動き出さない形にし、テスト側で起動している箇所を grep で全数確かめる。
+
 ## アーキテクチャ
 
 ### ディレクトリ構造
@@ -121,6 +123,7 @@ app/BubblePopGame/
 - そのため View 層修正は**手動 walk-through が必須**。PR description に「マージ前手動確認チェックリスト」を明記する
 - `simctl` には `tap` がないため、設定変更や tutorial スキップを伴う自動検証は不可。`xcrun simctl io ... screenshot` で起動確認＋クラッシュなしの確認までが自動化の上限
 - 永続化された GameSettings は SwiftData なので `UserDefaults trick`（`xcrun simctl spawn ... defaults write`）が効かない点に注意
+- 起動確認では、**確かめたい機能が動く画面まで届くか**を先に決める。BGM のようにメニュー画面で鳴る機能は、初回起動のチュートリアルで止まった screenshot では確かめたことにならない。DEBUG 起動引数（`--skip-tutorial`、`--screenshot=<画面>`）で目的の画面へ直行させる（#92）
 - 永続化フラグ（`isFirstLaunch` 等）で初期化フローが分岐する場合、手動 walk-through は「初回起動」「2回目以降」の両経路を必ず検証する。Tutorial を経由するかどうかで `updateScreenBounds` のような重要な副作用がスキップされ、本番バグの温床になる
 - `guard` で前提条件を弾く修正を入れるときは、その前提条件を供給するコード（例: `screenBounds` をセットする `onAppear`）が、ガードを通過する全ての到達経路で確実に走るかを必ず洗い出す。コメントに「X で供給される」と書くだけでは、X が一部経路でしか実行されないと永続デッドロックになる
 - ⚠️ **`screenBounds == .zero` は本番化済みの systemic fault**（#23 起動不能 / #24 チュートリアルバブル不可視で実際に TestFlight に出た）。共有 `gameViewModel.screenBounds` は LaunchScreen→ContentView のアニメ遷移中に供給を取りこぼし `.zero` になりうる。対処は「供給を待つ」だけでなく次の3点:
